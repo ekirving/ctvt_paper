@@ -510,7 +510,7 @@ class QPGraphPlot(PrioritisedTask):
             psfile.write(ps)
 
 
-class CTVCPipeline(luigi.WrapperTask):
+class CTVTPipeline(luigi.WrapperTask):
     """
     Run the main CTVC pipeline
     """
