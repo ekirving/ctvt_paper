@@ -14,14 +14,14 @@ comp2=strtoi(args[6])
 labeled=strtoi(args[7])
 
 # TODO remove when done testing
-setwd("/Users/Evan/Dropbox/Code/ctvt")
-pca1_file = "smartpca/all-pops.ascertain1.calc.pca"
-pca2_file = "smartpca/all-pops.ascertain1.proj.pca"
-pve_file = "smartpca/all-pops.ascertain1.pve"
-pdf_file = "pdf/all-pops.ascertain1.PCA.1.2.pdf"
-comp1=1
-comp2=2
-labeled=strtoi("0")
+# setwd("/Users/Evan/Dropbox/Code/ctvt")
+# pca1_file = "smartpca/all-pops.ascertain1.calc.pca"
+# pca2_file = "smartpca/all-pops.ascertain1.proj.pca"
+# pve_file = "smartpca/all-pops.ascertain1.pve"
+# pdf_file = "pdf/all-pops.ascertain1.PCA.1.2.pdf"
+# comp1=1
+# comp2=2
+# labeled=strtoi("0")
 
 # get the percentage of variance each component explains
 pve <- round(read.table(pve_file)[,1]*100, 1)
@@ -44,16 +44,20 @@ total <- merge(dat, info[c(1,3)], by = 'Code')
 # see http://www.cookbook-r.com/Graphs/Shapes_and_line_types/ for shape codes
 shapes <- c(15, 17, 19, 18, 13, 9, 0)
 
+# make sure there are enough of each shape
+shapes <- rep_len(shapes, length.out=length(unique(total$Type.Name)))
+
 # change the order of the factors
 # total[,'Type.Name'] <- factor(total[,'Type.Name'], levels = c("Taurine, Eurasian", "Taurine, African", "Zebu", "Hybrid", "Outgroup", "Auroch", "Socotra"))
 
 # setup the colours
-colours=c('#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d')
+colours <- c('#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02')
+colours <- rep_len(colours, length.out=length(unique(total$Type.Name)))
 
-# alpha=c(1, 1, 1, 0.1, 1, 1, 1, 1, 1, 1, 1, 1)
-# pdf(file=pdf_file, width = 10, height = 7)
+alpha=c(1, 1, 1, 0.1, 1, 1, 1, 1, 1, 1, 1, 1)
+pdf(file=pdf_file, width = 10, height = 7)
 
-ggplot(total, aes(total[[comp1+2]], total[[comp2+2]])) +
+gg <- ggplot(total, aes(total[[comp1+2]], total[[comp2+2]])) +
     aes(shape=factor(Type.Name)) +
     scale_shape_manual(values=shapes) +
     geom_point(aes(colour = factor(Type.Name)), size=4, alpha=1) +
@@ -65,12 +69,13 @@ ggplot(total, aes(total[[comp1+2]], total[[comp2+2]])) +
     theme(legend.title=element_blank(), legend.key = element_blank()) +
     guides(colour = guide_legend(override.aes = list(size=4)))
 
-# if (labeled) {
-#   # label all the points
-#   gg <- gg + geom_text(aes(label=str_sub(dat$V2, -3)),hjust=-.3, vjust=0)
-# }
-#
-# # display the plot
-# gg
-#
-# dev.off()
+if (labeled) {
+  # label all the points
+  gg <- gg + geom_text(aes(label=sub("^[^:]*:", "", dat$V2)), hjust=-.3, vjust=0)
+}
+
+
+# display the plot
+gg
+
+dev.off()
