@@ -48,6 +48,36 @@ class PlinkFilterPops(PrioritisedTask):
                  "--out", "bed/{0}.{1}".format(self.group, self.ascertain)])
 
 
+class PlinkExtractPop(PrioritisedTask):
+    """
+    Extract a single population from a larger BED file
+    """
+    ascertain = luigi.Parameter()
+    population = luigi.Parameter()
+
+    def requires(self):
+        return AscertainedBed(self.ascertain)
+
+    def output(self):
+        return [luigi.LocalTarget("bed/{0}.{1}.{2}".format(self.ascertain, self.population, ext)) for ext in ['bed', 'bim', 'fam']]
+
+    def run(self):
+        poplist = "bed/{0}.{1}.poplist".format(self.ascertain, self.population)
+
+        # write the population IDs to disk so we can filter out any unwanted "families"
+        with open(poplist, 'w') as par:
+            par.write(self.population)
+
+        # apply the prune list
+        run_cmd(["plink",
+                 "--dog",
+                 "--make-bed",
+                 "--geno", "0.999",  # drop sites with no coverage, or rather, where less than 0.1% is missing
+                 "--keep-fam", poplist,
+                 "--bfile", trim_ext(self.input()[0].path),
+                 "--out", "bed/{0}.{1}".format(self.ascertain, self.population)])
+
+
 class PlinkIndepPairwise(PrioritisedTask):
     """
     Produce a list of SNPs with high discriminating power, by filtering out sites under linkage disequilibrium.
@@ -68,8 +98,8 @@ class PlinkIndepPairwise(PrioritisedTask):
         log = run_cmd(["plink",
                        "--dog",
                        "--indep-pairwise", 50, 10, 0.5,  # accept R^2 coefficient of up to 0.5
-                        "--bfile", "bed/{0}.{1}".format(self.group, self.ascertain),
-                        "--out", "bed/{0}.{1}".format(self.group, self.ascertain)])
+                       "--bfile", "bed/{0}.{1}".format(self.group, self.ascertain),
+                       "--out", "bed/{0}.{1}".format(self.group, self.ascertain)])
 
         # write the log file
         with open(self.output()[2].path, 'w') as fout:
@@ -109,7 +139,10 @@ class PlinkFilterGenoByPops(PrioritisedTask):
     ascertain = luigi.Parameter()
 
     def requires(self):
-        return PlinkFilterPops(self.group, self.ascertain)
+        yield PlinkFilterPops(self.group, self.ascertain)
+
+        for population in ANCIENT_POPS:
+            yield PlinkExtractPop(self.ascertain, population)
 
     def output(self):
         extensions = ['bed', 'bim', 'fam']
