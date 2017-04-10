@@ -483,14 +483,14 @@ class CTVCPipeline(luigi.WrapperTask):
 
             for group in GROUPS[ascertain]:
 
-                yield SmartPCAPlot(group, GENOME, ascertain)
+                yield SmartPCAPlot(group, ascertain)
 
                 if group not in NO_OUTGROUPS:
 
                     for m in range(0, TREEMIX_MAX_M + 1):
 
-                        yield TreemixPlotM(group, GENOME, ascertain, m)
-                        yield QPGraphPlot(group, GENOME, ascertain, m)
+                        yield TreemixPlotM(group, ascertain, m)
+                        yield QPGraphPlot(group, ascertain, m)
 
 
 if __name__ == '__main__':

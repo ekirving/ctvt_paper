@@ -4,10 +4,6 @@
 import multiprocessing
 from collections import OrderedDict
 
-# the reference genome
-GENOME = "CanFam3.1"
-GENOME_URL = "ftp://ftp.ensembl.org/pub/release-88/fasta/canis_familiaris/dna/Canis_familiaris.CanFam3.1.dna_rm.toplevel.fa.gz"
-
 # the population and sample to use for rooting the NJ tree
 OUTGROUP_POP = {}
 
