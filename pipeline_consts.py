@@ -9,10 +9,8 @@ OUTGROUP_POP = {}
 
 OUTGROUP_SAMPLE = {}
 
-# populations and sample accession codes
-ANCIENT_POPS = {
-
-}
+# populations
+ANCIENT_POPS = ['DPC']
 
 # groups of populations for running analyses
 GROUPS = {
@@ -20,7 +18,8 @@ GROUPS = {
     'ascertain1': {
 
         # all the populations
-        'all-pops': {'BXR', 'CTVT', 'DCH', 'DEU', 'DGL', 'DHU', 'DMA', 'DME', 'DNA', 'DPC', 'DPU', 'OUT', 'WAM', 'WEU'},
+        'all-pops': {'BAS', 'COY', 'CTVT', 'DAE', 'DAL', 'DCH', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DIN', 'DLB', 'DMA',
+                    'DME', 'DNA', 'DPC', 'DPU', 'DQA', 'DSL', 'DTI', 'DTM', 'DVN', 'OUT', 'WAM', 'WAS', 'WEU', 'WME'},
     }
 }
 
