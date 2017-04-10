@@ -43,7 +43,7 @@ class PlinkFilterPops(PrioritisedTask):
         run_cmd(["plink",
                  "--make-bed",
                  "--keep-fam", poplist,
-                 "--bfile", "bed/{0}.merged.rmap".format(self.ascertain),
+                 "--bfile", trim_ext(self.input()[0]),
                  "--out", "bed/{0}.{1}".format(self.group, self.ascertain)])
 
 
