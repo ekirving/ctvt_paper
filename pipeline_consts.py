@@ -18,8 +18,10 @@ GROUPS = {
     'ascertain1': {
 
         # all the populations
-        'all-pops': {'BAS', 'COY', 'CTVT', 'DAE', 'DAL', 'DCH', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DIN', 'DLB', 'DMA',
-                    'DME', 'DNA', 'DPC', 'DPU', 'DQA', 'DSL', 'DTI', 'DTM', 'DVN', 'OUT', 'WAM', 'WAS', 'WEU', 'WME'},
+        # 'all-pops': {'BAS', 'COY', 'CTVT', 'DAE', 'DAL', 'DCH', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DIN', 'DLB', 'DMA',
+        #             'DME', 'DNA', 'DPC', 'DPU', 'DQA', 'DSL', 'DTI', 'DTM', 'DVN', 'OUT', 'WAM', 'WAS', 'WEU', 'WME'},
+
+        'test': {'BAS', 'DPC'}
     }
 }
 
