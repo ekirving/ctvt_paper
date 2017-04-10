@@ -5,9 +5,13 @@ import multiprocessing
 from collections import OrderedDict
 
 # the population and sample to use for rooting the NJ tree
-OUTGROUP_POP = {}
+OUTGROUP_POP = {
+    'ascertain1': 'OUT'
+}
 
-OUTGROUP_SAMPLE = {}
+OUTGROUP_SAMPLE = {
+    'ascertain1': 'AndeanFox'
+}
 
 # populations
 ANCIENT_POPS = ['DPC']
@@ -21,10 +25,13 @@ GROUPS = {
         'all-pops': {'BAS', 'COY', 'CTVT', 'DAE', 'DAL', 'DCH', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DIN', 'DLB', 'DMA',
                     'DME', 'DNA', 'DPC', 'DPU', 'DQA', 'DSL', 'DTI', 'DTM', 'DVN', 'OUT', 'WAM', 'WAS', 'WEU', 'WME'},
 
+        'all-no-out': {'BAS', 'COY', 'CTVT', 'DAE', 'DAL', 'DCH', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DIN', 'DLB', 'DMA',
+                       'DME', 'DNA', 'DPC', 'DPU', 'DQA', 'DSL', 'DTI', 'DTM', 'DVN', 'WAM', 'WAS', 'WEU', 'WME'},
+
     }
 }
 
-NO_OUTGROUPS = []
+NO_OUTGROUPS = ['all-no-out']
 
 POPULATIONS = OrderedDict([
 
