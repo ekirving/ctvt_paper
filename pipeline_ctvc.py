@@ -41,6 +41,7 @@ class PlinkFilterPops(PrioritisedTask):
 
         # apply the prune list
         run_cmd(["plink",
+                 "--dog",
                  "--make-bed",
                  "--keep-fam", poplist,
                  "--bfile", trim_ext(self.input()[0].path),
@@ -65,6 +66,7 @@ class PlinkIndepPairwise(PrioritisedTask):
 
         # calculate the prune list (prune.in / prune.out)
         log = run_cmd(["plink",
+                       "--dog",
                        "--indep-pairwise", 50, 10, 0.5,  # accept R^2 coefficient of up to 0.5
                         "--bfile", "bed/{0}.{1}".format(self.group, self.ascertain),
                         "--out", "bed/{0}.{1}".format(self.group, self.ascertain)])
@@ -92,6 +94,7 @@ class PlinkPruneBed(PrioritisedTask):
 
         # apply the prune list
         run_cmd(["plink",
+                 "--dog",
                  "--make-bed",
                  "--extract", self.input()[0].path,
                  "--bfile", "bed/{0}.{1}".format(self.group, self.ascertain),
@@ -132,6 +135,7 @@ class PlinkFilterGenoByPops(PrioritisedTask):
 
         # filter the big BED file using that list of variants
         run_cmd(["plink",
+                 "--dog",
                  "--make-bed",
                  "--extract", varlist,
                  "--bfile", "bed/{0}.{1}".format(self.group, self.ascertain),
@@ -154,6 +158,7 @@ class PlinkBedToFreq(PrioritisedTask):
     def run(self):
 
         run_cmd(["plink",
+                 "--dog",
                  "--freq", "gz",  # make a gzipped MAF report
                  "--family",      # group by population
                  "--bfile", "bed/{0}.{1}.geno".format(self.group, self.ascertain),
