@@ -183,8 +183,8 @@ class PlinkHighGeno(PrioritisedTask):
                  "--dog",
                  "--make-bed",
                  "--geno", "0.05",
-                 "--bfile", "bed/{0}.{1}.geno.random.{2}".format(self.group, self.dataset),
-                 "--out", "bed/{0}.{1}.geno.random.hq.{2}".format(self.group, self.dataset)])
+                 "--bfile", "bed/{0}.{1}.geno.random".format(self.group, self.dataset),
+                 "--out", "bed/{0}.{1}.geno.random.hq".format(self.group, self.dataset)])
 
 
 class PlinkBedToFreq(PrioritisedTask):
