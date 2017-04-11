@@ -139,18 +139,22 @@ class RandomPedAllele(PrioritisedTask):
 
     def run(self):
 
+        # conver to PED so it's easier to parse the data
         run_cmd(["plink",
                  "--dog",
                  "--recode",
                  "--bfile", "bed/{0}.{1}.geno".format(self.group, self.dataset),
                  "--out", "ped/{0}.{1}.geno".format(self.group, self.dataset),])
 
+        # make a random allele call for each site (i.e. pretend everything is homo)
         parse_ped("ped/{0}.{1}.geno.ped".format(self.group, self.dataset),
                   "ped/{0}.{1}.geno.random.ped".format(self.group, self.dataset))
 
+        # copy the map file
         copyfile("ped/{0}.{1}.geno.map".format(self.group, self.dataset),
                  "ped/{0}.{1}.geno.random.map".format(self.group, self.dataset))
 
+        # convert the random called file back to BED
         run_cmd(["plink",
                  "--dog",
                  "--make-bed",
@@ -637,15 +641,22 @@ class CTVTCustomPipeline(luigi.WrapperTask):
         # all the data
         dataset = 'merged_map'
 
-        yield SmartPCAPlot('all-pops', dataset)
-        yield SmartPCAPlot('all-no-out', dataset)
-        yield SmartPCAPlot('dog-ctvt', dataset)
-        yield SmartPCAPlot('dog-ctvt', dataset, ['DPC', 'CTVT'])
+        # yield SmartPCAPlot('all-pops', dataset)
+        # yield SmartPCAPlot('all-no-out', dataset)
+        # yield SmartPCAPlot('dog-ctvt', dataset)
+        # yield SmartPCAPlot('dog-ctvt', dataset, ['DPC', 'CTVT'])
+        #
+        # yield QPDstat('all-pops', dataset)
 
-        yield QPDstat('all-pops', dataset)
+        yield RandomPedAllele('test-pops', dataset)
 
-        # only the high quality ancient samples
-        dataset = 'merged_map_hq'
+        # yield QPDstat('test-pops', dataset)
+
+        # # only the high quality ancient samples
+        # dataset = 'merged_map_hq'
+        #
+        # yield TreemixPlotM('all-pops', dataset, 0)
+
 
 if __name__ == '__main__':
     luigi.run()
