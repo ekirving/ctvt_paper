@@ -48,7 +48,7 @@ shapes <- c(15, 17, 19, 18, 13, 9, 0)
 shapes <- rep_len(shapes, length.out=length(unique(total$Type.Name)))
 
 # change the order of the factors
-# total[,'Type.Name'] <- factor(total[,'Type.Name'], levels = c("Taurine, Eurasian", "Taurine, African", "Zebu", "Hybrid", "Outgroup", "Auroch", "Socotra"))
+# total[,'Type.Name'] <- factor(total[,'Type.Name'], levels = unique(total[,'Type.Name']))
 
 # setup the colours
 colours <- c('#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02')
