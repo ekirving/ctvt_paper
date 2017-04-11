@@ -121,9 +121,11 @@ class PlinkFilterGenoByPops(PrioritisedTask):
                  "--bfile", "bed/{0}.{1}".format(self.group, self.dataset),
                  "--out", "bed/{0}.{1}.geno".format(self.group, self.dataset)])
 
+
 class RandomPedAllele(PrioritisedTask):
     """
-   Convert bed to ped. Convert heterozygous sites in ped file to homozygous choosing alleles at random. Convert ped back to bed
+    Convert bed to ped. Convert heterozygous sites in ped file to homozygous choosing alleles at random.
+    Convert ped back to bed
     """
     group = luigi.Parameter()
     dataset = luigi.Parameter()
@@ -132,23 +134,28 @@ class RandomPedAllele(PrioritisedTask):
         return PlinkFilterGenoByPops(self.group, self.dataset)
 
     def output(self):
-        pass
+        return [luigi.LocalTarget("bed/{0}.{1}.geno.random.{2}".format(self.group, self.dataset, ext)) for ext in
+                    ['bed', 'bim', 'fam']]
 
     def run(self):
+
         run_cmd(["plink",
                  "--dog",
-                 "--bfile", "bed/{0}.{1}.geno",
                  "--recode",
-                 "--tab",
-                 "--out", "ped/{0}.{1}.geno"])
+                 "--bfile", "bed/{0}.{1}.geno".format(self.group, self.dataset),
+                 "--out", "ped/{0}.{1}.geno".format(self.group, self.dataset),])
 
-        parse_ped("ped/{0}.{1}.geno.ped", "ped/{0}.{1}.random.geno.ped")
+        parse_ped("ped/{0}.{1}.geno.ped".format(self.group, self.dataset),
+                  "ped/{0}.{1}.geno.random.ped".format(self.group, self.dataset))
+
+        copyfile("ped/{0}.{1}.geno.map".format(self.group, self.dataset),
+                 "ped/{0}.{1}.geno.random.map".format(self.group, self.dataset))
 
         run_cmd(["plink",
                  "--dog",
-                 "--file", "ped/{0}.{1}.random.geno",
                  "--make-bed",
-                 "--out", "bed/{0}.{1}.random.geno"])
+                 "--file", "ped/{0}.{1}.geno.random".format(self.group, self.dataset),
+                 "--out", "bed/{0}.{1}.geno.random".format(self.group, self.dataset)])
 
 
 class PlinkBedToFreq(PrioritisedTask):
@@ -170,8 +177,8 @@ class PlinkBedToFreq(PrioritisedTask):
                  "--dog",
                  "--freq", "gz",  # make a gzipped MAF report
                  "--family",      # group by population
-                 "--bfile", "bed/{0}.{1}.random.geno".format(self.group, self.dataset),
-                 "--out", "bed/{0}.{1}.random.geno".format(self.group, self.dataset)])
+                 "--bfile", "bed/{0}.{1}.geno.random".format(self.group, self.dataset),
+                 "--out", "bed/{0}.{1}.geno.random".format(self.group, self.dataset)])
 
 
 class SmartPCA(PrioritisedTask):

@@ -1,39 +1,33 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import luigi, subprocess, datetime, hashlib, os, pysam, random
+import luigi, subprocess, datetime, hashlib, os, pysam, random, itertools
 
 from shutil import copyfile
 
 # import all the constants
 from pipeline_consts import *
 
-ped = open(sys.argv[1],"r")
-#ped = open("toy.ped","r")
-outfile = open("test.ped","w")
-hom = [('A','A'),('C','C'),('G','G'),('T','T')]
-
 def parse_ped(ped_infile, ped_outfile):
     """
-    randomly select allele at heterozygous site in ped file and convert to homozygous
+    Randomly select allele at heterozygous site in ped file and convert to homozygous
     """
-    hom = [('A', 'A'), ('C', 'C'), ('G', 'G'), ('T', 'T')]
+    with open(ped_infile, 'r') as fin:
+        with open(ped_outfile, 'w') as fout:
 
-    for line in ped_infile:
-        row = line.split()
-        info = row[0:6]
-        genotype_rand = row[6:]
-        it = iter(genotype_rand)
-        genotype_it = zip(it,it)
-        for n,i in enumerate(genotype_it):
-                if i not in hom:
+            for line in fin:
+                row = line.split()
+                info = row[0:6]
+                genotype_rand = row[6:]
+                it = iter(genotype_rand)
+                genotype_it = zip(it,it)
+                for n,i in enumerate(genotype_it):
                     rand_allele=random.choice(i)
                     genotype_it[n]=rand_allele,rand_allele
-        genotype_t = list(itertools.chain(*genotype_it))
-        new_line = info+genotype_t
-        ped_outfile.write(" ".join(new_line)+"\n")
-    ped_outfile.close()
+                genotype_t = list(itertools.chain(*genotype_it))
+                new_line = info+genotype_t
 
+                fout.write(" ".join(new_line)+"\n")
 
 def run_cmd(cmd, returnout=True, shell=False, pwd='./'):
     """

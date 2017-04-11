@@ -43,7 +43,7 @@ GROUPS = {
     }
 }
 
-NO_OUTGROUPS = ['all-no-out']
+NO_OUTGROUPS = ['all-no-out', 'dog-ctvt']
 
 POPULATIONS = OrderedDict([
 
