@@ -675,6 +675,8 @@ class CTVTCustomPipeline(luigi.WrapperTask):
         yield SmartPCAPlot('dog-ctvt', dataset)
         yield SmartPCAPlot('dog-ctvt', dataset, ['DPC', 'CTVT'])
 
+        yield QPDstat('all-pops', dataset)
+
         # only the high quality ancient samples
         dataset = 'merged_map_hq'
 
