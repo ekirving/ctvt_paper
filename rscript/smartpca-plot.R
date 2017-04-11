@@ -71,7 +71,7 @@ gg <- ggplot(total, aes(total[[comp1+2]], total[[comp2+2]])) +
 
 if (labeled) {
   # label all the points
-  gg <- gg + geom_text(aes(label=sub("^[^:]*:", "", total$V2)), hjust=-.3, vjust=0)
+  gg <- gg + geom_text(aes(label=sub("^[^:]*:", "", total$V2)), hjust=-.3, vjust=0, size=3)
 }
 
 
