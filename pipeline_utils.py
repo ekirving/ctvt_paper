@@ -54,6 +54,20 @@ def run_cmd(cmd, returnout=True, shell=False, pwd='./'):
         pass
 
 
+def trim_ext(fullpath, n=1):
+    return ('.').join(fullpath.split('.')[:-n])
+
+
+def trim_path_ext(fullpath):
+    return trim_ext(os.path.basename(fullpath))
+
+
+def insert_suffix(fullpath, suffix):
+    splitpath = fullpath.split('.')
+    splitpath.insert(-1, suffix)
+    return ('.').join(splitpath)
+
+
 class PrioritisedTask(luigi.Task):
     """
     PrioritisedTask that implements a dynamic priority method
