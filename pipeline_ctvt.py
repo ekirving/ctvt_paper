@@ -204,6 +204,7 @@ class SmartPCA(PrioritisedTask):
     """
     group = luigi.Parameter()
     ascertain = luigi.Parameter()
+    projectpops = luigi.ListParameter(default=ANCIENT_POPS)
 
     def requires(self):
         return PlinkFilterPops(self.group, self.ascertain)
@@ -214,7 +215,7 @@ class SmartPCA(PrioritisedTask):
     def run(self):
 
         # tell smartpca which pops to use for calculating the eigenvectors, and by inference, which to project
-        pops = [pop for pop in GROUPS[self.ascertain][self.group] if pop not in ANCIENT_POPS]
+        pops = [pop for pop in GROUPS[self.ascertain][self.group] if pop not in self.projectpops]
 
         # save the pop list
         poplist = 'smartpca/{0}.{1}.poplist'.format(self.group, self.ascertain)
@@ -262,9 +263,10 @@ class SmartPCAPlot(PrioritisedTask):
     """
     group = luigi.Parameter()
     ascertain = luigi.Parameter()
+    projectpops = luigi.ListParameter(default=ANCIENT_POPS)
 
     def requires(self):
-        return SmartPCA(self.group, self.ascertain)
+        return SmartPCA(self.group, self.ascertain, self.projectpops)
 
     def output(self):
         for pc1, pc2 in [(1, 2), (3, 4), (5, 6)]:
@@ -284,11 +286,11 @@ class SmartPCAPlot(PrioritisedTask):
         awk = "awk 'NR>1 {print $NF $0}' " + self.input()[0].path
 
         # make a regex to match only the ancient pops
-        ancientpops = "|".join(["^{} ".format(pop) for pop in ANCIENT_POPS])
+        projectpops = "|".join(["^{} ".format(pop) for pop in self.projectpops])
 
         # split the data into calculated and projected
-        calc = run_cmd([awk + ' | grep -Ev "{}"'.format(ancientpops)], shell=True)
-        proj = run_cmd([awk + ' | grep -E  "{}"'.format(ancientpops)], shell=True)
+        calc = run_cmd([awk + ' | grep -Ev "{}"'.format(projectpops)], shell=True)
+        proj = run_cmd([awk + ' | grep -E  "{}"'.format(projectpops)], shell=True)
 
         # save the pca data
         for suffix, data in [('calc', calc), ('proj',proj)]:
