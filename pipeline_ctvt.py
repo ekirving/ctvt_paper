@@ -525,12 +525,28 @@ class CTVTPipeline(luigi.WrapperTask):
 
                 yield SmartPCAPlot(group, ascertain)
 
-                # if group not in NO_OUTGROUPS:
-                #
-                #     for m in range(0, TREEMIX_MAX_M + 1):
-                #
-                #         yield TreemixPlotM(group, ascertain, m)
-                #         yield QPGraphPlot(group, ascertain, m)
+                if group not in NO_OUTGROUPS:
+
+                    for m in range(0, TREEMIX_MAX_M + 1):
+
+                        yield TreemixPlotM(group, ascertain, m)
+                        yield QPGraphPlot(group, ascertain, m)
+
+
+class CTVTCustomPipeline(luigi.WrapperTask):
+    """
+    Run the specific elements of the CTVC pipeline
+    """
+
+    def requires(self):
+
+        ascertain = 'ascertain1'
+
+        yield SmartPCAPlot('all-pops', ascertain)
+        yield SmartPCAPlot('all-no-out', ascertain)
+        yield SmartPCAPlot('dog-ctvt', ascertain)
+        yield SmartPCAPlot('dog-ctvt', ascertain, ['DPC', 'CTVT'])
+
 
 
 if __name__ == '__main__':
