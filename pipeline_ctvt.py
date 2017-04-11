@@ -316,8 +316,8 @@ class SmartPCAPlot(PrioritisedTask):
                 # generate a PDF of the PCA plot
                 run_cmd(["Rscript",
                          "rscript/smartpca-plot.R",
-                         "smartpca/{0}.{1}.prj{2}.calc.pca".format(self.group, prj, self.dataset),  # pca data, used for calculating the eigenvectors
-                         "smartpca/{0}.{1}.prj{2}.proj.pca".format(self.group, prj, self.dataset),  # projected pca data
+                         "smartpca/{0}.{1}.prj{2}.calc.pca".format(self.group, self.dataset, prj),  # pca data, used for calculating the eigenvectors
+                         "smartpca/{0}.{1}.prj{2}.proj.pca".format(self.group, self.dataset, prj),  # projected pca data
                          "smartpca/{0}.{1}.prj{2}.pve".format(self.group, self.dataset, prj),       # pve data (% variance)
                          pdf_path,                                                       # location to save the pdf file
                          pc1,                                                            # component num for x-axis
