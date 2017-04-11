@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import luigi, os, os.path, glob, re, shutil, sys
+import luigi, os, os.path, glob, re, shutil, sys, itertools
 
 # import my custom modules
 from pipeline_utils import *
@@ -533,17 +533,25 @@ class QPDstat(PrioritisedTask):
 
     def run(self):
 
-        # compose an ordered population list
+        # get the out group pop
+        outpop = OUTGROUP_POP[self.dataset]
+
+        # get the list of populations, minus the outgroup
+        pops = list(GROUPS[self.dataset][self.group])
+        pops.remove(outpop)
+
+        # compose a list of the 4-way tests
         with self.output()[2].open('w') as fout:
-            for pop in GROUPS[self.dataset][self.group]:
-                fout.write("{}\n".format(pop))
+            # get all the 3 population pairs
+            for pop1, pop2, pop3 in itertools.permutations(pops, 3):
+                fout.write(" ".join([outpop, pop1, pop2, pop3]) + "\n")
 
         # compose the config settings
         config = [
             "genotypename: {}".format(self.input()[1].path),
             "snpname:      {}".format(self.input()[2].path),
             "indivname:    {}".format(self.input()[3].path),
-            "poplistname:  {}".format(self.output()[2].path),  # Program will run the method for all quadrapules.
+            "popfilename:  {}".format(self.output()[2].path),  # Program will run the method for all listed quadrapules
             # "f4mode:   YES",                                   # f4 statistics not D-stats are computed
         ]
 
