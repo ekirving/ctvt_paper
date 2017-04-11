@@ -6,11 +6,11 @@ from collections import OrderedDict
 
 # the population and sample to use for rooting the NJ tree
 OUTGROUP_POP = {
-    'ascertain1': 'OUT'
+    'merged_map': 'OUT'
 }
 
 OUTGROUP_SAMPLE = {
-    'ascertain1': 'AndeanFox'
+    'merged_map': 'AndeanFox'
 }
 
 # populations

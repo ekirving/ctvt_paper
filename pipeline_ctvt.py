@@ -518,6 +518,102 @@ class QPGraphPlot(PrioritisedTask):
             psfile.write(ps)
 
 
+class ConvertfBedToEigenstrat(PrioritisedTask):
+    """
+    Convert a BED file into Eigenstrat format, for use by admixtools
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+
+    def requires(self):
+        return PlinkFilterPops(self.group, self.dataset)
+
+    def output(self):
+        extensions = ['par', 'eigenstratgeno', 'snp', 'ind', 'log']
+        return [luigi.LocalTarget("eigenstrat/{0}.{1}.{2}".format(self.group, self.dataset, ext)) for ext in extensions]
+
+    def run(self):
+
+        # NB admixtools requires a non-standard fam file format
+        fam = run_cmd(["awk '$6=$1' " + self.input()[2].path], shell=True)
+
+        # save the fam file
+        famfile = insert_suffix(self.input()[2].path, "alder")
+        with open(famfile, 'w') as fout:
+            fout.write(fam)
+
+        # compose the config settings for convertf
+        config = [
+            "genotypename:    {}".format(self.input()[0].path),
+            "snpname:         {}".format(self.input()[1].path),
+            "indivname:       {}".format(famfile),
+            "outputformat:    EIGENSTRAT",
+            "genotypeoutname: {}".format(self.output()[1].path),
+            "snpoutname:      {}".format(self.output()[2].path),
+            "indivoutname:    {}".format(self.output()[3].path),
+            "familynames:     NO",
+            "pordercheck:     NO"
+        ]
+
+        # convertf needs the params to be defined in a .par file
+        parfile = self.output()[0].path
+
+        with open(parfile, 'w') as par:
+            par.write("\n".join(config))
+
+        # run convertf
+        log = run_cmd(["convertf",
+                       "-p", parfile])
+
+        # save the log file
+        with self.output()[4].open('w') as logfile:
+            logfile.write(log)
+
+
+class QPDstat(PrioritisedTask):
+    """
+    Run qpDstat to test all four-population admixture models.
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+
+    def requires(self):
+        return ConvertfBedToEigenstrat(self.group, self.dataset)
+
+    def output(self):
+        return [luigi.LocalTarget("qpdstat/{0}.{1}.{2}".format(self.group, self.dataset, ext))
+                    for ext in ['par', 'log', 'poplist']]
+
+    def run(self):
+
+        # compose an ordered population list
+        with self.output()[2].open('w') as fout:
+            for pop in GROUPS[self.dataset][self.group]:
+                fout.write("{}\n".format(pop))
+
+        # compose the config settings
+        config = [
+            "genotypename: {}".format(self.input()[1].path),
+            "snpname:      {}".format(self.input()[2].path),
+            "indivname:    {}".format(self.input()[3].path),
+            "poplistname:  {}".format(self.output()[2].path),  # Program will run the method for all quadrapules.
+            # "f4mode:   YES",                                   # f4 statistics not D-stats are computed
+        ]
+
+        # the params to be defined in a .par file
+        parfile = self.output()[0].path
+
+        with open(parfile, 'w') as par:
+            par.write("\n".join(config))
+
+        # run qpDstat
+        log = run_cmd(["qpDstat", "-p", parfile])
+
+        # save the log file
+        with self.output()[1].open('w') as logfile:
+            logfile.write(log)
+
+
 class CTVTPipeline(luigi.WrapperTask):
     """
     Run the main CTVC pipeline
