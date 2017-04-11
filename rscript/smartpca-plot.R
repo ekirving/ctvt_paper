@@ -15,10 +15,10 @@ labeled=strtoi(args[7])
 
 # TODO remove when done testing
 # setwd("/Users/Evan/Dropbox/Code/ctvt")
-# pca1_file = "smartpca/all-pops.ascertain1.calc.pca"
-# pca2_file = "smartpca/all-pops.ascertain1.proj.pca"
-# pve_file = "smartpca/all-pops.ascertain1.pve"
-# pdf_file = "pdf/all-pops.ascertain1.PCA.1.2.pdf"
+# pca1_file = "smartpca/all-pops.merged_map.calc.pca"
+# pca2_file = "smartpca/all-pops.merged_map.proj.pca"
+# pve_file = "smartpca/all-pops.merged_map.pve"
+# pdf_file = "pdf/all-pops.merged_map.PCA.1.2.pdf"
 # comp1=1
 # comp2=2
 # labeled=strtoi("0")
@@ -71,7 +71,7 @@ gg <- ggplot(total, aes(total[[comp1+2]], total[[comp2+2]])) +
 
 if (labeled) {
   # label all the points
-  gg <- gg + geom_text(aes(label=sub("^[^:]*:", "", dat$V2)), hjust=-.3, vjust=0)
+  gg <- gg + geom_text(aes(label=sub("^[^:]*:", "", total$V2)), hjust=-.3, vjust=0)
 }
 
 
