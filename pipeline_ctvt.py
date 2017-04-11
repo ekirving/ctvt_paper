@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import luigi, os, os.path, glob, re, shutil, sys, itertools
+import luigi, os, os.path, glob, re, shutil, sys, random, itertools
 
 # import my custom modules
 from pipeline_utils import *
@@ -121,6 +121,35 @@ class PlinkFilterGenoByPops(PrioritisedTask):
                  "--bfile", "bed/{0}.{1}".format(self.group, self.dataset),
                  "--out", "bed/{0}.{1}.geno".format(self.group, self.dataset)])
 
+class RandomPedAllele(PrioritisedTask):
+    """
+   Convert bed to ped. Convert heterozygous sites in ped file to homozygous choosing alleles at random. Convert ped back to bed
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+
+    def requires(self):
+        return PlinkFilterGenoByPops(self.group, self.dataset)
+
+    def output(self):
+        pass
+
+    def run(self):
+        run_cmd(["plink",
+                 "--dog",
+                 "--bfile", "bed/{0}.{1}.geno",
+                 "--recode",
+                 "--tab",
+                 "--out", "ped/{0}.{1}.geno"])
+
+        parse_ped("ped/{0}.{1}.geno.ped", "ped/{0}.{1}.random.geno.ped")
+
+        run_cmd(["plink",
+                 "--dog",
+                 "--file", "ped/{0}.{1}.random.geno",
+                 "--make-bed",
+                 "--out", "bed/{0}.{1}.random.geno"])
+
 
 class PlinkBedToFreq(PrioritisedTask):
     """
@@ -130,10 +159,10 @@ class PlinkBedToFreq(PrioritisedTask):
     dataset = luigi.Parameter()
 
     def requires(self):
-        return PlinkFilterGenoByPops(self.group, self.dataset)
+        return RandomPedAllele(self.group, self.dataset)
 
     def output(self):
-        return luigi.LocalTarget("bed/{0}.{1}.geno.frq.strat.gz".format(self.group, self.dataset))
+        return luigi.LocalTarget("bed/{0}.{1}.geno.random.frq.strat.gz".format(self.group, self.dataset))
 
     def run(self):
 
@@ -141,8 +170,8 @@ class PlinkBedToFreq(PrioritisedTask):
                  "--dog",
                  "--freq", "gz",  # make a gzipped MAF report
                  "--family",      # group by population
-                 "--bfile", "bed/{0}.{1}.geno".format(self.group, self.dataset),
-                 "--out", "bed/{0}.{1}.geno".format(self.group, self.dataset)])
+                 "--bfile", "bed/{0}.{1}.random.geno".format(self.group, self.dataset),
+                 "--out", "bed/{0}.{1}.random.geno".format(self.group, self.dataset)])
 
 
 class SmartPCA(PrioritisedTask):
