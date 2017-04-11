@@ -32,7 +32,14 @@ GROUPS = {
         # dogs + ctvc (no outgroup)
         'dog-ctvt': {'BAS', 'CTVT', 'DAE', 'DAL', 'DCH', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DLB', 'DMA', 'DME', 'DNA',
                      'DPC', 'DPU', 'DQA', 'DSL', 'DTI', 'DTM', 'DVN'},
+    },
 
+    # same as above, but I've filtered out the low quality ancient samples
+    'merged_map_hq' : {
+
+        # all the populations
+        'all-pops': {'BAS', 'COY', 'CTVT', 'DAE', 'DAL', 'DCH', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DIN', 'DLB', 'DMA',
+                     'DME', 'DNA', 'DPC', 'DPU', 'DQA', 'DSL', 'DTI', 'DTM', 'DVN', 'OUT', 'WAM', 'WAS', 'WEU', 'WME'},
     }
 }
 

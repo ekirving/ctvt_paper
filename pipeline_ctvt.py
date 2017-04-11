@@ -598,6 +598,7 @@ class CTVTCustomPipeline(luigi.WrapperTask):
 
     def requires(self):
 
+        # all the data
         dataset = 'merged_map'
 
         yield SmartPCAPlot('all-pops', dataset)
@@ -607,6 +608,8 @@ class CTVTCustomPipeline(luigi.WrapperTask):
 
         yield QPDstat('all-pops', dataset)
 
+        # only the high quality ancient samples
+        dataset = 'merged_map_hq'
 
 if __name__ == '__main__':
     luigi.run()
