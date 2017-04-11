@@ -29,6 +29,10 @@ GROUPS = {
         'all-no-out': {'BAS', 'COY', 'CTVT', 'DAE', 'DAL', 'DCH', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DIN', 'DLB', 'DMA',
                        'DME', 'DNA', 'DPC', 'DPU', 'DQA', 'DSL', 'DTI', 'DTM', 'DVN', 'WAM', 'WAS', 'WEU', 'WME'},
 
+        # dogs + ctvc (no outgroup)
+        'dog-ctvt': {'BAS', 'CTVT', 'DAE', 'DAL', 'DCH', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DLB', 'DMA', 'DME', 'DNA',
+                     'DPC', 'DPU', 'DQA', 'DSL', 'DTI', 'DTM', 'DVN'},
+
     }
 }
 
