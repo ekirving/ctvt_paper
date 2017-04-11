@@ -641,21 +641,17 @@ class CTVTCustomPipeline(luigi.WrapperTask):
         # all the data
         dataset = 'merged_map'
 
-        # yield SmartPCAPlot('all-pops', dataset)
-        # yield SmartPCAPlot('all-no-out', dataset)
-        # yield SmartPCAPlot('dog-ctvt', dataset)
-        # yield SmartPCAPlot('dog-ctvt', dataset, ['DPC', 'CTVT'])
-        #
-        # yield QPDstat('all-pops', dataset)
+        yield SmartPCAPlot('all-pops', dataset)
+        yield SmartPCAPlot('all-no-out', dataset)
+        yield SmartPCAPlot('dog-ctvt', dataset)
+        yield SmartPCAPlot('dog-ctvt', dataset, ['DPC', 'CTVT'])
 
-        yield RandomPedAllele('test-pops', dataset)
+        yield QPDstat('all-pops', dataset)
 
-        # yield QPDstat('test-pops', dataset)
+        # only the high quality ancient samples
+        dataset = 'merged_map_hq'
 
-        # # only the high quality ancient samples
-        # dataset = 'merged_map_hq'
-        #
-        # yield TreemixPlotM('all-pops', dataset, 0)
+        yield TreemixPlotM('all-pops', dataset, 0)
 
 
 if __name__ == '__main__':
