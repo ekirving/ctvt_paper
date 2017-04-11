@@ -19,7 +19,7 @@ ANCIENT_POPS = ['DPC']
 # groups of populations for running analyses
 GROUPS = {
 
-    'ascertain1': {
+    'merged_map': {
 
         # all the populations
         'all-pops': {'BAS', 'COY', 'CTVT', 'DAE', 'DAL', 'DCH', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DIN', 'DLB', 'DMA',
