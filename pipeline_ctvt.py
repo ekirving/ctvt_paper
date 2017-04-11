@@ -78,59 +78,6 @@ class PlinkExtractPop(PrioritisedTask):
                  "--out", "bed/{0}.{1}".format(self.dataset, self.population)])
 
 
-class PlinkIndepPairwise(PrioritisedTask):
-    """
-    Produce a list of SNPs with high discriminating power, by filtering out sites under linkage disequilibrium.
-    """
-    group = luigi.Parameter()
-    dataset = luigi.Parameter()
-
-    def requires(self):
-        return PlinkFilterPops(self.group, self.dataset)
-
-    def output(self):
-        extensions = ['in', 'out', 'log']
-        return [luigi.LocalTarget("bed/{0}.{1}.prune.{2}".format(self.group, self.dataset, ext)) for ext in extensions]
-
-    def run(self):
-
-        # calculate the prune list (prune.in / prune.out)
-        log = run_cmd(["plink",
-                       "--dog",
-                       "--indep-pairwise", 50, 5, 0.5,  # accept R^2 coefficient of up to 0.5
-                       "--bfile", "bed/{0}.{1}".format(self.group, self.dataset),
-                       "--out", "bed/{0}.{1}".format(self.group, self.dataset)])
-
-        # write the log file
-        with open(self.output()[2].path, 'w') as fout:
-            fout.write(log)
-
-
-class PlinkPruneBed(PrioritisedTask):
-    """
-    Prune the merged group BED file using the prune.in list from PlinkIndepPairwise()
-    """
-    group = luigi.Parameter()
-    dataset = luigi.Parameter()
-
-    def requires(self):
-        return PlinkIndepPairwise(self.group, self.dataset)
-
-    def output(self):
-        extensions = ['bed', 'bim', 'fam']
-        return [luigi.LocalTarget("bed/{0}.{1}.pruned.{2}".format(self.group, self.dataset, ext)) for ext in extensions]
-
-    def run(self):
-
-        # apply the prune list
-        run_cmd(["plink",
-                 "--dog",
-                 "--make-bed",
-                 "--extract", self.input()[0].path,
-                 "--bfile", "bed/{0}.{1}".format(self.group, self.dataset),
-                 "--out", "bed/{0}.{1}.pruned".format(self.group, self.dataset)])
-
-
 class PlinkFilterGenoByPops(PrioritisedTask):
     """
     Filter a merged BED file, such that all sites are called at least once in all the sub-populations of interest.
