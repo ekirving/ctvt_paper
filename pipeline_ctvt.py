@@ -626,6 +626,7 @@ class CTVTPipeline(luigi.WrapperTask):
             for group in GROUPS[dataset]:
 
                 yield SmartPCAPlot(group, dataset)
+                yield QPDstat(group, dataset)
 
                 if group not in NO_OUTGROUPS:
 
@@ -649,6 +650,7 @@ class CTVTCustomPipeline(luigi.WrapperTask):
         yield SmartPCAPlot('dog-ctvt', dataset)
         yield SmartPCAPlot('dog-ctvt', dataset, ['DPC', 'CTVT'])
 
+        yield QPDstat('all-pops', dataset)
 
 
 if __name__ == '__main__':
