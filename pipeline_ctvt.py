@@ -210,15 +210,18 @@ class SmartPCA(PrioritisedTask):
         return PlinkFilterPops(self.group, self.dataset)
 
     def output(self):
-        return [luigi.LocalTarget("smartpca/{0}.{1}.{2}".format(self.group, self.dataset, ext)) for ext in ['pca.evec', 'eval']]
+        prj = "".join(self.projectpops)
+        return [luigi.LocalTarget("smartpca/{0}.{1}.prj{2}.{3}".format(self.group, self.dataset, prj, ext)) for ext in ['pca.evec', 'eval']]
 
     def run(self):
 
         # tell smartpca which pops to use for calculating the eigenvectors, and by inference, which to project
         pops = [pop for pop in GROUPS[self.dataset][self.group] if pop not in self.projectpops]
 
+        prj = "".join(self.projectpops)
+
         # save the pop list
-        poplist = 'smartpca/{0}.{1}.poplist'.format(self.group, self.dataset)
+        poplist = 'smartpca/{0}.{1}.prj{2}.poplist'.format(self.group, self.dataset, prj)
         with open(poplist, 'w') as fout:
             fout.write("\n".join(pops))
 
@@ -244,10 +247,11 @@ class SmartPCA(PrioritisedTask):
             "poplistname:    {0}".format(poplist),                # the list of pops to calculate the eigenvectors from
             "lsqproject:     YES",                                # use least squares projection, best for missing data
             "numoutlieriter: 0",                                  # don't exclude outliers
+            "inbreed:        YES",                                # compute inbreeding stats
         ]
 
         # smartpca needs the params to be defined in a .par file
-        parfile = "smartpca/{0}.{1}.par".format(self.group, self.dataset)
+        parfile = "smartpca/{0}.{1}.prj{2}.par".format(self.group, self.dataset, prj)
 
         with open(parfile, 'w') as par:
             par.write("\n".join(config))
@@ -269,17 +273,19 @@ class SmartPCAPlot(PrioritisedTask):
         return SmartPCA(self.group, self.dataset, self.projectpops)
 
     def output(self):
+        prj = "".join(self.projectpops)
         for pc1, pc2 in [(1, 2), (3, 4), (5, 6)]:
-            yield luigi.LocalTarget("pdf/{0}.{1}.PCA.{2}.{3}.pdf".format(self.group, self.dataset, pc1, pc2))
+            yield luigi.LocalTarget("pdf/{0}.{1}.prj{2}.PCA.{3}.{4}.pdf".format(self.group, self.dataset, prj, pc1, pc2))
 
     def run(self):
+        prj = "".join(self.projectpops)
 
         # calculate the percentage of variance explained by each PC, by dividing each eigenvalue by the sum total
         sum = run_cmd(["awk '{ sum+=$1 } END {print sum}' " + self.input()[1].path], shell=True)
         pve = run_cmd(["awk '{print $1/" + sum.strip() +"}' " + self.input()[1].path], shell=True)
 
         # save the percentage variance
-        with open("smartpca/{0}.{1}.pve".format(self.group, self.dataset), 'w') as fout:
+        with open("smartpca/{0}.{1}.prj{2}.pve".format(self.group, self.dataset, prj), 'w') as fout:
             fout.write(pve)
 
         # copy the population name into the first column, skip the header row (to make things easier for the Rscript)
@@ -294,7 +300,7 @@ class SmartPCAPlot(PrioritisedTask):
 
         # save the pca data
         for suffix, data in [('calc', calc), ('proj',proj)]:
-            with open("smartpca/{0}.{1}.{2}.pca".format(self.group, self.dataset, suffix), 'w') as fout:
+            with open("smartpca/{0}.{1}.prj{2}.{3}.pca".format(self.group, self.dataset, prj, suffix), 'w') as fout:
                 fout.write(data)
 
         # plot the first 6 components
@@ -302,17 +308,17 @@ class SmartPCAPlot(PrioritisedTask):
 
             # generate both labeled and unlabeled PDFs
             pdfs = {
-                0: "pdf/{0}.{1}.PCA.{2}.{3}.pdf".format(self.group, self.dataset, pc1, pc2),
-                1: "pdf/{0}.{1}.PCA.{2}.{3}.labeled.pdf".format(self.group, self.dataset, pc1, pc2)
+                0: "pdf/{0}.{1}.prj{2}.PCA.{3}.{4}.pdf".format(self.group, self.dataset, prj, pc1, pc2),
+                1: "pdf/{0}.{1}.prj{2}.PCA.{3}.{4}.labeled.pdf".format(self.group, self.dataset, prj, pc1, pc2)
             }
 
             for labeled, pdf_path in pdfs.iteritems():
                 # generate a PDF of the PCA plot
                 run_cmd(["Rscript",
                          "rscript/smartpca-plot.R",
-                         "smartpca/{0}.{1}.calc.pca".format(self.group, self.dataset),  # pca data, used for calculating the eigenvectors
-                         "smartpca/{0}.{1}.proj.pca".format(self.group, self.dataset),  # projected pca data
-                         "smartpca/{0}.{1}.pve".format(self.group, self.dataset),       # pve data (% variance)
+                         "smartpca/{0}.{1}.prj{2}.calc.pca".format(self.group, prj, self.dataset),  # pca data, used for calculating the eigenvectors
+                         "smartpca/{0}.{1}.prj{2}.proj.pca".format(self.group, prj, self.dataset),  # projected pca data
+                         "smartpca/{0}.{1}.prj{2}.pve".format(self.group, self.dataset, prj),       # pve data (% variance)
                          pdf_path,                                                       # location to save the pdf file
                          pc1,                                                            # component num for x-axis
                          pc2,                                                            # component num for y-axis
