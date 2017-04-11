@@ -547,10 +547,11 @@ class ConvertfBedToEigenstrat(PrioritisedTask):
     def run(self):
 
         # NB admixtools requires a non-standard fam file format
-        fam = run_cmd(["awk '$6=$1' " + self.input()[2].path], shell=True)
+        # also... we want to pretent that all our samples are populations!
+        fam = run_cmd(["awk '$6=$2' " + self.input()[2].path], shell=True)
 
         # save the fam file
-        famfile = insert_suffix(self.input()[2].path, "alder")
+        famfile = insert_suffix(self.input()[2].path, "convertf")
         with open(famfile, 'w') as fout:
             fout.write(fam)
 
@@ -601,15 +602,18 @@ class QPDstat(PrioritisedTask):
         # get the out group pop
         outpop = OUTGROUP_POP[self.dataset]
 
-        # get the list of populations, minus the outgroup
-        pops = list(GROUPS[self.dataset][self.group])
-        pops.remove(outpop)
+        # split the samples based on outgroup
+        out_samples = run_cmd(["grep    '" + outpop + "' bed/test-pops.merged_map.convertf.fam | awk '{print $2}'"], shell=True).splitlines()
+        all_samples = run_cmd(["grep -v '" + outpop + "' bed/test-pops.merged_map.convertf.fam | awk '{print $2}'"], shell=True).splitlines()
 
-        # compose a list of the 4-way tests
+        perms = itertools.permutations(all_samples, 3)
+
+        # write the list of 4-way tests
         with self.output()[2].open('w') as fout:
-            # get all the 3 population pairs
-            for pop1, pop2, pop3 in itertools.permutations(pops, 3):
-                fout.write(" ".join([outpop, pop1, pop2, pop3]) + "\n")
+
+            for out in out_samples:
+                for pop1, pop2, pop3 in perms:
+                    fout.write(" ".join([out, pop1, pop2, pop3]) + "\n")
 
         # compose the config settings
         config = [
