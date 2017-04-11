@@ -162,6 +162,31 @@ class RandomPedAllele(PrioritisedTask):
                  "--out", "bed/{0}.{1}.geno.random".format(self.group, self.dataset)])
 
 
+class PlinkHighGeno(PrioritisedTask):
+    """
+    Filter all sites without a gentyping rate of 95%
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+
+    def requires(self):
+        return RandomPedAllele(self.group, self.dataset)
+
+    def output(self):
+        return [luigi.LocalTarget("bed/{0}.{1}.geno.random.hq.{2}".format(self.group, self.dataset, ext)) for ext in
+                    ['bed', 'bim', 'fam']]
+
+    def run(self):
+
+        # conver to PED so it's easier to parse the data
+        run_cmd(["plink",
+                 "--dog",
+                 "--make-bed",
+                 "--geno", "0.05",
+                 "--bfile", "bed/{0}.{1}.geno.random.{2}".format(self.group, self.dataset),
+                 "--out", "bed/{0}.{1}.geno.random.hq.{2}".format(self.group, self.dataset)])
+
+
 class PlinkBedToFreq(PrioritisedTask):
     """
     Convert a BED file into a minor allele frequency report, needed for input into Treemix.
@@ -170,7 +195,7 @@ class PlinkBedToFreq(PrioritisedTask):
     dataset = luigi.Parameter()
 
     def requires(self):
-        return RandomPedAllele(self.group, self.dataset)
+        return PlinkHighGeno(self.group, self.dataset)
 
     def output(self):
         return luigi.LocalTarget("bed/{0}.{1}.geno.random.frq.strat.gz".format(self.group, self.dataset))
