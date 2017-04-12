@@ -89,6 +89,10 @@ TREEMIX_MAX_M = 10
 # number of SNPs to group for LD
 TREEMIX_K = 1000
 
+# what level should Treemix group by, pops OR samples?
+GROUP_BY_POPS = 'grp-pops'
+GROUP_BY_SMPL = 'grp-smpl'
+
 # no single worker should use more than 50% of the available cores
 MAX_CPU_CORES = int(multiprocessing.cpu_count() * 0.5)
 

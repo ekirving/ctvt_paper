@@ -194,22 +194,28 @@ class PlinkBedToFreq(PrioritisedTask):
     """
     group = luigi.Parameter()
     dataset = luigi.Parameter()
+    groupby = luigi.Parameter()
 
     def requires(self):
         return PlinkHighGeno(self.group, self.dataset)
 
     def output(self):
-        return [luigi.LocalTarget("bed/{0}.{1}.geno.random.frq.{2}".format(self.group, self.dataset, ext))
-                    for ext in ['frq.strat.gz', 'log']]
+        exts = ['frq.strat.gz', 'log'] if self.groupby == GROUP_BY_POPS else ['frq.gz', 'log']
+        return [luigi.LocalTarget("bed/{0}.{1}.geno.random.{2}.{3}".format(self.group, self.dataset, self.groupby, ext))
+                    for ext in exts]
 
     def run(self):
 
-        run_cmd(["plink",
+        cmd = ["plink",
                  "--dog",
                  "--freq", "gz",  # make a gzipped MAF report
-                 "--family",      # group by population
                  "--bfile", "bed/{0}.{1}.geno.random".format(self.group, self.dataset),
-                 "--out", "bed/{0}.{1}.geno.random.frq".format(self.group, self.dataset)])
+               "--out",   "bed/{0}.{1}.geno.random.{2}".format(self.group, self.dataset, self.groupby)]
+
+        if self.groupby == GROUP_BY_POPS:
+            cmd.append("--family") # group by population
+
+        run_cmd(cmd)
 
 
 class SmartPCA(PrioritisedTask):
@@ -395,12 +401,13 @@ class TreemixPlinkFreq(PrioritisedTask):
     """
     group = luigi.Parameter()
     dataset = luigi.Parameter()
+    groupby = luigi.Parameter()
 
     def requires(self):
-        return PlinkBedToFreq(self.group, self.dataset)
+        return PlinkBedToFreq(self.group, self.dataset, self.groupby)
 
     def output(self):
-        return luigi.LocalTarget("treemix/{0}.{1}.geno.frq.gz".format(self.group, self.dataset))
+        return luigi.LocalTarget("treemix/{0}.{1}.geno.random.{2}.frq.gz".format(self.group, self.dataset, self.groupby))
 
     def run(self):
 
@@ -417,13 +424,14 @@ class TreemixM(PrioritisedTask):
     """
     group = luigi.Parameter()
     dataset = luigi.Parameter()
+    groupby = luigi.Parameter()
     m = luigi.IntParameter(default=0)
 
     def requires(self):
-        return TreemixPlinkFreq(self.group, self.dataset)
+        return TreemixPlinkFreq(self.group, self.dataset, self.groupby)
 
     def output(self):
-        return [luigi.LocalTarget("treemix/{0}.{1}.geno.m{2}.{3}".format(self.group, self.dataset, self.m, ext))
+        return [luigi.LocalTarget("treemix/{0}.{1}.geno.random.{2}.m{3}.{4}".format(self.group, self.dataset, self.groupby, self.m, ext))
                     for ext in ['cov.gz', 'covse.gz', 'edges.gz', 'llik', 'modelcov.gz', 'treeout.gz', 'vertices.gz']]
 
     def run(self):
@@ -443,13 +451,14 @@ class TreemixPlotM(PrioritisedTask):
     """
     group = luigi.Parameter()
     dataset = luigi.Parameter()
+    groupby = luigi.Parameter()
     m = luigi.IntParameter(default=0)
 
     def requires(self):
-        return TreemixM(self.group, self.dataset, self.m)
+        return TreemixM(self.group, self.dataset, self.groupby, self.m)
 
     def output(self):
-        return luigi.LocalTarget("pdf/{0}.{1}.treemix.m{2}.pdf".format(self.group, self.dataset, self.m))
+        return luigi.LocalTarget("pdf/{0}.{1}.treemix.geno.random.{2}.m{3}.pdf".format(self.group, self.dataset, self.groupby, self.m))
 
     def run(self):
 
@@ -476,7 +485,7 @@ class TreemixToQPGraph(PrioritisedTask):
     m = luigi.IntParameter(default=0)
 
     def requires(self):
-        return TreemixM(self.group, self.dataset, self.m)
+        return TreemixM(self.group, self.dataset, GROUP_BY_POPS, self.m)
 
     def output(self):
         return luigi.LocalTarget("qpgraph/{0}.{1}.treemix.m{2}.graph".format(self.group, self.dataset, self.m))
@@ -705,7 +714,8 @@ class CTVTPipeline(luigi.WrapperTask):
 
                     for m in range(0, TREEMIX_MAX_M + 1):
 
-                        yield TreemixPlotM(group, dataset, m)
+                        yield TreemixPlotM(group, dataset, GROUP_BY_POPS, m)
+                        yield TreemixPlotM(group, dataset, GROUP_BY_SMPL, m)
                         yield QPGraphPlot(group, dataset, m)
 
 
@@ -731,7 +741,9 @@ class CTVTCustomPipeline(luigi.WrapperTask):
         # only the high quality ancient samples
         dataset = 'merged_map_hq'
 
-        yield TreemixPlotM('all-pops', dataset, 0)
+        yield TreemixPlotM('all-pops', dataset, GROUP_BY_POPS, 0)
+        yield TreemixPlotM('all-pops', dataset, GROUP_BY_SMPL, 0)
+
 
 
 if __name__ == '__main__':
