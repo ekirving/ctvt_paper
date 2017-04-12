@@ -198,7 +198,8 @@ class PlinkBedToFreq(PrioritisedTask):
         return PlinkHighGeno(self.group, self.dataset)
 
     def output(self):
-        return luigi.LocalTarget("bed/{0}.{1}.geno.random.frq.strat.gz".format(self.group, self.dataset))
+        return [luigi.LocalTarget("bed/{0}.{1}.geno.random.frq.{2}".format(self.group, self.dataset, ext))
+                    for ext in ['frq.strat.gz', 'log']]
 
     def run(self):
 
@@ -207,7 +208,7 @@ class PlinkBedToFreq(PrioritisedTask):
                  "--freq", "gz",  # make a gzipped MAF report
                  "--family",      # group by population
                  "--bfile", "bed/{0}.{1}.geno.random".format(self.group, self.dataset),
-                 "--out", "bed/{0}.{1}.geno.random".format(self.group, self.dataset)])
+                 "--out", "bed/{0}.{1}.geno.random.frq".format(self.group, self.dataset)])
 
 
 class SmartPCA(PrioritisedTask):
@@ -355,7 +356,7 @@ class TreemixPlinkFreq(PrioritisedTask):
         # convert the file
         run_cmd(["python",
                  "plink2treemix.py",
-                 self.input().path,
+                 self.input()[0].path,
                  self.output().path])
 
 
