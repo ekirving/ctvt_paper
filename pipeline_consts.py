@@ -48,11 +48,50 @@ GROUPS = {
 NO_OUTGROUPS = ['all-no-out', 'dog-ctvt']
 
 POPULATIONS = OrderedDict([
-
+    ('BAS', 'African Dogs'),
+    ('COY', 'Coyotes'),
+    ('CTVT', 'CTVT'),
+    ('DAE', 'European Dogs'),
+    ('DAL', 'Northern Dogs'),
+    ('DCH', 'East Asian Dogs'),
+    ('DEU', 'European Dogs'),
+    ('DGL', 'Northern Dogs'),
+    ('DGS', 'European Dogs'),
+    ('DHU', 'Northern Dogs'),
+    ('DID', 'Asian Dogs'),
+    ('DIN', 'Dingo'),
+    ('DLB', 'European Dogs'),
+    ('DMA', 'Northern Dogs'),
+    ('DME', 'American Dogs'),
+    ('DNA', 'African Dogs'),
+    ('DPC', 'Pre-Colombian Dogs'),
+    ('DPU', 'American Dogs'),
+    ('DQA', 'Asian Dogs'),
+    ('DSL', 'Northern Dogs'),
+    ('DTI', 'East Asian Dogs'),
+    ('DTM', 'East Asian Dogs'),
+    ('DVN', 'East Asian Dogs'),
+    ('OUT', 'Outgroup'),
+    ('WAM', 'American Wolf'),
+    ('WAS', 'Eurasian Wolf'),
+    ('WEU', 'Eurasian Wolf'),
+    ('WME', 'Eurasian Wolf'),
 ])
 
 COLOURS = {
-
+    'African Dogs':       '#a6cee3',
+    'Coyotes':            '#1f78b4',
+    'CTVT':               '#b2df8a',
+    'European Dogs':      '#33a02c',
+    'Northern Dogs':      '#fb9a99',
+    'East Asian Dogs':    '#e31a1c',
+    'Asian Dogs':         '#fdbf6f',
+    'Dingo':              '#ff7f00',
+    'American Dogs':      '#cab2d6',
+    'Pre-Colombian Dogs': '#6a3d9a',
+    'Outgroup':           '#ffff99',
+    'American Wolf':      '#b15928',
+    'Eurasian Wolf':      '#003c30',
 }
 DEFAULT_COLOUR = '#e7298a'
 

@@ -478,7 +478,7 @@ class TreemixPlotM(PrioritisedTask):
     def run(self):
 
         # compose an ordered population list, with colors for the node labels
-        poplist = "treemix/{0}.{1}.poplist".format(self.group, self.dataset)
+        poplist = "treemix/{0}.{1}.geno.random.{2}.poplist".format(self.group, self.dataset, self.groupby)
         with open(poplist, 'w') as fout:
             for pop in GROUPS[self.dataset][self.group]:
                 fout.write("{}\t{}\n".format(pop, COLOURS.get(POPULATIONS.get(pop), DEFAULT_COLOUR)))
