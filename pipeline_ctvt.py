@@ -182,6 +182,7 @@ class PlinkHighGeno(PrioritisedTask):
         run_cmd(["plink",
                  "--dog",
                  "--make-bed",
+                 "--maf", "0.05",
                  "--geno", "0.05",
                  "--bfile", "bed/{0}.{1}.geno.random".format(self.group, self.dataset),
                  "--out", "bed/{0}.{1}.geno.random.hq".format(self.group, self.dataset)])
