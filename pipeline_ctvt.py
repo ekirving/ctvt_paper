@@ -479,9 +479,22 @@ class TreemixPlotM(PrioritisedTask):
 
         # compose an ordered population list, with colors for the node labels
         poplist = "treemix/{0}.{1}.geno.random.{2}.poplist".format(self.group, self.dataset, self.groupby)
+
         with open(poplist, 'w') as fout:
+            if self.groupby == GROUP_BY_POPS:
+                # output the populations
             for pop in GROUPS[self.dataset][self.group]:
-                fout.write("{}\t{}\n".format(pop, COLOURS.get(POPULATIONS.get(pop), DEFAULT_COLOUR)))
+                    colour = COLOURS.get(POPULATIONS.get(pop), DEFAULT_COLOUR)
+                    fout.write("{}\t{}\n".format(pop, colour))
+            else:
+                # fetch the sample names from the fam file
+                fam_file = "bed/{0}.{1}.geno.random.fam".format(self.group, self.dataset)
+                fam = run_cmd(["awk '{print $2\" \"$1}' " + fam_file], shell=True)
+                samples = dict(line.split() for line in fam.splitlines())
+
+                for sample in samples:
+                    colour = COLOURS.get(POPULATIONS.get(samples[sample]), DEFAULT_COLOUR)
+                    fout.write("{}\t{}\n".format(sample, colour))
 
         # plot the treemix tree
         run_cmd(["Rscript",
