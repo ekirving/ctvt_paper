@@ -7,12 +7,14 @@ from collections import OrderedDict
 # the population and sample to use for rooting the NJ tree
 OUTGROUP_POP = {
     'merged_map': 'OUT',
-    'merged_map_hq': 'OUT'
+    'merged_map_hq': 'OUT',
+    'merged_map_hq2': 'OUT'
 }
 
 OUTGROUP_SAMPLE = {
     'merged_map': 'AndeanFox',
-    'merged_map_hq': 'AndeanFox'
+    'merged_map_hq': 'AndeanFox',
+    'merged_map_hq2': 'AndeanFox'
 }
 
 # populations
