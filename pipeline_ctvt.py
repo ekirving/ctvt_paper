@@ -200,23 +200,33 @@ class PlinkBedToFreq(PrioritisedTask):
         return PlinkHighGeno(self.group, self.dataset)
 
     def output(self):
-        exts = ['frq.strat.gz', 'log'] if self.groupby == GROUP_BY_POPS else ['frq.gz', 'log']
         return [luigi.LocalTarget("bed/{0}.{1}.geno.random.{2}.{3}".format(self.group, self.dataset, self.groupby, ext))
-                    for ext in exts]
+                    for ext in ['frq.strat.gz', 'log']]
 
     def run(self):
 
-        cmd = ["plink",
+        # get the paths for the input files
+        bed_file, bim_file, fam_file = [file.path for file in self.input()]
+
+        # to group by samples, we need to reassign them to their own families
+        if self.groupby == GROUP_BY_SMPL:
+
+            # replace family with sample code
+            fam = run_cmd(["awk '{$1=$2}$0' " + fam_file], shell=True)
+
+            # make a new fam file
+            fam_file = insert_suffix(fam_file, GROUP_BY_SMPL)
+            with open(fam_file, 'w') as fout:
+                fout.write(fam)
+
+        run_cmd(["plink",
                  "--dog",
-                 "--freq", "gz",  # make a gzipped MAF report
-                 "--bfile", "bed/{0}.{1}.geno.random".format(self.group, self.dataset),
-               "--out",   "bed/{0}.{1}.geno.random.{2}".format(self.group, self.dataset, self.groupby)]
-
-        if self.groupby == GROUP_BY_POPS:
-            cmd.append("--family") # group by population
-
-        run_cmd(cmd)
-
+                 "--freq", "gz",     # make a gzipped MAF report
+                 "--family",         # group by population
+                 "--bed", bed_file,
+                 "--bim", bim_file,
+                 "--fam", fam_file,
+                 "--out", "bed/{0}.{1}.geno.random.{2}".format(self.group, self.dataset, self.groupby)])
 
 class SmartPCA(PrioritisedTask):
     """
