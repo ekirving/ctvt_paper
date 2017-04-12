@@ -8,10 +8,10 @@ poplist_file=args[2]
 pdf_file=args[3]
 
 # TODO remove when done testing
-# setwd("/Users/Evan/Dropbox/Code/socotra")
-# data_file <- "treemix/select-pops.BovineHD.geno.k1000.m3"
-# poplist_file <- "treemix/select-pops.BovineHD.poplist"
-# pdf_file <- "pdf/select-pops.BovineHD.treemix.k1000.m3.pdf"
+# setwd("/Users/Evan/Dropbox/Code/ctvt")
+# data_file <- "treemix/test-pops.merged_map.geno.random.grp-smpl.m0"
+# poplist_file <- "treemix/test-pops.merged_map.poplist"
+# pdf_file <- "pdf/test-pops.merged_map.treemix.geno.random.grp-smpl.m0.pdf"
 
 pdf(file=pdf_file, width = 16, height = 8)
 par(mfrow=c(1,2))

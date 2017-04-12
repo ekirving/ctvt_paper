@@ -12,7 +12,7 @@ pdf_file=args[5]
 # TODO remove when done testing
 # setwd("/Users/Evan/Dropbox/Code/ctvt")
 # data_file <- "njtree/test-pops.merged_map.geno.data"
-# treetype <- "fan"
+# treetype <- "phylogram" #"fan"
 # outgroup <- "AndeanFox"
 # tree_file <- "njtree/test-pops.merged_map.geno.tree"
 # pdf_file <- "pdf/test-pops.merged_map.njtree.pdf"
