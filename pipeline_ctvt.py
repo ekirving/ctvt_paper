@@ -731,6 +731,8 @@ class CTVTCustomPipeline(luigi.WrapperTask):
 
         yield QPDstat('all-pops', dataset)
 
+        yield NeighborJoiningTree('all-pops', dataset)
+
         # only the high quality ancient samples
         dataset = 'merged_map_hq'
 
