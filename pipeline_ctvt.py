@@ -344,6 +344,7 @@ class NeighborJoiningTree(PrioritisedTask):
     """
     group = luigi.Parameter()
     dataset = luigi.Parameter()
+    treetype = luigi.Parameter(default='phylogram')
 
     def requires(self):
         return PlinkFilterGenoByPops(self.group, self.dataset)
@@ -381,6 +382,7 @@ class NeighborJoiningTree(PrioritisedTask):
         run_cmd(["Rscript",
                  "rscript/plot-phylo-tree.R",
                  self.output()[0].path,
+                 self.treetype,
                  OUTGROUP_SAMPLE[self.dataset],
                  self.output()[1].path,
                  self.output()[2].path])

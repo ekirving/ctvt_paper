@@ -4,13 +4,15 @@ suppressWarnings(library("ape"))
 # get the command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 data_file=args[1]
-outgroup=args[2]
-tree_file=args[3]
-pdf_file=args[4]
+treetype=args[2]
+outgroup=args[3]
+tree_file=args[4]
+pdf_file=args[5]
 
 # TODO remove when done testing
 # setwd("/Users/Evan/Dropbox/Code/ctvt")
 # data_file <- "njtree/test-pops.merged_map.geno.data"
+# treetype <- "fan"
 # outgroup <- "AndeanFox"
 # tree_file <- "njtree/test-pops.merged_map.geno.tree"
 # pdf_file <- "pdf/test-pops.merged_map.njtree.pdf"
