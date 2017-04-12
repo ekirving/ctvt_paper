@@ -86,6 +86,9 @@ ADMIXTURE_BOOTSTRAP = 0  # TODO put this back to 100
 # the maximum number of migration events in Treemix
 TREEMIX_MAX_M = 10
 
+# number of SNPs to group for LD
+TREEMIX_K = 1000
+
 # no single worker should use more than 50% of the available cores
 MAX_CPU_CORES = int(multiprocessing.cpu_count() * 0.5)
 

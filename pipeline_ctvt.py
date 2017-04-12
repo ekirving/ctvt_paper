@@ -418,13 +418,12 @@ class TreemixM(PrioritisedTask):
     group = luigi.Parameter()
     dataset = luigi.Parameter()
     m = luigi.IntParameter(default=0)
-    k = luigi.IntParameter(default=1000)
 
     def requires(self):
         return TreemixPlinkFreq(self.group, self.dataset)
 
     def output(self):
-        return [luigi.LocalTarget("treemix/{0}.{1}.geno.k{2}.m{3}.{4}".format(self.group, self.dataset, self.k, self.m, ext))
+        return [luigi.LocalTarget("treemix/{0}.{1}.geno.m{2}.{3}".format(self.group, self.dataset, self.m, ext))
                     for ext in ['cov.gz', 'covse.gz', 'edges.gz', 'llik', 'modelcov.gz', 'treeout.gz', 'vertices.gz']]
 
     def run(self):
@@ -433,7 +432,7 @@ class TreemixM(PrioritisedTask):
         run_cmd(["treemix",
                  "-i", self.input().path,   # the input file
                  "-root", OUTGROUP_POP[self.dataset],
-                 "-k", self.k,              # group together "k" SNPs to account for linkage disequilibrium
+                 "-k", TREEMIX_K,           # group together "k" SNPs to account for linkage disequilibrium
                  "-m", self.m,              # build the ML graph with "m" migration events
                  "-o", trim_ext(self.output()[0].path, 2)])
 
@@ -445,13 +444,12 @@ class TreemixPlotM(PrioritisedTask):
     group = luigi.Parameter()
     dataset = luigi.Parameter()
     m = luigi.IntParameter(default=0)
-    k = luigi.IntParameter(default=1000)
 
     def requires(self):
-        return TreemixM(self.group, self.dataset, self.m, self.k)
+        return TreemixM(self.group, self.dataset, self.m)
 
     def output(self):
-        return luigi.LocalTarget("pdf/{0}.{1}.treemix.k{2}.m{3}.pdf".format(self.group, self.dataset, self.k, self.m))
+        return luigi.LocalTarget("pdf/{0}.{1}.treemix.m{2}.pdf".format(self.group, self.dataset, self.m))
 
     def run(self):
 
@@ -476,13 +474,12 @@ class TreemixToQPGraph(PrioritisedTask):
     group = luigi.Parameter()
     dataset = luigi.Parameter()
     m = luigi.IntParameter(default=0)
-    k = luigi.IntParameter(default=1000)
 
     def requires(self):
-        return TreemixM(self.group, self.dataset, self.m, self.k)
+        return TreemixM(self.group, self.dataset, self.m)
 
     def output(self):
-        return luigi.LocalTarget("qpgraph/{0}.{1}.treemix.k{2}.m{3}.graph".format(self.group, self.dataset, self.k, self.m))
+        return luigi.LocalTarget("qpgraph/{0}.{1}.treemix.m{2}.graph".format(self.group, self.dataset, self.m))
 
     def run(self):
 
@@ -503,13 +500,12 @@ class QPGraph(PrioritisedTask):
     group = luigi.Parameter()
     dataset = luigi.Parameter()
     m = luigi.IntParameter(default=0)
-    k = luigi.IntParameter(default=1000)
 
     def requires(self):
-        return [TreemixToQPGraph(self.group, self.dataset, self.m, self.k)]
+        return [TreemixToQPGraph(self.group, self.dataset, self.m)]
 
     def output(self):
-        return [luigi.LocalTarget("qpgraph/{0}.{1}.treemix.k{2}.m{3}.{4}".format(self.group, self.dataset, self.k, self.m, ext))
+        return [luigi.LocalTarget("qpgraph/{0}.{1}.treemix.m{2}.{3}".format(self.group, self.dataset, self.m, ext))
                     for ext in ['par', 'dot', 'log']]
 
     def run(self):
@@ -564,13 +560,12 @@ class QPGraphPlot(PrioritisedTask):
     group = luigi.Parameter()
     dataset = luigi.Parameter()
     m = luigi.IntParameter(default=0)
-    k = luigi.IntParameter(default=1000)
 
     def requires(self):
-        return QPGraph(self.group, self.dataset, self.m, self.k)
+        return QPGraph(self.group, self.dataset, self.m)
 
     def output(self):
-        return luigi.LocalTarget("pdf/{0}.{1}.qpgraph.k{2}.m{3}.pdf".format(self.group, self.dataset, self.k, self.m))
+        return luigi.LocalTarget("pdf/{0}.{1}.qpgraph.m{2}.pdf".format(self.group, self.dataset, self.m))
 
     def run(self):
 
