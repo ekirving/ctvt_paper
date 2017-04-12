@@ -483,7 +483,7 @@ class TreemixPlotM(PrioritisedTask):
         with open(poplist, 'w') as fout:
             if self.groupby == GROUP_BY_POPS:
                 # output the populations
-            for pop in GROUPS[self.dataset][self.group]:
+                for pop in GROUPS[self.dataset][self.group]:
                     colour = COLOURS.get(POPULATIONS.get(pop), DEFAULT_COLOUR)
                     fout.write("{}\t{}\n".format(pop, colour))
             else:
@@ -492,6 +492,7 @@ class TreemixPlotM(PrioritisedTask):
                 fam = run_cmd(["awk '{print $2\" \"$1}' " + fam_file], shell=True)
                 samples = dict(line.split() for line in fam.splitlines())
 
+                # output the samples
                 for sample in samples:
                     colour = COLOURS.get(POPULATIONS.get(samples[sample]), DEFAULT_COLOUR)
                     fout.write("{}\t{}\n".format(sample, colour))
