@@ -446,10 +446,15 @@ class TreemixM(PrioritisedTask):
 
     def run(self):
 
+        if self.groupby == GROUP_BY_POPS:
+            outgroup = OUTGROUP_POP[self.dataset]
+        else:
+            outgroup = OUTGROUP_SAMPLE[self.dataset]
+
         # run treemix
         run_cmd(["treemix",
                  "-i", self.input().path,   # the input file
-                 "-root", OUTGROUP_POP[self.dataset],
+                 "-root", outgroup,
                  "-k", TREEMIX_K,           # group together "k" SNPs to account for linkage disequilibrium
                  "-m", self.m,              # build the ML graph with "m" migration events
                  "-o", trim_ext(self.output()[0].path, 2)])
