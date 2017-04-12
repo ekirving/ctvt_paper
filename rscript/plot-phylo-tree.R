@@ -62,5 +62,5 @@ plotsize = max(c(numnodes/20, 7))
 
 # plot the tree
 pdf(file=pdf_file, width = plotsize, height = plotsize)
-plot(tr, type='fan', cex=0.8) #, tip.color=col)
+plot(tr, type=treetype, cex=0.8) #, tip.color=col)
 dev.off()
