@@ -34,16 +34,14 @@ GROUPS = {
         # dogs + ctvc (no outgroup)
         'dog-ctvt': ['BAS', 'CTVT', 'DAE', 'DAL', 'DCH', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DLB', 'DMA', 'DME', 'DNA',
                      'DPC', 'DPU', 'DQA', 'DSL', 'DTI', 'DTM', 'DVN'],
+
+        'test-pops' : ['OUT', 'CTVT', 'DPC', 'WAM']
     },
-
-    # same as above, but I've filtered out the low quality ancient samples
-    'merged_map_hq' : {
-
-        # all the populations
-        'all-pops': ['BAS', 'COY', 'CTVT', 'DAE', 'DAL', 'DCH', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DIN', 'DLB', 'DMA',
-                     'DME', 'DNA', 'DPC', 'DPU', 'DQA', 'DSL', 'DTI', 'DTM', 'DVN', 'OUT', 'WAM', 'WAS', 'WEU', 'WME'],
-    }
 }
+
+# add the 'all-pops' group to the new analysis dataset
+GROUPS['merged_map_hq']  = {'all-pops': GROUPS['merged_map']['all-pops']}
+GROUPS['merged_map_hq2'] = {'all-pops': GROUPS['merged_map']['all-pops']}
 
 NO_OUTGROUPS = ['all-no-out', 'dog-ctvt']
 
