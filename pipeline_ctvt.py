@@ -339,6 +339,56 @@ class SmartPCAPlot(PrioritisedTask):
                          labeled])                                                       # show point labels (0/1)
 
 
+class NeighborJoiningTree(PrioritisedTask):
+    """
+    Create a neighbor joining phylogenetic tree from a pruned BED file
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+    treetype = luigi.Parameter(default='phylogram')
+
+    def requires(self):
+        return PlinkFilterGenoByPops(self.group, self.dataset)
+
+    def output(self):
+            return [luigi.LocalTarget("njtree/{0}.{1}.geno.data".format(self.group, self.dataset)),
+                    luigi.LocalTarget("njtree/{0}.{1}.geno.tree".format(self.group, self.dataset)),
+                    luigi.LocalTarget("pdf/{0}.{1}.njtree.pdf".format(self.group, self.dataset))]
+
+    def run(self):
+
+        # TODO what about bootstrapping?
+        # make the distance matrix
+        run_cmd(["plink",
+                 "--dog",
+                 "--distance", "square", "1-ibs",
+                 "--bfile", "bed/{0}.{1}.geno".format(self.group, self.dataset),
+                 "--out", "njtree/{0}.{1}.geno".format(self.group, self.dataset)])
+
+        # use awk to extract short versions of the pop and sample names
+        awk = "awk '{print $2}' " + "bed/{0}.{1}.geno.fam".format(self.group, self.dataset)
+
+        # fetch the names as a row
+        head = run_cmd([awk + " | xargs"], returnout=True, shell=True)
+
+        # add the samples names as a column to the mdist data
+        data = run_cmd([awk + " | paste - njtree/{0}.{1}.geno.mdist".format(self.group, self.dataset)], shell=True)
+
+        # save the labeled file
+        with self.output()[0].open('w') as fout:
+            fout.write("\t" + head)
+            fout.write(data)
+
+        # generate a tree from the labeled data
+        run_cmd(["Rscript",
+                 "rscript/plot-phylo-tree.R",
+                 self.output()[0].path,
+                 self.treetype,
+                 OUTGROUP_SAMPLE[self.dataset],
+                 self.output()[1].path,
+                 self.output()[2].path])
+
+
 class TreemixPlinkFreq(PrioritisedTask):
     """
     Convert a Plink MAF frequency file into Treemix format
