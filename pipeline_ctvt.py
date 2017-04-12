@@ -774,7 +774,7 @@ class CTVTCustomPipeline(luigi.WrapperTask):
                 yield TreemixPlotM('all-pops', dataset, GROUP_BY_SMPL, m)
 
 
-class CTVTMyCustomPipeline(luigi.WrapperTask):
+class CTVTTestPipeline(luigi.WrapperTask):
     """
     Run the specific elements of the CTVC pipeline
     """
