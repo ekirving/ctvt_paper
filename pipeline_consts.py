@@ -90,7 +90,7 @@ COLOURS = {
     'Dingo':              '#ff7f00',
     'American Dogs':      '#cab2d6',
     'Pre-Colombian Dogs': '#6a3d9a',
-    'Outgroup':           '#ffff99',
+    'Outgroup':           '#4d4d4d',
     'American Wolf':      '#b15928',
     'Eurasian Wolf':      '#003c30',
 }
