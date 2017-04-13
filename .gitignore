@@ -17,6 +17,7 @@ tmp*
 stub*
 test*
 *tmp
+~*
 
 # ms output
 seedms
