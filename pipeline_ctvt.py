@@ -790,6 +790,7 @@ class CTVTTestPipeline(luigi.WrapperTask):
         yield NeighborJoiningTree('test-pops', 'merged_map')
         yield NeighborJoiningTree('all-pops', 'merged_map')
 
+        yield SmartPCAPlot('all-pops', 'merged_map')
         # yield TreemixPlotM('test-pops', 'merged_map', GROUP_BY_POPS, 0)
         # yield TreemixPlotM('test-pops', 'merged_map', GROUP_BY_SMPL, 0)
 

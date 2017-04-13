@@ -52,16 +52,11 @@ hollow=c(21, 22, 23, 24, 25) # hollow shapes (projected)
 shapes<-c(rep_len(solid, length.out=length(unique(t1meta$Type.Name))),
           rep_len(hollow, length.out=length(unique(t1meta$Type.Name))))
 
-# preserve the order of the factors
-# meta[,'Type.Name'] <- factor(meta[,'Type.Name'], levels = unique(meta[,'Type.Name']))
-
 # setup the colours
-# colours <- c('#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02')
-# colours <- rep_len(colours, length.out=length(unique(meta$Type.Name)))
 colours <- unique(as.character(meta$Colour))
 
-# alpha=c(1, 1, 1, 0.1, 1, 1, 1, 1, 1, 1, 1, 1)
-# pdf(file=pdf_file, width = 10, height = 7)
+alpha=c(1, 1, 1, 0.1, 1, 1, 1, 1, 1, 1, 1, 1)
+pdf(file=pdf_file, width = 10, height = 7)
 
 gg <- ggplot(meta, aes(meta[[comp1+2]], meta[[comp2+2]])) +
     aes(shape=factor(Type.Name)) +
