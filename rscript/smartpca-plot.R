@@ -43,6 +43,9 @@ t2meta <- merge(t2, info[c(1,3,4)], by = 'Code')
 # join the two data frames
 meta <- rbind(t1meta, t2meta)
 
+# preserve the order of the factors
+meta[,'Type.Name'] <- factor(meta[,'Type.Name'], levels = unique(meta[,'Type.Name']))
+
 # setup the different symbol types
 # see http://www.cookbook-r.com/Graphs/Shapes_and_line_types/ for shape codes
 solid=c(15, 17, 15, 20, 18, 17, 15, 16, 20, 18, 15) # solid shapes
