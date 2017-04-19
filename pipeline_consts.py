@@ -79,34 +79,85 @@ for pop in GROUPS['merged_map_Taimyr'] :
 NO_OUTGROUPS = ['all-no-out', 'dog-ctvt']
 
 POPULATIONS = OrderedDict([
-    ('BAS', 'African Dogs'),
-    ('COY', 'Coyotes'),
-    ('CTVT', 'CTVT'),
-    ('DAE', 'European Dogs'),
-    ('DAL', 'Northern Dogs'),
-    ('DCH', 'East Asian Dogs'),
-    ('DEU', 'European Dogs'),
-    ('DGL', 'Northern Dogs'),
-    ('DGS', 'European Dogs'),
-    ('DHU', 'Northern Dogs'),
-    ('DID', 'Asian Dogs'),
-    ('DIN', 'Dingo'),
-    ('DLB', 'European Dogs'),
-    ('DMA', 'Northern Dogs'),
-    ('DME', 'American Dogs'),
-    ('DNA', 'African Dogs'),
-    ('DPC', 'Pre-Colombian Dogs'),
-    ('DPU', 'American Dogs'),
-    ('DQA', 'Asian Dogs'),
-    ('DSL', 'Northern Dogs'),
-    ('DTI', 'East Asian Dogs'),
-    ('DTM', 'East Asian Dogs'),
-    ('DVN', 'East Asian Dogs'),
-    ('OUT', 'Outgroup'),
-    ('WAM', 'American Wolf'),
-    ('WAS', 'Eurasian Wolf'),
-    ('WEU', 'Eurasian Wolf'),
-    ('WME', 'Eurasian Wolf'),
+    ('BAS', 'African Dogs')
+    ('Basenji', 'African Dogs')
+    ('DNA', 'African Dogs')
+    ('Beagle', 'European Dogs')
+    ('Boxer', 'European Dogs')
+    ('DAE', 'European Dogs')
+    ('DEU', 'European Dogs')
+    ('DGS', 'European Dogs')
+    ('DLB', 'European Dogs')
+    ('Alaskan_Malamute', 'Northern Dogs')
+    ('DAL', 'Northern Dogs')
+    ('DGL', 'Northern Dogs')
+    ('DHU', 'Northern Dogs')
+    ('DMA', 'Northern Dogs')
+    ('DSL', 'Northern Dogs')
+    ('Eurasier', 'Northern Dogs')
+    ('Finnish_Spitz', 'Northern Dogs')
+    ('Greenland_Sledge_Dog', 'Northern Dogs')
+    ('Samoyed', 'Northern Dogs')
+    ('Siberian_Husky', 'Northern Dogs')
+    ('American_Eskimo_Dog', 'American Dogs')
+    ('American_Pit_Bull_Terrier', 'American Dogs')
+    ('American_Staffordshire_Terrier', 'American Dogs')
+    ('Carolina_Dog', 'American Dogs')
+    ('Catahoula_Leopard_Dog', 'American Dogs')
+    ('Chesapeake_Bay_Retriever', 'American Dogs')
+    ('Chihuahua', 'American Dogs')
+    ('DME', 'American Dogs')
+    ('DPU', 'American Dogs')
+    ('Newfoundland', 'American Dogs')
+    ('Nova_Scotia_Duck_Tolling_Retriever', 'American Dogs')
+    ('Peruvian_Inca_Orchid', 'American Dogs')
+    ('Village_Dog_Belize', 'American Dogs')
+    ('Village_Dog_Brazil', 'American Dogs')
+    ('Village_Dog_Colombia', 'American Dogs')
+    ('Village_Dog_Costa_Rica', 'American Dogs')
+    ('Village_Dog_Dominican_Republic', 'American Dogs')
+    ('Village_Dog_Honduras', 'American Dogs')
+    ('Village_Dog_Panama', 'American Dogs')
+    ('Village_Dog_Peru-Arequipa', 'American Dogs')
+    ('Village_Dog_Peru-Cusco', 'American Dogs')
+    ('Village_Dog_Peru-Ica', 'American Dogs')
+    ('Village_Dog_Peru-Loreto', 'American Dogs')
+    ('Village_Dog_Peru-Puno', 'American Dogs')
+    ('Village_Dog_Puerto_Rico', 'American Dogs')
+    ('Village_Dog_US-Alaska', 'American Dogs')
+    ('Xoloitzcuintli', 'American Dogs')
+    ('DID', 'Asian Dogs')
+    ('DQA', 'Asian Dogs')
+    ('Village_Dog_India-Chennai', 'Asian Dogs')
+    ('Village_Dog_India-Dehli', 'Asian Dogs')
+    ('Village_Dog_India-Hazaribagh', 'Asian Dogs')
+    ('Village_Dog_India-Mumbai', 'Asian Dogs')
+    ('Village_Dog_India-Orissa', 'Asian Dogs')
+    ('Chinese_Shar-pei', 'East Asian Dogs')
+    ('Chow_Chow', 'East Asian Dogs')
+    ('DCH', 'East Asian Dogs')
+    ('DTI', 'East Asian Dogs')
+    ('DTM', 'East Asian Dogs')
+    ('DVN', 'East Asian Dogs')
+    ('New_Guinea_Singing_Dog', 'East Asian Dogs')
+    ('Village_Dog_Indonesia-Borneo', 'East Asian Dogs')
+    ('Village_Dog_Indonesia-Jakarta', 'East Asian Dogs')
+    ('Village_Dog_Papua_New_Guinea-East_Highlands_', 'East Asian Dogs')
+    ('Village_Dog_Papua_New_Guinea-Port_Moresby', 'East Asian Dogs')
+    ('Village_Dog_Vietnam-Cao_Bang', 'East Asian Dogs')
+    ('Village_Dog_Vietnam-Ha_Giang', 'East Asian Dogs')
+    ('Village_Dog_Vietnam-Lang_Son', 'East Asian Dogs')
+    ('Village_Dog_Vietnam-Lao_Cai', 'East Asian Dogs')
+    ('DPC', 'Pre-Colombian Dogs')
+    ('CTVT', 'CTVT')
+    ('DIN', 'Dingo')
+    ('COY', 'Coyotes')
+    ('WAM', 'American Wolf')
+    ('WAS', 'Eurasian Wolf')
+    ('WEU', 'Eurasian Wolf')
+    ('WME', 'Eurasian Wolf')
+    ('Taimyr', 'Ancient Wolf')
+    ('OUT', 'Outgroup')
 ])
 
 COLOURS = {
@@ -122,6 +173,7 @@ COLOURS = {
     'Pre-Colombian Dogs': '#6a3d9a',
     'Outgroup':           '#4d4d4d',
     'American Wolf':      '#b15928',
+    'Ancient Wolf':       '#4d4d4d',
     'Eurasian Wolf':      '#003c30',
 }
 DEFAULT_COLOUR = '#e7298a'
