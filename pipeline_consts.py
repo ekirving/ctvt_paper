@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import multiprocessing
+import multiprocessing, copy
 from collections import OrderedDict
 
 # the population and sample to use for rooting the NJ tree
 OUTGROUP_POP = {
     'merged_map': 'OUT',
     'merged_map_hq': 'OUT',
-    'merged_map_hq2': 'OUT'
+    'merged_map_hq2': 'OUT',
+    'merged_map_Taimyr': 'OUT'
 }
 
 OUTGROUP_SAMPLE = {
     'merged_map': 'AndeanFox',
     'merged_map_hq': 'AndeanFox',
-    'merged_map_hq2': 'AndeanFox'
+    'merged_map_hq2': 'AndeanFox',
+    'merged_map_Taimyr': 'AndeanFox'
 }
 
 # populations
@@ -40,11 +42,37 @@ GROUPS = {
         # TODO remove when done testing
         'test-pops' : ['OUT', 'CTVT', 'DPC', 'WAM']
     },
+
+    'merged_SNParray': {
+
+        'all-pops' : ['BAS', 'Basenji', 'DNA', 'Beagle', 'Boxer', 'DAE', 'DEU', 'DGS', 'DLB', 'Alaskan_Malamute', 'DAL',
+                      'DGL', 'DHU', 'DMA', 'DSL', 'Eurasier', 'Finnish_Spitz', 'Greenland_Sledge_Dog', 'Samoyed',
+                      'Siberian_Husky', 'American_Eskimo_Dog', 'American_Pit_Bull_Terrier', 'American_Staffordshire_Terrier',
+                      'Carolina_Dog', 'Catahoula_Leopard_Dog', 'Chesapeake_Bay_Retriever', 'Chihuahua', 'DME', 'DPU',
+                      'Newfoundland', 'Nova_Scotia_Duck_Tolling_Retriever', 'Peruvian_Inca_Orchid', 'Village_Dog_Belize',
+                      'Village_Dog_Brazil', 'Village_Dog_Colombia', 'Village_Dog_Costa_Rica', 'Village_Dog_Dominican_Republic',
+                      'Village_Dog_Honduras', 'Village_Dog_Panama', 'Village_Dog_Peru-Arequipa', 'Village_Dog_Peru-Cusco',
+                      'Village_Dog_Peru-Ica', 'Village_Dog_Peru-Loreto', 'Village_Dog_Peru-Puno', 'Village_Dog_Puerto_Rico',
+                      'Village_Dog_US-Alaska', 'Xoloitzcuintli', 'DID', 'DQA', 'Village_Dog_India-Chennai',
+                      'Village_Dog_India-Dehli', 'Village_Dog_India-Hazaribagh', 'Village_Dog_India-Mumbai',
+                      'Village_Dog_India-Orissa', 'Chinese_Shar-pei', 'Chow_Chow', 'DCH', 'DTI', 'DTM', 'DVN',
+                      'New_Guinea_Singing_Dog', 'Village_Dog_Indonesia-Borneo', 'Village_Dog_Indonesia-Jakarta',
+                      'Village_Dog_Papua_New_Guinea-East_Highlands_', 'Village_Dog_Papua_New_Guinea-Port_Moresby',
+                      'Village_Dog_Vietnam-Cao_Bang', 'Village_Dog_Vietnam-Ha_Giang', 'Village_Dog_Vietnam-Lang_Son',
+                      'Village_Dog_Vietnam-Lao_Cai', 'DPC', 'CTVT', 'DIN', 'COY', 'WAM', 'WAS', 'WEU', 'WME', 'Taimyr', 'OUT']
+    },
+
 }
 
 # add the 'all-pops' group to the new analysis dataset
-GROUPS['merged_map_hq']  = {'all-pops': GROUPS['merged_map']['all-pops']}
-GROUPS['merged_map_hq2'] = {'all-pops': GROUPS['merged_map']['all-pops']}
+GROUPS['merged_map_hq']  = {'all-pops': list(GROUPS['merged_map']['all-pops'])}
+GROUPS['merged_map_hq2'] = {'all-pops': list(GROUPS['merged_map']['all-pops'])}
+
+# added the Taimyr (Ancient Wolf)
+GROUPS['merged_map_Taimyr'] = copy.deepcopy(GROUPS['merged_map'])
+for pop in GROUPS['merged_map_Taimyr'] :
+    GROUPS['merged_map_Taimyr'][pop].append('Taimyr')
+
 
 NO_OUTGROUPS = ['all-no-out', 'dog-ctvt']
 
