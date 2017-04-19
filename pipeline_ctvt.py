@@ -679,12 +679,13 @@ class QPDstat(PrioritisedTask):
     """
     group = luigi.Parameter()
     dataset = luigi.Parameter()
+    blgsize = luigi.Parameter()
 
     def requires(self):
         return ConvertfBedToEigenstrat(self.group, self.dataset)
 
     def output(self):
-        return [luigi.LocalTarget("qpdstat/{0}.{1}.{2}".format(self.group, self.dataset, ext))
+        return [luigi.LocalTarget("qpdstat/{0}.{1}.{2}.blgsize-{3}".format(self.group, self.dataset, self.blgsize, ext))
                     for ext in ['par', 'log', 'poplist']]
 
     def run(self):
@@ -713,6 +714,7 @@ class QPDstat(PrioritisedTask):
             "snpname:      {}".format(self.input()[2].path),
             "indivname:    {}".format(self.input()[3].path),
             "popfilename:  {}".format(self.output()[2].path),  # Program will run the method for all listed quadrapules
+            "blgsize:      {}".format(self.blgsize)
             # "f4mode:   YES",                                   # f4 statistics not D-stats are computed
         ]
 
@@ -742,7 +744,9 @@ class CTVTPipeline(luigi.WrapperTask):
             for group in GROUPS[dataset]:
 
                 yield SmartPCAPlot(group, dataset)
-                yield QPDstat(group, dataset)
+
+                for blgsize in [0.5, 1, 2]:
+                    yield QPDstat(group, dataset, blgsize)
 
                 if group not in NO_OUTGROUPS:
 
@@ -768,7 +772,8 @@ class CTVTCustomPipeline(luigi.WrapperTask):
         yield SmartPCAPlot('dog-ctvt', dataset)
         yield SmartPCAPlot('dog-ctvt', dataset, ['DPC', 'CTVT'])
 
-        yield QPDstat('all-pops', dataset)
+            for blgsize in [0.5, 1, 2]:
+                yield QPDstat('all-pops', dataset, blgsize)
 
         yield NeighborJoiningTree('all-pops', dataset)
 
