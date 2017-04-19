@@ -9,14 +9,16 @@ OUTGROUP_POP = {
     'merged_map': 'OUT',
     'merged_map_hq': 'OUT',
     'merged_map_hq2': 'OUT',
-    'merged_map_Taimyr': 'OUT'
+    'merged_map_Taimyr': 'OUT',
+    'merged_SNParray': 'OUT'
 }
 
 OUTGROUP_SAMPLE = {
     'merged_map': 'AndeanFox',
     'merged_map_hq': 'AndeanFox',
     'merged_map_hq2': 'AndeanFox',
-    'merged_map_Taimyr': 'AndeanFox'
+    'merged_map_Taimyr': 'AndeanFox',
+    'merged_SNParray': 'AndeanFox'
 }
 
 # populations
