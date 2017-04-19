@@ -681,6 +681,9 @@ class QPDstat(PrioritisedTask):
     dataset = luigi.Parameter()
     blgsize = luigi.Parameter()
 
+    # only run one at a time
+    resources = {'qpdstat': 1}
+
     def requires(self):
         return ConvertfBedToEigenstrat(self.group, self.dataset)
 
