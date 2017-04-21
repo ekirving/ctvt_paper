@@ -790,21 +790,5 @@ class CTVTCustomPipeline(luigi.WrapperTask):
                 yield TreemixPlotM('all-pops', dataset, GROUP_BY_POPS, m)
                 yield TreemixPlotM('all-pops', dataset, GROUP_BY_SMPL, m)
 
-
-class CTVTTestPipeline(luigi.WrapperTask):
-    """
-    Run the specific elements of the CTVC pipeline
-    """
-
-    def requires(self):
-
-        # yield QPDstat('test-pops', 'merged_map')
-        yield NeighborJoiningTree('test-pops', 'merged_map')
-        yield NeighborJoiningTree('all-pops', 'merged_map')
-
-        yield SmartPCAPlot('all-pops', 'merged_map')
-        # yield TreemixPlotM('test-pops', 'merged_map', GROUP_BY_POPS, 0)
-        # yield TreemixPlotM('test-pops', 'merged_map', GROUP_BY_SMPL, 0)
-
 if __name__ == '__main__':
     luigi.run()

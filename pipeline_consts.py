@@ -40,9 +40,6 @@ GROUPS = {
         # dogs + ctvc (no outgroup)
         'dog-ctvt': ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID',
                      'DQA', 'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT'],
-
-        # TODO remove when done testing
-        'test-pops' : ['OUT', 'CTVT', 'DPC', 'WAM']
     },
 
     'merged_SNParray': {
