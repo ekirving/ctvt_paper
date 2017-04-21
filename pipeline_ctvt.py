@@ -769,20 +769,20 @@ class CTVTCustomPipeline(luigi.WrapperTask):
 
         # all the data
 
+        for dataset in ['merged_map', 'merged_map_Taimyr', 'merged_SNParray']:
+
+            yield SmartPCAPlot('all-pops', dataset)
+            yield NeighborJoiningTree('all-pops', dataset)
+
         for dataset in ['merged_map', 'merged_map_Taimyr']:
 
             yield SmartPCAPlot('all-no-out', dataset)
             yield SmartPCAPlot('dog-ctvt', dataset)
             yield SmartPCAPlot('dog-ctvt', dataset, ['DPC', 'CTVT'])
 
-        for dataset in ['merged_map', 'merged_map_Taimyr', 'merged_SNParray']:
-
-            yield SmartPCAPlot('all-pops', dataset)
-
+            # don't attempt this with merged_SNParray as there are >258e6 combinations
             for blgsize in [0.5, 1, 2]:
                 yield QPDstat('all-pops', dataset, blgsize)
-
-            yield NeighborJoiningTree('all-pops', dataset)
 
         # only the high quality ancient samples
         for dataset in ['merged_map_hq', 'merged_map_hq2']:
