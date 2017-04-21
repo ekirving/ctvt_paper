@@ -784,10 +784,6 @@ class CTVTCustomPipeline(luigi.WrapperTask):
 
             yield NeighborJoiningTree('all-pops', dataset)
 
-            for m in range(0, 3):
-                yield TreemixPlotM('all-pops', dataset, GROUP_BY_POPS, m)
-                yield TreemixPlotM('all-pops', dataset, GROUP_BY_SMPL, m)
-
         # only the high quality ancient samples
         for dataset in ['merged_map_hq', 'merged_map_hq2']:
             for m in range(0, 5):
