@@ -788,7 +788,8 @@ class CTVTCustomPipeline(luigi.WrapperTask):
         for dataset in ['merged_map_hq', 'merged_map_hq2', 'merged_SNParray']:
             for m in range(0, 5):
                 yield TreemixPlotM('all-pops', dataset, GROUP_BY_POPS, m)
-                yield TreemixPlotM('all-pops', dataset, GROUP_BY_SMPL, m)
+                if dataset != 'merged_SNParray':
+                    yield TreemixPlotM('all-pops', dataset, GROUP_BY_SMPL, m)
 
 if __name__ == '__main__':
     luigi.run()
