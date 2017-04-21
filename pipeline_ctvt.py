@@ -688,7 +688,7 @@ class QPDstat(PrioritisedTask):
         return ConvertfBedToEigenstrat(self.group, self.dataset)
 
     def output(self):
-        return [luigi.LocalTarget("qpdstat/{0}.{1}.{2}.blgsize-{3}".format(self.group, self.dataset, self.blgsize, ext))
+        return [luigi.LocalTarget("qpdstat/{0}.{1}.blgsize-{2}.{3}".format(self.group, self.dataset, self.blgsize, ext))
                     for ext in ['par', 'log', 'poplist']]
 
     def run(self):
