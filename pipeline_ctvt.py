@@ -144,7 +144,7 @@ class RandomPedAllele(PrioritisedTask):
                  "--dog",
                  "--recode",
                  "--bfile", "bed/{0}.{1}.geno".format(self.group, self.dataset),
-                 "--out", "ped/{0}.{1}.geno".format(self.group, self.dataset),])
+                 "--out", "ped/{0}.{1}.geno".format(self.group, self.dataset)])
 
         # make a random allele call for each site (i.e. pretend everything is homo)
         parse_ped("ped/{0}.{1}.geno.ped".format(self.group, self.dataset),
@@ -160,6 +160,10 @@ class RandomPedAllele(PrioritisedTask):
                  "--make-bed",
                  "--file", "ped/{0}.{1}.geno.random".format(self.group, self.dataset),
                  "--out", "bed/{0}.{1}.geno.random".format(self.group, self.dataset)])
+
+        # tidy up all the temporary ped files
+        for tmp in glob.glob("ped/{0}.{1}.geno.*".format(self.group, self.dataset)):
+            os.remove(tmp)
 
 
 class PlinkHighGeno(PrioritisedTask):
