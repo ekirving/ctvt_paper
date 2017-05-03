@@ -24,12 +24,24 @@ OUTGROUP_SAMPLE = {
 # populations
 ANCIENT_POPS = ['DPC']
 
+
+ALL_POPS = ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID', 'DQA',
+            'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT', 'DIN', 'COY', 'TAI', 'WAM', 'WAS', 'WEU', 'WME', 'OUT']
+
+SNP_ARRAY_POPS = ['BAS', 'BAS2', 'DNA', 'BEA', 'BOX', 'DAE', 'DEU', 'DGS', 'DLB', 'AM', 'DAL', 'DGL', 'DHU', 'DMA',
+                  'DSL', 'EUR', 'FS', 'GSD', 'SAM', 'SH', 'AED', 'APBT', 'AST', 'CD', 'CLD', 'CBR', 'CHI', 'DME',
+                  'DPU', 'NEW', 'NSDTR', 'PIO', 'VDB', 'VDB2', 'VDC', 'VDCR', 'VDDR', 'VDH', 'VDP', 'VDPA', 'VDPC',
+                  'VDPI', 'VDPL', 'VDPP', 'VDPR', 'VDUA', 'XOL', 'DID', 'DQA', 'VDIC', 'VDID', 'VDIH', 'VDIM',
+                  'VDIO', 'CSP', 'CC', 'DCH', 'DTI', 'DTM', 'DVN', 'NGSD', 'VDIB', 'VDIJ', 'VDPNGEH', 'VDPNGPM',
+                  'VDVCB', 'VDVHG', 'VDVLS', 'VDVLC', 'DPC', 'CTVT', 'DIN', 'COY', 'WAM', 'WAS', 'WEU', 'WME',
+                  'TAI', 'OUT']
+
 # groups of populations for running analyses
 GROUPS = {
 
     'merged_map': {
 
-        # all the populations
+        # all the populations (except the Taimyr)
         'all-pops': ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID',
                      'DQA', 'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT', 'DIN', 'COY', 'WAM', 'WAS', 'WEU', 'WME', 'OUT'],
 
@@ -42,16 +54,14 @@ GROUPS = {
                      'DQA', 'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT'],
     },
 
-    'merged_SNParray': {
+    'merged_v1':    { 'all-pops': ALL_POPS },
+    'merged_v1_TV': { 'all-pops': ALL_POPS },
+    'merged_v2':    { 'all-pops': ALL_POPS },
+    'merged_v2_TV': { 'all-pops': ALL_POPS },
 
-        'all-pops' : ['BAS', 'BAS2', 'DNA', 'BEA', 'BOX', 'DAE', 'DEU', 'DGS', 'DLB', 'AM', 'DAL', 'DGL', 'DHU', 'DMA',
-                      'DSL', 'EUR', 'FS', 'GSD', 'SAM', 'SH', 'AED', 'APBT', 'AST', 'CD', 'CLD', 'CBR', 'CHI', 'DME',
-                      'DPU', 'NEW', 'NSDTR', 'PIO', 'VDB', 'VDB2', 'VDC', 'VDCR', 'VDDR', 'VDH', 'VDP', 'VDPA', 'VDPC',
-                      'VDPI', 'VDPL', 'VDPP', 'VDPR', 'VDUA', 'XOL', 'DID', 'DQA', 'VDIC', 'VDID', 'VDIH', 'VDIM',
-                      'VDIO', 'CSP', 'CC', 'DCH', 'DTI', 'DTM', 'DVN', 'NGSD', 'VDIB', 'VDIJ', 'VDPNGEH', 'VDPNGPM',
-                      'VDVCB', 'VDVHG', 'VDVLS', 'VDVLC', 'DPC', 'CTVT', 'DIN', 'COY', 'WAM', 'WAS', 'WEU', 'WME',
-                      'TAI', 'OUT']
-    },
+    'merged_SNParray':           { 'all-pops': SNP_ARRAY_POPS },
+    'merged_SNParray_v1':        { 'all-pops': SNP_ARRAY_POPS },
+    'merged_SNParray_v1_noCTVT': { 'all-pops': SNP_ARRAY_POPS },
 
 }
 
