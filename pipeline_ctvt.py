@@ -801,8 +801,17 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
 
         for dataset in ['merged_v1', 'merged_v2']:
 
-            yield SmartPCAPlot('all-pops', dataset, ANCIENT_POPS)
-            yield SmartPCAPlot('all-pops', dataset + '.random', ANCIENT_POPS)
+            yield SmartPCAPlot('all-pops', dataset, ['DPC'])
+            yield SmartPCAPlot('all-pops', dataset, ['DPC', 'CTVT'])
+
+            yield SmartPCAPlot('dog-ctvt', dataset, ['DPC'])
+            yield SmartPCAPlot('dog-ctvt', dataset, ['DPC', 'CTVT'])
+
+            yield SmartPCAPlot('all-pops', dataset + '.random', ['DPC'])
+            yield SmartPCAPlot('all-pops', dataset + '.random', ['DPC', 'CTVT'])
+
+            yield SmartPCAPlot('dog-ctvt', dataset + '.random', ['DPC'])
+            yield SmartPCAPlot('dog-ctvt', dataset + '.random', ['DPC', 'CTVT'])
 
             yield NeighborJoiningTree('all-pops', dataset)
 

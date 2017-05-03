@@ -10,6 +10,9 @@ ANCIENT_POPS = ['DPC']
 ALL_POPS = ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID', 'DQA',
             'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT', 'DIN', 'COY', 'TAI', 'WAM', 'WAS', 'WEU', 'WME', 'OUT']
 
+ALL_DOGS = ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID', 'DQA',
+            'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT', 'DIN']
+
 SNP_ARRAY_POPS = ['BAS', 'BAS2', 'DNA', 'BEA', 'BOX', 'DAE', 'DEU', 'DGS', 'DLB', 'AM', 'DAL', 'DGL', 'DHU', 'DMA',
                   'DSL', 'EUR', 'FS', 'GSD', 'SAM', 'SH', 'AED', 'APBT', 'AST', 'CD', 'CLD', 'CBR', 'CHI', 'DME',
                   'DPU', 'NEW', 'NSDTR', 'PIO', 'VDB', 'VDB2', 'VDC', 'VDCR', 'VDDR', 'VDH', 'VDP', 'VDPA', 'VDPC',
@@ -36,12 +39,12 @@ GROUPS = {
                      'DQA', 'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT'],
     },
 
-    'merged_v1':        { 'all-pops': ALL_POPS },
-    'merged_v1.random': { 'all-pops': ALL_POPS },
-    'merged_v1_TV':     { 'all-pops': ALL_POPS },
-    'merged_v2':        { 'all-pops': ALL_POPS },
-    'merged_v2.random': { 'all-pops': ALL_POPS },
-    'merged_v2_TV':     { 'all-pops': ALL_POPS },
+    'merged_v1':        { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v1.random': { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
+    'merged_v1_TV':     { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
+    'merged_v2':        { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
+    'merged_v2.random': { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
+    'merged_v2_TV':     { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
 
     'merged_SNParray':           { 'all-pops': SNP_ARRAY_POPS },
     'merged_SNParray_v1':        { 'all-pops': SNP_ARRAY_POPS },
