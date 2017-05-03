@@ -630,22 +630,27 @@ class ConvertfBedToEigenstrat(PrioritisedTask):
     """
     group = luigi.Parameter()
     dataset = luigi.Parameter()
+    groupby = luigi.Parameter()
 
     def requires(self):
         return PlinkFilterPops(self.group, self.dataset)
 
     def output(self):
         extensions = ['par', 'eigenstratgeno', 'snp', 'ind', 'log']
-        return [luigi.LocalTarget("eigenstrat/{0}.{1}.{2}".format(self.group, self.dataset, ext)) for ext in extensions]
+        return [luigi.LocalTarget("eigenstrat/{0}.{1}.{2}.{3}".format(self.group, self.dataset, self.groupby, ext)) for ext in extensions]
 
     def run(self):
 
         # NB admixtools requires a non-standard fam file format
-        # also... we want to pretent that all our samples are populations!
-        fam = run_cmd(["awk '$6=$2' " + self.input()[2].path], shell=True)
+        if self.groupby == GROUP_BY_POPS:
+            fam = run_cmd(["awk '$6=$1' " + self.input()[2].path], shell=True)
+
+        elif self.groupby == GROUP_BY_SMPL:
+            # also... we want to pretend that all our samples are populations!
+            fam = run_cmd(["awk '$6=$2' " + self.input()[2].path], shell=True)
 
         # save the fam file
-        famfile = insert_suffix(self.input()[2].path, "convertf")
+        famfile = insert_suffix(self.input()[2].path, self.groupby)
         with open(famfile, 'w') as fout:
             fout.write(fam)
 
@@ -689,7 +694,7 @@ class QPDstat(PrioritisedTask):
     resources = {'qpdstat': 1}
 
     def requires(self):
-        return ConvertfBedToEigenstrat(self.group, self.dataset)
+        return ConvertfBedToEigenstrat(self.group, self.dataset, GROUP_BY_SMPL)
 
     def output(self):
         return [luigi.LocalTarget("qpdstat/{0}.{1}.blgsize-{2}.{3}".format(self.group, self.dataset, self.blgsize, ext))
@@ -733,6 +738,56 @@ class QPDstat(PrioritisedTask):
 
         # run qpDstat
         log = run_cmd(["qpDstat", "-p", parfile])
+
+        # save the log file
+        with self.output()[1].open('w') as logfile:
+            logfile.write(log)
+
+
+class QP3Pop(PrioritisedTask):
+    """
+    Run qp3Pop to test all three-population admixture models.
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+
+    def requires(self):
+        return ConvertfBedToEigenstrat(self.group, self.dataset, GROUP_BY_POPS)
+
+    def output(self):
+        return [luigi.LocalTarget("qp3pop/{0}.{1}.{2}".format(self.group, self.dataset, ext))
+                    for ext in ['par', 'log', 'poplist']]
+
+    def run(self):
+
+        # get the out group pop
+        outpop = OUTGROUP_POP[self.dataset]
+
+        # write the list of 3-way tests
+        with self.output()[2].open('w') as fout:
+
+            for target in ANCIENT_POPS:
+                for testpop in GROUPS[self.dataset][self.group]:
+                    if testpop not in [target, outpop]:
+                        fout.write(" ".join([target, testpop, outpop]) + "\n")
+
+        # compose the config settings
+        config = [
+            "genotypename: {}".format(self.input()[1].path),
+            "snpname:      {}".format(self.input()[2].path),
+            "indivname:    {}".format(self.input()[3].path),
+            "popfilename:  {}".format(self.output()[2].path),
+            # "inbreed:      YES"  # Use if target pop is inbred OR abd crucially if target is psudo-diploid
+        ]
+
+        # the params need to be defined in a .par file
+        parfile = self.output()[0].path
+
+        with open(parfile, 'w') as par:
+            par.write("\n".join(config))
+
+        # run qp3pop
+        log = run_cmd(["qp3pop", "-p", parfile])
 
         # save the log file
         with self.output()[1].open('w') as logfile:
@@ -827,6 +882,9 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
 
             yield TreemixPlotM('all-pops', dataset + '_hq2', GROUP_BY_POPS, 0)
             yield TreemixPlotM('all-pops', dataset + '_hq2', GROUP_BY_SMPL, 0)
+
+            # qp3pop
+            yield QP3Pop('all-pops', dataset + '_hq')
 
 
 
