@@ -791,5 +791,22 @@ class CTVTCustomPipeline(luigi.WrapperTask):
                 if dataset != 'merged_SNParray':
                     yield TreemixPlotM('all-pops', dataset, GROUP_BY_SMPL, m)
 
+
+class CTVTCustomPipelineV2(luigi.WrapperTask):
+    """
+    Run the specific elements of the CTVT pipeline
+    """
+
+    def requires(self):
+
+        for dataset in ['merged_v1', 'merged_v2']:
+
+            yield SmartPCAPlot('all-pops', dataset, ANCIENT_POPS)
+            yield SmartPCAPlot('all-pops', dataset + '.random', ANCIENT_POPS)
+
+            yield NeighborJoiningTree('all-pops', dataset)
+
+
+
 if __name__ == '__main__':
     luigi.run()
