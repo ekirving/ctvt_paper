@@ -705,7 +705,7 @@ class QPDstat(PrioritisedTask):
         # get the out group pop
         outpop = OUTGROUP_POP[self.dataset]
 
-        famfile = "bed/{0}.{1}.convertf.fam".format(self.group, self.dataset)
+        famfile = "bed/{0}.{1}.{2}.fam".format(self.group, self.dataset, GROUP_BY_SMPL)
 
         # split the samples based on outgroup
         out_samples = run_cmd(["grep    '" + outpop + "' " + famfile + " | awk '{print $2}'"], shell=True).splitlines()
