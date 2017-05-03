@@ -234,7 +234,7 @@ class SmartPCA(PrioritisedTask):
     """
     group = luigi.Parameter()
     dataset = luigi.Parameter()
-    projectpops = luigi.ListParameter(default=ANCIENT_POPS)
+    projectpops = luigi.ListParameter()
 
     def requires(self):
         return PlinkFilterPops(self.group, self.dataset)
@@ -297,7 +297,7 @@ class SmartPCAPlot(PrioritisedTask):
     """
     group = luigi.Parameter()
     dataset = luigi.Parameter()
-    projectpops = luigi.ListParameter(default=ANCIENT_POPS)
+    projectpops = luigi.ListParameter()
 
     def requires(self):
         return SmartPCA(self.group, self.dataset, self.projectpops)
@@ -746,7 +746,7 @@ class CTVTPipeline(luigi.WrapperTask):
 
             for group in GROUPS[dataset]:
 
-                yield SmartPCAPlot(group, dataset)
+                yield SmartPCAPlot(group, dataset, ANCIENT_POPS)
 
                 for blgsize in [0.5, 1, 2]:
                     yield QPDstat(group, dataset, blgsize)
@@ -771,13 +771,13 @@ class CTVTCustomPipeline(luigi.WrapperTask):
 
         for dataset in ['merged_map', 'merged_map_Taimyr', 'merged_SNParray']:
 
-            yield SmartPCAPlot('all-pops', dataset)
+            yield SmartPCAPlot('all-pops', dataset, ANCIENT_POPS)
             yield NeighborJoiningTree('all-pops', dataset)
 
         for dataset in ['merged_map', 'merged_map_Taimyr']:
 
-            yield SmartPCAPlot('all-no-out', dataset)
-            yield SmartPCAPlot('dog-ctvt', dataset)
+            yield SmartPCAPlot('all-no-out', dataset, ANCIENT_POPS)
+            yield SmartPCAPlot('dog-ctvt', dataset, ANCIENT_POPS)
             yield SmartPCAPlot('dog-ctvt', dataset, ['DPC', 'CTVT'])
 
             # don't attempt this with merged_SNParray as there are >258e6 combinations
