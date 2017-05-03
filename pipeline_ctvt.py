@@ -807,16 +807,19 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
             yield SmartPCAPlot('dog-ctvt', dataset, ['DPC'])
             yield SmartPCAPlot('dog-ctvt', dataset, ['DPC', 'CTVT'])
 
+            # random call versions
             yield SmartPCAPlot('all-pops', dataset + '.random', ['DPC'])
             yield SmartPCAPlot('all-pops', dataset + '.random', ['DPC', 'CTVT'])
 
             yield SmartPCAPlot('dog-ctvt', dataset + '.random', ['DPC'])
             yield SmartPCAPlot('dog-ctvt', dataset + '.random', ['DPC', 'CTVT'])
 
+            # NJ tree
             yield NeighborJoiningTree('all-pops', dataset)
 
-            yield TreemixPlotM('all-pops', dataset, GROUP_BY_POPS, 0)
-            yield TreemixPlotM('all-pops', dataset, GROUP_BY_SMPL, 0)
+            # treemix
+            yield TreemixPlotM('all-pops', dataset + '_hq', GROUP_BY_POPS, 0)
+            yield TreemixPlotM('all-pops', dataset + '_hq', GROUP_BY_SMPL, 0)
 
 
 
