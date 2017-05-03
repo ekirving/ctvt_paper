@@ -885,6 +885,7 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
 
             # qp3Pop
             yield QP3Pop('all-pops', dataset + '_hq')
+            yield QP3Pop('all-pops', dataset + '_TV_hq')
 
             # qpDstat
             yield QPDstat('all-pops', dataset, blgsize=1)
