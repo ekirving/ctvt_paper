@@ -139,7 +139,7 @@ class RandomPedAllele(PrioritisedTask):
 
     def run(self):
 
-        # conver to PED so it's easier to parse the data
+        # convert to PED so it's easier to parse the data
         run_cmd(["plink",
                  "--dog",
                  "--recode",
@@ -235,13 +235,15 @@ class SmartPCA(PrioritisedTask):
     group = luigi.Parameter()
     dataset = luigi.Parameter()
     projectpops = luigi.ListParameter()
+    randomcall = luigi.BoolParameter(default=False)
 
     def requires(self):
         return PlinkFilterPops(self.group, self.dataset)
 
     def output(self):
         prj = "-".join(self.projectpops)
-        return [luigi.LocalTarget("smartpca/{0}.{1}.prj-{2}.{3}".format(self.group, self.dataset, prj, ext)) for ext in ['pca.evec', 'eval']]
+        rand = 'rand' if self.randomcall else 'full'
+        return [luigi.LocalTarget("smartpca/{0}.{1}.{2}.prj-{3}.{4}".format(self.group, self.dataset, rand, prj, ext)) for ext in ['pca.evec', 'eval']]
 
     def run(self):
 
@@ -249,9 +251,10 @@ class SmartPCA(PrioritisedTask):
         pops = [pop for pop in GROUPS[self.dataset][self.group] if pop not in self.projectpops]
 
         prj = "-".join(self.projectpops)
+        rand = 'rand' if self.randomcall else 'full'
 
         # save the pop list
-        poplist = 'smartpca/{0}.{1}.prj-{2}.poplist'.format(self.group, self.dataset, prj)
+        poplist = 'smartpca/{0}.{1}.{2}.prj-{3}.poplist'.format(self.group, self.dataset, rand, prj)
         with open(poplist, 'w') as fout:
             fout.write("\n".join(pops))
 
@@ -281,7 +284,7 @@ class SmartPCA(PrioritisedTask):
         ]
 
         # smartpca needs the params to be defined in a .par file
-        parfile = "smartpca/{0}.{1}.prj-{2}.par".format(self.group, self.dataset, prj)
+        parfile = "smartpca/{0}.{1}.{2}.prj-{3}.par".format(self.group, self.dataset, rand, prj)
 
         with open(parfile, 'w') as par:
             par.write("\n".join(config))
@@ -298,24 +301,27 @@ class SmartPCAPlot(PrioritisedTask):
     group = luigi.Parameter()
     dataset = luigi.Parameter()
     projectpops = luigi.ListParameter()
+    randomcall = luigi.BoolParameter(default=False)
 
     def requires(self):
-        return SmartPCA(self.group, self.dataset, self.projectpops)
+        return SmartPCA(self.group, self.dataset, self.projectpops, self.randomcall)
 
     def output(self):
         prj = "-".join(self.projectpops)
+        rand = 'rand' if self.randomcall else 'full'
         for pc1, pc2 in [(1, 2), (3, 4), (5, 6)]:
-            yield luigi.LocalTarget("pdf/{0}.{1}.prj-{2}.PCA.{3}.{4}.pdf".format(self.group, self.dataset, prj, pc1, pc2))
+            yield luigi.LocalTarget("pdf/{0}.{1}.{2}.prj-{3}.PCA.{4}.{5}.pdf".format(self.group, self.dataset, rand, prj, pc1, pc2))
 
     def run(self):
         prj = "-".join(self.projectpops)
+        rand = 'rand' if self.randomcall else 'full'
 
         # calculate the percentage of variance explained by each PC, by dividing each eigenvalue by the sum total
         sum = run_cmd(["awk '{ sum+=$1 } END {print sum}' " + self.input()[1].path], shell=True)
         pve = run_cmd(["awk '{print $1/" + sum.strip() +"}' " + self.input()[1].path], shell=True)
 
         # save the percentage variance
-        with open("smartpca/{0}.{1}.prj-{2}.pve".format(self.group, self.dataset, prj), 'w') as fout:
+        with open("smartpca/{0}.{1}.{2}.prj-{3}.pve".format(self.group, self.dataset, rand, prj), 'w') as fout:
             fout.write(pve)
 
         # copy the population name into the first column, skip the header row (to make things easier for the Rscript)
@@ -330,7 +336,7 @@ class SmartPCAPlot(PrioritisedTask):
 
         # save the pca data
         for suffix, data in [('calc', calc), ('proj',proj)]:
-            with open("smartpca/{0}.{1}.prj-{2}.{3}.pca".format(self.group, self.dataset, prj, suffix), 'w') as fout:
+            with open("smartpca/{0}.{1}.{2}.prj-{3}.{4}.pca".format(self.group, self.dataset, rand, prj, suffix), 'w') as fout:
                 fout.write(data)
 
         # plot the first 6 components
@@ -338,17 +344,17 @@ class SmartPCAPlot(PrioritisedTask):
 
             # generate both labeled and unlabeled PDFs
             pdfs = {
-                0: "pdf/{0}.{1}.prj-{2}.PCA.{3}.{4}.pdf".format(self.group, self.dataset, prj, pc1, pc2),
-                1: "pdf/{0}.{1}.prj-{2}.PCA.{3}.{4}.labeled.pdf".format(self.group, self.dataset, prj, pc1, pc2)
+                0: "pdf/{0}.{1}.{2}.prj-{3}.PCA.{4}.{5}.pdf".format(self.group, self.dataset, rand, prj, pc1, pc2),
+                1: "pdf/{0}.{1}.{2}.prj-{3}.PCA.{4}.{5}.labeled.pdf".format(self.group, self.dataset, rand, prj, pc1, pc2)
             }
 
             for labeled, pdf_path in pdfs.iteritems():
                 # generate a PDF of the PCA plot
                 run_cmd(["Rscript",
                          "rscript/smartpca-plot.R",
-                         "smartpca/{0}.{1}.prj-{2}.calc.pca".format(self.group, self.dataset, prj),  # pca data, used for calculating the eigenvectors
-                         "smartpca/{0}.{1}.prj-{2}.proj.pca".format(self.group, self.dataset, prj),  # projected pca data
-                         "smartpca/{0}.{1}.prj-{2}.pve".format(self.group, self.dataset, prj),       # pve data (% variance)
+                         "smartpca/{0}.{1}.{2}.prj-{3}.calc.pca".format(self.group, self.dataset, rand, prj),  # pca data, used for calculating the eigenvectors
+                         "smartpca/{0}.{1}.{2}.prj-{3}.proj.pca".format(self.group, self.dataset, rand, prj),  # projected pca data
+                         "smartpca/{0}.{1}.{2}.prj-{3}.pve".format(self.group, self.dataset, rand, prj),       # pve data (% variance)
                          pdf_path,                                                       # location to save the pdf file
                          pc1,                                                            # component num for x-axis
                          pc2,                                                            # component num for y-axis
@@ -790,6 +796,20 @@ class CTVTCustomPipeline(luigi.WrapperTask):
                 yield TreemixPlotM('all-pops', dataset, GROUP_BY_POPS, m)
                 if dataset != 'merged_SNParray':
                     yield TreemixPlotM('all-pops', dataset, GROUP_BY_SMPL, m)
+
+
+class CTVTCustomPipelineV2(luigi.WrapperTask):
+    """
+    Run the specific elements of the CTVT pipeline
+    """
+
+    def requires(self):
+
+        for dataset in ['merged_v1', 'merged_v2']:
+
+            yield SmartPCAPlot('all-pops', dataset, ANCIENT_POPS)
+            yield SmartPCAPlot('all-pops', dataset, ANCIENT_POPS, randomcall=True)
+
 
 if __name__ == '__main__':
     luigi.run()
