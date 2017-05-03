@@ -769,7 +769,7 @@ class QP3Pop(PrioritisedTask):
             for target in ANCIENT_POPS:
                 for testpop in GROUPS[self.dataset][self.group]:
                     if testpop not in [target, outpop]:
-                        fout.write(" ".join([target, testpop, outpop]) + "\n")
+                        fout.write(" ".join([outpop, testpop, target]) + "\n")
 
         # compose the config settings
         config = [
