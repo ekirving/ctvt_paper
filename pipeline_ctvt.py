@@ -737,7 +737,7 @@ class QPDstat(PrioritisedTask):
 
 class CTVTPipeline(luigi.WrapperTask):
     """
-    Run the main CTVC pipeline
+    Run the main CTVT pipeline
     """
 
     def requires(self):
@@ -762,7 +762,7 @@ class CTVTPipeline(luigi.WrapperTask):
 
 class CTVTCustomPipeline(luigi.WrapperTask):
     """
-    Run the specific elements of the CTVC pipeline
+    Run the specific elements of the CTVT pipeline
     """
 
     def requires(self):

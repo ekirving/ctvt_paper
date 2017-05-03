@@ -37,7 +37,7 @@ GROUPS = {
         'all-no-out': ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID',
                        'DQA', 'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT', 'DIN', 'COY', 'WAM', 'WAS', 'WEU', 'WME'],
 
-        # dogs + ctvc (no outgroup)
+        # dogs + CTVT (no outgroup)
         'dog-ctvt': ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID',
                      'DQA', 'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT'],
     },
