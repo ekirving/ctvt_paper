@@ -4,26 +4,8 @@
 import multiprocessing, copy
 from collections import OrderedDict
 
-# the population and sample to use for rooting the NJ tree
-OUTGROUP_POP = {
-    'merged_map': 'OUT',
-    'merged_map_hq': 'OUT',
-    'merged_map_hq2': 'OUT',
-    'merged_map_Taimyr': 'OUT',
-    'merged_SNParray': 'OUT'
-}
-
-OUTGROUP_SAMPLE = {
-    'merged_map': 'AndeanFox',
-    'merged_map_hq': 'AndeanFox',
-    'merged_map_hq2': 'AndeanFox',
-    'merged_map_Taimyr': 'AndeanFox',
-    'merged_SNParray': 'AndeanFox'
-}
-
 # populations
 ANCIENT_POPS = ['DPC']
-
 
 ALL_POPS = ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID', 'DQA',
             'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT', 'DIN', 'COY', 'TAI', 'WAM', 'WAS', 'WEU', 'WME', 'OUT']
@@ -76,6 +58,9 @@ GROUPS['merged_map_Taimyr'] = copy.deepcopy(GROUPS['merged_map'])
 for pop in GROUPS['merged_map_Taimyr'] :
     GROUPS['merged_map_Taimyr'][pop].append('Taimyr')
 
+# the population and sample to use for rooting the NJ tree
+OUTGROUP_POP = {group: 'OUT' for group in GROUPS}
+OUTGROUP_SAMPLE = {group: 'AndeanFox' for group in GROUPS}
 
 NO_OUTGROUPS = ['all-no-out', 'dog-ctvt']
 
