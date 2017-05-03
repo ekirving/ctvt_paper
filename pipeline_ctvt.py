@@ -883,8 +883,11 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
             yield TreemixPlotM('all-pops', dataset + '_hq2', GROUP_BY_POPS, 0)
             yield TreemixPlotM('all-pops', dataset + '_hq2', GROUP_BY_SMPL, 0)
 
-            # qp3pop
+            # qp3Pop
             yield QP3Pop('all-pops', dataset + '_hq')
+
+            # qpDstat
+            yield QPDstat('all-pops', dataset, blgsize=1)
 
 
 
