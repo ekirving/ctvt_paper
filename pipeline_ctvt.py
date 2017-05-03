@@ -787,7 +787,7 @@ class QP3Pop(PrioritisedTask):
             par.write("\n".join(config))
 
         # run qp3pop
-        log = run_cmd(["qp3pop", "-p", parfile])
+        log = run_cmd(["qp3Pop", "-p", parfile])
 
         # save the log file
         with self.output()[1].open('w') as logfile:
