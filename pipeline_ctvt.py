@@ -806,8 +806,8 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
 
             yield NeighborJoiningTree('all-pops', dataset)
 
-            yield TreemixPlotM('all-pops', dataset + '.random', GROUP_BY_POPS, 0)
-            yield TreemixPlotM('all-pops', dataset + '.random', GROUP_BY_SMPL, 0)
+            yield TreemixPlotM('all-pops', dataset, GROUP_BY_POPS, 0)
+            yield TreemixPlotM('all-pops', dataset, GROUP_BY_SMPL, 0)
 
 
 
