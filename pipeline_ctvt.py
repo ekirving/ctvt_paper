@@ -925,7 +925,7 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
 
         # qpGraph
         for m in range(0, TREEMIX_MAX_M + 1):
-            yield TreemixPlotM('qpgraph-pops', 'merged_v2_hq_nomex', m)
+            yield TreemixPlotM('qpgraph-pops', 'merged_v2_hq_nomex', GROUP_BY_POPS, m)
             yield QPGraphPlot('qpgraph-pops', 'merged_v2_hq_nomex', m)
 
 
