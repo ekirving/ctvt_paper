@@ -122,50 +122,6 @@ class PlinkFilterGenoByPops(PrioritisedTask):
                  "--out", "bed/{0}.{1}.geno".format(self.group, self.dataset)])
 
 
-class RandomPedAllele(PrioritisedTask):
-    """
-    Convert bed to ped. Convert heterozygous sites in ped file to homozygous choosing alleles at random.
-    Convert ped back to bed
-    """
-    group = luigi.Parameter()
-    dataset = luigi.Parameter()
-
-    def requires(self):
-        return PlinkFilterGenoByPops(self.group, self.dataset)
-
-    def output(self):
-        return [luigi.LocalTarget("bed/{0}.{1}.geno.random.{2}".format(self.group, self.dataset, ext)) for ext in
-                    ['bed', 'bim', 'fam']]
-
-    def run(self):
-
-        # conver to PED so it's easier to parse the data
-        run_cmd(["plink",
-                 "--dog",
-                 "--recode",
-                 "--bfile", "bed/{0}.{1}.geno".format(self.group, self.dataset),
-                 "--out", "ped/{0}.{1}.geno".format(self.group, self.dataset)])
-
-        # make a random allele call for each site (i.e. pretend everything is homo)
-        parse_ped("ped/{0}.{1}.geno.ped".format(self.group, self.dataset),
-                  "ped/{0}.{1}.geno.random.ped".format(self.group, self.dataset))
-
-        # copy the map file
-        copyfile("ped/{0}.{1}.geno.map".format(self.group, self.dataset),
-                 "ped/{0}.{1}.geno.random.map".format(self.group, self.dataset))
-
-        # convert the random called file back to BED
-        run_cmd(["plink",
-                 "--dog",
-                 "--make-bed",
-                 "--file", "ped/{0}.{1}.geno.random".format(self.group, self.dataset),
-                 "--out", "bed/{0}.{1}.geno.random".format(self.group, self.dataset)])
-
-        # tidy up all the temporary ped files
-        for tmp in glob.glob("ped/{0}.{1}.geno.*".format(self.group, self.dataset)):
-            os.remove(tmp)
-
-
 class PlinkHighGeno(PrioritisedTask):
     """
     Filter all sites without a gentyping rate of 95%
@@ -174,10 +130,10 @@ class PlinkHighGeno(PrioritisedTask):
     dataset = luigi.Parameter()
 
     def requires(self):
-        return RandomPedAllele(self.group, self.dataset)
+        return PlinkFilterGenoByPops(self.group, self.dataset)
 
     def output(self):
-        return [luigi.LocalTarget("bed/{0}.{1}.geno.random.hq.{2}".format(self.group, self.dataset, ext)) for ext in
+        return [luigi.LocalTarget("bed/{0}.{1}.geno.hq.{2}".format(self.group, self.dataset, ext)) for ext in
                     ['bed', 'bim', 'fam']]
 
     def run(self):
@@ -188,8 +144,8 @@ class PlinkHighGeno(PrioritisedTask):
                  "--make-bed",
                  # "--maf", "0.05",
                  "--geno", "0.05",
-                 "--bfile", "bed/{0}.{1}.geno.random".format(self.group, self.dataset),
-                 "--out", "bed/{0}.{1}.geno.random.hq".format(self.group, self.dataset)])
+                 "--bfile", "bed/{0}.{1}.geno".format(self.group, self.dataset),
+                 "--out", "bed/{0}.{1}.geno.hq".format(self.group, self.dataset)])
 
 
 class PlinkBedToFreq(PrioritisedTask):
@@ -204,7 +160,7 @@ class PlinkBedToFreq(PrioritisedTask):
         return PlinkHighGeno(self.group, self.dataset)
 
     def output(self):
-        return [luigi.LocalTarget("bed/{0}.{1}.geno.random.{2}.{3}".format(self.group, self.dataset, self.groupby, ext))
+        return [luigi.LocalTarget("bed/{0}.{1}.geno.{2}.{3}".format(self.group, self.dataset, self.groupby, ext))
                     for ext in ['frq.strat.gz', 'log']]
 
     def run(self):
@@ -230,7 +186,7 @@ class PlinkBedToFreq(PrioritisedTask):
                  "--bed", bed_file,
                  "--bim", bim_file,
                  "--fam", fam_file,
-                 "--out", "bed/{0}.{1}.geno.random.{2}".format(self.group, self.dataset, self.groupby)])
+                 "--out", "bed/{0}.{1}.geno.{2}".format(self.group, self.dataset, self.groupby)])
 
 class SmartPCA(PrioritisedTask):
     """
@@ -426,7 +382,7 @@ class TreemixPlinkFreq(PrioritisedTask):
         return PlinkBedToFreq(self.group, self.dataset, self.groupby)
 
     def output(self):
-        return luigi.LocalTarget("treemix/{0}.{1}.geno.random.{2}.frq.gz".format(self.group, self.dataset, self.groupby))
+        return luigi.LocalTarget("treemix/{0}.{1}.geno.{2}.frq.gz".format(self.group, self.dataset, self.groupby))
 
     def run(self):
 
@@ -450,7 +406,7 @@ class TreemixM(PrioritisedTask):
         return TreemixPlinkFreq(self.group, self.dataset, self.groupby)
 
     def output(self):
-        return [luigi.LocalTarget("treemix/{0}.{1}.geno.random.{2}.m{3}.{4}".format(self.group, self.dataset, self.groupby, self.m, ext))
+        return [luigi.LocalTarget("treemix/{0}.{1}.geno.{2}.m{3}.{4}".format(self.group, self.dataset, self.groupby, self.m, ext))
                     for ext in ['cov.gz', 'covse.gz', 'edges.gz', 'llik', 'modelcov.gz', 'treeout.gz', 'vertices.gz']]
 
     def run(self):
@@ -482,12 +438,12 @@ class TreemixPlotM(PrioritisedTask):
         return TreemixM(self.group, self.dataset, self.groupby, self.m)
 
     def output(self):
-        return luigi.LocalTarget("pdf/{0}.{1}.treemix.geno.random.{2}.m{3}.pdf".format(self.group, self.dataset, self.groupby, self.m))
+        return luigi.LocalTarget("pdf/{0}.{1}.treemix.geno.{2}.m{3}.pdf".format(self.group, self.dataset, self.groupby, self.m))
 
     def run(self):
 
         # compose an ordered population list, with colors for the node labels
-        poplist = "treemix/{0}.{1}.geno.random.{2}.poplist".format(self.group, self.dataset, self.groupby)
+        poplist = "treemix/{0}.{1}.geno.{2}.poplist".format(self.group, self.dataset, self.groupby)
 
         with open(poplist, 'w') as fout:
             if self.groupby == GROUP_BY_POPS:
@@ -497,7 +453,7 @@ class TreemixPlotM(PrioritisedTask):
                     fout.write("{}\t{}\n".format(pop, colour))
             else:
                 # fetch the sample names from the fam file
-                fam_file = "bed/{0}.{1}.geno.random.fam".format(self.group, self.dataset)
+                fam_file = "bed/{0}.{1}.geno.fam".format(self.group, self.dataset)
                 fam = run_cmd(["awk '{print $2\" \"$1}' " + fam_file], shell=True)
                 samples = dict(line.split() for line in fam.splitlines())
 
@@ -945,11 +901,11 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
             yield NeighborJoiningTree('all-pops', dataset)
 
             # treemix
-            yield TreemixPlotM('all-pops', dataset + '_hq', GROUP_BY_POPS, 0)
-            yield TreemixPlotM('all-pops', dataset + '_hq', GROUP_BY_SMPL, 0)
-
-            yield TreemixPlotM('all-pops', dataset + '_hq2', GROUP_BY_POPS, 0)
-            yield TreemixPlotM('all-pops', dataset + '_hq2', GROUP_BY_SMPL, 0)
+            # yield TreemixPlotM('all-pops', dataset + '_hq.random', GROUP_BY_POPS, 0)
+            # yield TreemixPlotM('all-pops', dataset + '_hq.random', GROUP_BY_SMPL, 0)
+            #
+            # yield TreemixPlotM('all-pops', dataset + '_hq2.random', GROUP_BY_POPS, 0)
+            # yield TreemixPlotM('all-pops', dataset + '_hq2.random', GROUP_BY_SMPL, 0)
 
             # qp3Pop
             yield QP3Pop('all-pops', dataset + '_hq')
