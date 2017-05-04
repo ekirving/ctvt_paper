@@ -811,10 +811,11 @@ class QPF4ratio(PrioritisedTask):
 
     def output(self):
 
-        a = re.sub('[^A-Z\-]', '', '-'.join(self.meta_a))
-        b = re.sub('[^A-Z\-]', '', '-'.join(self.meta_b))
-        c = re.sub('[^A-Z\-]', '', '-'.join(self.meta_c))
-        x = re.sub('[^A-Z\-]', '', '-'.join(self.meta_x))
+        # shorten the meta pop names
+        a = '-'.join([re.sub('[^A-Z]', '', meta) for meta in self.meta_a])
+        b = '-'.join([re.sub('[^A-Z]', '', meta) for meta in self.meta_b])
+        c = '-'.join([re.sub('[^A-Z]', '', meta) for meta in self.meta_c])
+        x = '-'.join([re.sub('[^A-Z]', '', meta) for meta in self.meta_x])
 
         return [luigi.LocalTarget("qpf4ratio/{0}.{1}.a-{2}.b-{3}.c-{4}.x-{5}.{6}".format(self.group, self.dataset, a, b, c, x, ext))
                     for ext in ['par', 'log', 'poplist']]
