@@ -817,7 +817,7 @@ class QPF4ratio(PrioritisedTask):
         c = '-'.join([re.sub('[^A-Z]', '', meta) for meta in self.meta_c])
         x = '-'.join([re.sub('[^A-Z]', '', meta) for meta in self.meta_x])
 
-        return [luigi.LocalTarget("qpf4ratio/{0}.{1}.a-{2}.b-{3}.c-{4}.x-{5}.{6}".format(self.group, self.dataset, a, b, c, x, ext))
+        return [luigi.LocalTarget("qpf4ratio/{0}.{1}.a-{2}.b-{3}.c-{4}.x-{5}.blgsize-{6}.{7}".format(self.group, self.dataset, a, b, c, x, self.blgsize, ext))
                     for ext in ['par', 'log', 'poplist']]
 
     def run(self):
@@ -958,24 +958,6 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
             # qpDstat
             yield QPDstat('all-pops', dataset, blgsize=1)
 
-        # # qpF4ratio
-        # dataset = 'merged_SNParray_v1'
-        # a = ['European Dogs', 'East Asian Dogs']
-        # b = ['European Dogs', 'East Asian Dogs']
-        # c = ['Pre-Colombian Dogs']
-        # x = ['American Dogs']
-        #
-        # yield QPF4ratio('all-pops', dataset, a, b, c, x, blgsize=1)
-        #
-        # # qpF4ratio
-        # dataset = 'merged_v2'
-        # a = ['European Dogs', 'East Asian Dogs']
-        # b = ['European Dogs', 'East Asian Dogs']
-        # c = ['American Wolf']
-        # x = ['Pre-Colombian Dogs']
-        #
-        # yield QPF4ratio('all-pops', dataset, a, b, c, x, blgsize=1)
-
         # qpF4ratio
         dataset = 'merged_SNParray_v1'
         a = ['CTVT']
@@ -983,7 +965,8 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
         c = ['European Dogs', 'East Asian Dogs']
         x = ['American Dogs']
 
-        yield QPF4ratio('all-pops', dataset, a, b, c, x, blgsize=1)
+        for blgsize in [0.5, 1, 2]:
+            yield QPF4ratio('all-pops', dataset, a, b, c, x, blgsize)
 
 if __name__ == '__main__':
     luigi.run()
