@@ -794,6 +794,64 @@ class QP3Pop(PrioritisedTask):
             logfile.write(log)
 
 
+class QPF4ratio(PrioritisedTask):
+    """
+    Run qpF4ratio to test all F4 ratios.
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+    blgsize = luigi.Parameter()
+
+    def requires(self):
+        return ConvertfBedToEigenstrat(self.group, self.dataset, GROUP_BY_POPS)
+
+    def output(self):
+        return [luigi.LocalTarget("qpf4ratio/{0}.{1}.{2}".format(self.group, self.dataset, ext))
+                    for ext in ['par', 'log', 'poplist']]
+
+    def run(self):
+
+        # get the metapopulations of interest
+        def get_metapops(metalist):
+            return [pop for pop in GROUPS[self.dataset][self.group] if POPULATIONS[pop] in metalist]
+
+        eurasians = get_metapops(['European Dogs', 'East Asian Dogs'])
+        americans = get_metapops(['American Dogs'])
+        targets = ANCIENT_POPS
+
+        # write the list of F4 ratio tests
+        with self.output()[2].open('w') as fout:
+            # e.g.  f4(A,O; X,C) / f4(A,O; B,C)
+            #       Yoruba  Papuan : Uygur Han :: Yoruba  Papuan :  French Han
+
+            for target in ANCIENT_POPS:
+                # TOOD compose this list
+                # fout.write(" ".join([outpop, testpop, target]) + "\n")
+                pass
+
+        # compose the config settings
+        config = [
+            "genotypename: {}".format(self.input()[1].path),
+            "snpname:      {}".format(self.input()[2].path),
+            "indivname:    {}".format(self.input()[3].path),
+            "popfilename:  {}".format(self.output()[2].path),
+            "blgsize:      {}".format(self.blgsize)
+        ]
+
+        # the params need to be defined in a .par file
+        parfile = self.output()[0].path
+
+        with open(parfile, 'w') as par:
+            par.write("\n".join(config))
+
+        # run qp3pop
+        log = run_cmd(["qpF4ratio", "-p", parfile])
+
+        # save the log file
+        with self.output()[1].open('w') as logfile:
+            logfile.write(log)
+
+
 class CTVTPipeline(luigi.WrapperTask):
     """
     Run the main CTVT pipeline
