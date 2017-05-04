@@ -956,14 +956,23 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
             # qpDstat
             yield QPDstat('all-pops', dataset, blgsize=1)
 
-
-        # the meta pops to use
+        # qpF4ratio
+        dataset = 'merged_SNParray_v1'
         a = ['European Dogs']
         b = ['East Asian Dogs']
+        c = ['Pre-Colombian Dogs']
+        x = ['American Dogs']
+
+        yield QPF4ratio('all-pops', dataset, a, b, c, x, blgsize=1)
 
         # qpF4ratio
-        yield QPF4ratio('all-pops', 'merged_SNParray_v1', a, b, c=['Pre-Colombian Dogs'], x=['American Dogs'], blgsize=1)
-        yield QPF4ratio('all-pops', 'merged_v2', a, b, c=['American Wolf'], x=['Pre-Colombian Dogs'], blgsize=1)
+        dataset = 'merged_v2'
+        a = ['European Dogs']
+        b = ['East Asian Dogs']
+        c = ['American Wolf']
+        x = ['Pre-Colombian Dogs']
+
+        yield QPF4ratio('all-pops', dataset, a, b, c, x, blgsize=1)
 
 if __name__ == '__main__':
     luigi.run()
