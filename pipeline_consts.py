@@ -39,23 +39,23 @@ GROUPS = {
                      'DQA', 'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT'],
     },
 
-    'merged_v1':        { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v1.random': { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
-    'merged_v1_hq':     { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
-    'merged_v1_hq2':    { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
-    'merged_v1_TV':     { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
-    'merged_v1_TV_hq':  { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
+    'merged_v1':        {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v1.random': {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v1_hq':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v1_hq2':    {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v1_TV':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v1_TV_hq':  {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
 
-    'merged_v2':        { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
-    'merged_v2.random': { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
-    'merged_v2_hq':     { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
-    'merged_v2_hq2':    { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
-    'merged_v2_TV':     { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
-    'merged_v2_TV_hq':  { 'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS },
+    'merged_v2':        {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v2.random': {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v2_hq':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v2_hq2':    {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v2_TV':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v2_TV_hq':  {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
 
-    'merged_SNParray':           { 'all-pops': SNP_ARRAY_POPS },
-    'merged_SNParray_v1':        { 'all-pops': SNP_ARRAY_POPS },
-    'merged_SNParray_v1_noCTVT': { 'all-pops': SNP_ARRAY_POPS },
+    'merged_SNParray':           {'all-pops': SNP_ARRAY_POPS},
+    'merged_SNParray_v1':        {'all-pops': SNP_ARRAY_POPS},
+    'merged_SNParray_v1_noCTVT': {'all-pops': SNP_ARRAY_POPS},
 
 }
 
