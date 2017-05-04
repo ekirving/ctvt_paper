@@ -824,18 +824,13 @@ class QPF4ratio(PrioritisedTask):
         # get the outgroup
         o = OUTGROUP_POP[self.dataset]
 
-        # get the list of permutations for all pairs drawn from both a_pops and b_pops
-        prod_ab = list(itertools.product(a_pops, b_pops))
-        prod_ba = list(itertools.product(b_pops, a_pops))
-        perm_ab = prod_ab + prod_ba
-
         # write the list of F4 ratio tests
         with self.output()[2].open('w') as fout:
-            for a, b in perm_ab:
-                for c in c_pops:
-                    for x in x_pops:
-                        # f4(A,O; X,C) / f4(A,O; B,C)
-                        fout.write("{a} {o} : {x} {c} :: {a} {o} : {b} {c}".format(a=a, b=b, c=c, x=x, o=o) + "\n")
+            for a, b, c, x in itertools.product(a_pops, b_pops, c_pops, x_pops):
+                # skip any duplicates
+                if len(set([a, b, c, x])) == 4:
+                    # f4(A,O; X,C) / f4(A,O; B,C)
+                    fout.write("{a} {o} : {x} {c} :: {a} {o} : {b} {c}".format(a=a, b=b, c=c, x=x, o=o) + "\n")
 
         # compose the config settings
         config = [
@@ -956,21 +951,30 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
             # qpDstat
             yield QPDstat('all-pops', dataset, blgsize=1)
 
+        # # qpF4ratio
+        # dataset = 'merged_SNParray_v1'
+        # a = ['European Dogs', 'East Asian Dogs']
+        # b = ['European Dogs', 'East Asian Dogs']
+        # c = ['Pre-Colombian Dogs']
+        # x = ['American Dogs']
+        #
+        # yield QPF4ratio('all-pops', dataset, a, b, c, x, blgsize=1)
+        #
+        # # qpF4ratio
+        # dataset = 'merged_v2'
+        # a = ['European Dogs', 'East Asian Dogs']
+        # b = ['European Dogs', 'East Asian Dogs']
+        # c = ['American Wolf']
+        # x = ['Pre-Colombian Dogs']
+        #
+        # yield QPF4ratio('all-pops', dataset, a, b, c, x, blgsize=1)
+
         # qpF4ratio
         dataset = 'merged_SNParray_v1'
-        a = ['European Dogs']
-        b = ['East Asian Dogs']
-        c = ['Pre-Colombian Dogs']
+        a = ['CTVT']
+        b = ['Pre-Colombian Dogs']
+        c = ['European Dogs', 'East Asian Dogs']
         x = ['American Dogs']
-
-        yield QPF4ratio('all-pops', dataset, a, b, c, x, blgsize=1)
-
-        # qpF4ratio
-        dataset = 'merged_v2'
-        a = ['European Dogs']
-        b = ['East Asian Dogs']
-        c = ['American Wolf']
-        x = ['Pre-Colombian Dogs']
 
         yield QPF4ratio('all-pops', dataset, a, b, c, x, blgsize=1)
 
