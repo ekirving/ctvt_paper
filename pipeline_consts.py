@@ -55,7 +55,7 @@ GROUPS = {
     'merged_v2_TV':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
     'merged_v2_TV_hq':  {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
 
-    'merged_v2_nomex':  {'qpgraph-pops': QPGRAPH_POPS},
+    'merged_v2_hq_nomex': {'qpgraph-pops': QPGRAPH_POPS},
 
     'merged_SNParray':           {'all-pops': SNP_ARRAY_POPS},
     'merged_SNParray_v1':        {'all-pops': SNP_ARRAY_POPS},
