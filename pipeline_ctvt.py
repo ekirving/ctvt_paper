@@ -959,14 +959,18 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
             yield QPDstat('all-pops', dataset, blgsize=1)
 
         # qpF4ratio
-        dataset = 'merged_SNParray_v1'
         a = ['CTVT']
         b = ['Pre-Colombian Dogs']
         c = ['European Dogs', 'East Asian Dogs']
         x = ['American Dogs']
 
         for blgsize in [0.5, 1, 2]:
-            yield QPF4ratio('all-pops', dataset, a, b, c, x, blgsize)
+            yield QPF4ratio('all-pops', 'merged_SNParray_v1', a, b, c, x, blgsize)
+
+        # qpGraph
+        for m in range(0, TREEMIX_MAX_M + 1):
+            yield QPGraphPlot('qpgraph-pops', 'merged_v2_nomex', m)
+
 
 if __name__ == '__main__':
     luigi.run()

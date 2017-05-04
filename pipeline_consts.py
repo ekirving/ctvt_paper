@@ -21,6 +21,8 @@ SNP_ARRAY_POPS = ['BAS', 'BAS2', 'DNA', 'BEA', 'BOX', 'DAE', 'DEU', 'DGS', 'DLB'
                   'VDVCB', 'VDVHG', 'VDVLS', 'VDVLC', 'DPC', 'CTVT', 'DIN', 'COY', 'WAM', 'WAS', 'WEU', 'WME',
                   'TAI', 'OUT']
 
+QPGRAPH_POPS = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'WEU', 'WAM', 'TAI', 'COY', 'OUT']
+
 # groups of populations for running analyses
 GROUPS = {
 
@@ -52,6 +54,8 @@ GROUPS = {
     'merged_v2_hq2':    {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
     'merged_v2_TV':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
     'merged_v2_TV_hq':  {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+
+    'merged_v2_nomex':  {'qpgraph-pops': QPGRAPH_POPS},
 
     'merged_SNParray':           {'all-pops': SNP_ARRAY_POPS},
     'merged_SNParray_v1':        {'all-pops': SNP_ARRAY_POPS},
@@ -175,7 +179,7 @@ COLOURS = {
 DEFAULT_COLOUR = '#e7298a'
 
 # the maximum number of migration events in Treemix
-TREEMIX_MAX_M = 10
+TREEMIX_MAX_M = 5
 
 # number of SNPs to group for LD
 TREEMIX_K = 1000
