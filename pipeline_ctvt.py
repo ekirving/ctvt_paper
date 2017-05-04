@@ -800,6 +800,10 @@ class QPF4ratio(PrioritisedTask):
     """
     group = luigi.Parameter()
     dataset = luigi.Parameter()
+    meta_a = luigi.ListParameter()
+    meta_b = luigi.ListParameter()
+    meta_c = luigi.ListParameter()
+    meta_x = luigi.ListParameter()
     blgsize = luigi.Parameter()
 
     def requires(self):
@@ -811,23 +815,27 @@ class QPF4ratio(PrioritisedTask):
 
     def run(self):
 
-        # get the metapopulations of interest
-        def get_metapops(metalist):
-            return [pop for pop in GROUPS[self.dataset][self.group] if POPULATIONS[pop] in metalist]
+        # resolve the meta pops into lists of actual populations
+        a_pops = get_metapops(self.group, self.dataset, self.meta_a)
+        b_pops = get_metapops(self.group, self.dataset, self.meta_b)
+        c_pops = get_metapops(self.group, self.dataset, self.meta_c)
+        x_pops = get_metapops(self.group, self.dataset, self.meta_x)
 
-        eurasians = get_metapops(['European Dogs', 'East Asian Dogs'])
-        americans = get_metapops(['American Dogs'])
-        targets = ANCIENT_POPS
+        # get the outgroup
+        o = OUTGROUP_POP[self.dataset]
+
+        # get the list of permutations for all pairs drawn from both a_pops and b_pops
+        prod_ab = list(itertools.product(a_pops, b_pops))
+        prod_ba = list(itertools.product(b_pops, a_pops))
+        perm_ab = prod_ab + prod_ba
 
         # write the list of F4 ratio tests
         with self.output()[2].open('w') as fout:
-            # e.g.  f4(A,O; X,C) / f4(A,O; B,C)
-            #       Yoruba  Papuan : Uygur Han :: Yoruba  Papuan :  French Han
-
-            for target in ANCIENT_POPS:
-                # TOOD compose this list
-                # fout.write(" ".join([outpop, testpop, target]) + "\n")
-                pass
+            for a, b in perm_ab:
+                for c in c_pops:
+                    for x in x_pops:
+                        # f4(A,O; X,C) / f4(A,O; B,C)
+                        fout.write("{a} {o} : {x} {c} :: {a} {o} : {b} {c}".format(a=a, b=b, c=c, x=x, o=o) + "\n")
 
         # compose the config settings
         config = [
@@ -949,6 +957,13 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
             yield QPDstat('all-pops', dataset, blgsize=1)
 
 
+        # the meta pops to use
+        a = ['European Dogs']
+        b = ['East Asian Dogs']
+
+        # qpF4ratio
+        yield QPF4ratio('all-pops', 'merged_SNParray_v1', a, b, c=['Pre-Colombian Dogs'], x=['American Dogs'], blgsize=1)
+        yield QPF4ratio('all-pops', 'merged_v2', a, b, c=['American Wolf'], x=['Pre-Colombian Dogs'], blgsize=1)
 
 if __name__ == '__main__':
     luigi.run()

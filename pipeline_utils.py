@@ -87,6 +87,12 @@ def insert_suffix(fullpath, suffix):
     splitpath.insert(-1, suffix)
     return ('.').join(splitpath)
 
+def get_metapops(group, dataset, metalist):
+    """
+    Get all the populations belonging to the given meta groups.
+    """
+    return [pop for pop in GROUPS[dataset][group] if POPULATIONS[pop] in metalist]
+
 
 class PrioritisedTask(luigi.Task):
     """
