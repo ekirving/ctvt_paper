@@ -528,15 +528,16 @@ class QPGraph(PrioritisedTask):
             "snpname:       bed/{0}.{1}.geno.bim".format(self.group, self.dataset),
             "indivname:     bed/{0}.{1}.qpgraph.fam".format(self.group, self.dataset),
             "outpop:        {}".format(OUTGROUP_POP[self.dataset]),
-            "blgsize:       0.05",
-            "lsqmode:       YES",
-            "diag:          .0001",
-            "hires:         YES",
-            "initmix:       1000",
-            "precision:     .0001",
-            "zthresh:       3.0",
-            "terse:         NO",
-            "useallsnps:    NO",
+            "blgsize:       1",
+            # TODO review these defaults
+            # "lsqmode:       YES",
+            # "diag:          .0001",
+            # "hires:         YES",
+            # "initmix:       1000",
+            # "precision:     .0001",
+            # "zthresh:       3.0",
+            # "terse:         NO",
+            # "useallsnps:    NO",
         ]
 
         # qpGraph needs the params to be defined in a .par file
@@ -924,9 +925,16 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
             yield QPF4ratio('all-pops', 'merged_SNParray_v1', a, b, c, x, blgsize)
 
         # qpGraph
-        for m in range(0, TREEMIX_MAX_M + 1):
-            yield TreemixPlotM('qpgraph-pops', 'merged_v2_hq_nomex', GROUP_BY_POPS, m)
-            yield QPGraphPlot('qpgraph-pops', 'merged_v2_hq_nomex', m)
+        for dataset in ['merged_v2_hq_nomex',
+                        'merged_v2_hq2_nomex'
+                        'merged_v2_TV_hq_nomex',
+                        'merged_v2_TV_hq2_nomex']:
+
+            for group in ['qpgraph-pops', 'qpgraph-simple']:
+
+                for m in range(0, 2 + 1):
+                    yield TreemixPlotM(group, dataset, GROUP_BY_POPS, m)
+                    yield QPGraphPlot(group, dataset, m)
 
 
 if __name__ == '__main__':

@@ -23,6 +23,8 @@ SNP_ARRAY_POPS = ['BAS', 'BAS2', 'DNA', 'BEA', 'BOX', 'DAE', 'DEU', 'DGS', 'DLB'
 
 QPGRAPH_POPS = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'WEU', 'WAM', 'TAI', 'COY', 'OUT']
 
+QPGRAPH_SIMPLE = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'WAM', 'COY']
+
 # groups of populations for running analyses
 GROUPS = {
 
@@ -55,7 +57,12 @@ GROUPS = {
     'merged_v2_TV':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
     'merged_v2_TV_hq':  {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
 
-    'merged_v2_hq_nomex': {'qpgraph-pops': QPGRAPH_POPS},
+    # qpGraph analysis
+    'merged_v2_hq_nomex':     {'qpgraph-pops': QPGRAPH_POPS, 'qpgraph-simple': QPGRAPH_SIMPLE},
+    'merged_v2_hq2_nomex':    {'qpgraph-pops': QPGRAPH_POPS, 'qpgraph-simple': QPGRAPH_SIMPLE},
+    'merged_v2_TV_hq_nomex':  {'qpgraph-pops': QPGRAPH_POPS, 'qpgraph-simple': QPGRAPH_SIMPLE},
+    'merged_v2_TV_hq2_nomex': {'qpgraph-pops': QPGRAPH_POPS, 'qpgraph-simple': QPGRAPH_SIMPLE},
+
 
     'merged_SNParray':           {'all-pops': SNP_ARRAY_POPS},
     'merged_SNParray_v1':        {'all-pops': SNP_ARRAY_POPS},
@@ -75,6 +82,10 @@ for pop in GROUPS['merged_map_Taimyr'] :
 # the population and sample to use for rooting the NJ tree
 OUTGROUP_POP = {group: 'OUT' for group in GROUPS}
 OUTGROUP_SAMPLE = {group: 'AndeanFox' for group in GROUPS}
+
+# sepcial case for qpgraph simple
+OUTGROUP_POP['qpgraph-simple'] = 'COY'
+OUTGROUP_SAMPLE['qpgraph-simple'] = 'C_Cal'
 
 NO_OUTGROUPS = ['all-no-out', 'dog-ctvt']
 
