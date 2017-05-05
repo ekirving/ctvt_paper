@@ -547,7 +547,7 @@ class QPGraph(PrioritisedTask):
             par.write("\n".join(config))
 
         # run qpGraph
-        log = run_cmd(["qpGraph",
+        log = run_cmd([QPGRAPH,
                        "-p", parfile,
                        "-g", self.input()[0].path,    # graph file
                        "-d", self.output()[1].path])  # dot file

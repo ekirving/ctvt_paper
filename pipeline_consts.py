@@ -203,3 +203,6 @@ GROUP_BY_SMPL = 'grp-smpl'
 
 # no single worker should use more than 50% of the available cores
 MAX_CPU_CORES = int(multiprocessing.cpu_count() * 0.5)
+
+# location of software tools
+QPGRAPH = "/media/raid1/laurent/full_run_results/Pig/analysis_21092016/qpAdm/qpGraph"
