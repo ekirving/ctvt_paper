@@ -926,11 +926,12 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
 
         # qpGraph
         for dataset in ['merged_v2_hq_nomex',
-                        'merged_v2_hq2_nomex'
+                        'merged_v2_hq2_nomex',
                         'merged_v2_TV_hq_nomex',
                         'merged_v2_TV_hq2_nomex']:
 
-            for group in ['qpgraph-pops', 'qpgraph-simple']:
+            for group in ['qpgraph-pops',
+                          'qpgraph-simple']:
 
                 for m in range(0, 2 + 1):
                     yield TreemixPlotM(group, dataset, GROUP_BY_POPS, m)
