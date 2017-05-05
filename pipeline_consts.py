@@ -80,12 +80,14 @@ for pop in GROUPS['merged_map_Taimyr'] :
     GROUPS['merged_map_Taimyr'][pop].append('Taimyr')
 
 # the population and sample to use for rooting the NJ tree
-OUTGROUP_POP = {group: 'OUT' for group in GROUPS}
-OUTGROUP_SAMPLE = {group: 'AndeanFox' for group in GROUPS}
+OUTGROUP_POP = {dataset: 'OUT' for dataset in GROUPS}
+OUTGROUP_SAMPLE = {dataset: 'AndeanFox' for dataset in GROUPS}
 
-# sepcial case for qpgraph simple
-OUTGROUP_POP['qpgraph-simple'] = 'COY'
-OUTGROUP_SAMPLE['qpgraph-simple'] = 'C_Cal'
+# FIXME temp hack to get the simple models to run
+OUTGROUP_POP['merged_v2_hq_nomex'] = 'COY'
+OUTGROUP_POP['merged_v2_hq2_nomex'] = 'COY'
+OUTGROUP_POP['merged_v2_TV_hq_nomex'] = 'COY'
+OUTGROUP_POP['merged_v2_TV_hq2_nomex'] = 'COY'
 
 NO_OUTGROUPS = ['all-no-out', 'dog-ctvt']
 
