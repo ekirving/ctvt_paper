@@ -1,0 +1,5 @@
+root	R
+label	Out	O
+label	C	C
+edge 	o	R	O
+edge	c	R	C

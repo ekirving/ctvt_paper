@@ -1,0 +1,11 @@
+digraph G { 
+size = "7.5,10" ;
+labelloc = "t" ; 
+label = "start.graph ::      Out           C       Out           C      0.093624     0.093628     0.000005     0.001326     0.004 
+" ; 
+
+           O  [ label = "Out" ] ; 
+           C  [ label = "C" ] ; 
+R -> O [  label = "47" ] ; 
+R -> C [  label = "47" ] ; 
+} 
