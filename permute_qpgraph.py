@@ -11,28 +11,30 @@ out = 'O'
 nodes = ['A', 'B', 'C', 'X']
 
 
-def add_node(sub_tree, new_node):
+def add_node(root_tree, new_node):
 
     # get all the leaf nodes
-    nodes = sub_tree.findall('*')
+    nodes = root_tree.findall('.//*')
 
     for node in nodes:
         # skip the outgroup and non-leaf nodes
-        if node.tag == out or len(node) > 1:
+        if node.tag == out or len(node) > 0:
             continue
 
         # clone the current tree
-        new_tree = copy.deepcopy(sub_tree)
+        new_tree = copy.deepcopy(root_tree)
+
+        ET.dump(new_tree)
 
         # get the target node in the new tree
-        target_node = new_tree.find(node.tag)
+        target_node = new_tree.find('.//' + node.tag)
 
         # get the parent of the target
-        parent_node = new_tree.find(node.tag + '/..')
+        parent_node = new_tree.find('.//' + node.tag + '/..')
 
         # does the target node have a sibling
         if len(parent_node) > 1:
-            new_tree.remove(target_node)
+            parent_node.remove(target_node)
 
             # add an intermediate node, to act as the parent for the new node
             parent_node = ET.SubElement(parent_node, new_label())
@@ -45,13 +47,13 @@ def add_node(sub_tree, new_node):
 
         yield new_tree
 
-
-def build_tree(sub_tree, unplaced):
+def build_tree(root_tree, unplaced):
+    CNTR = 1
 
     for new_node in unplaced:
 
         # adding each new node generates (n-1)*2 new trees, where n is the number of nodes already in the tree
-        new_trees = add_node(sub_tree, new_node)
+        new_trees = add_node(root_tree, new_node)
 
         # get the remaining nodes
         remaining = list(unplaced)
@@ -62,7 +64,10 @@ def build_tree(sub_tree, unplaced):
 
             print convert_tree(new_tree)
 
-            quit()
+            CNTR += 1
+
+            if CNTR > 2:
+                quit()
 
         #     # TODO export tree to qpgraph format
         #
@@ -76,21 +81,19 @@ def build_tree(sub_tree, unplaced):
             build_tree(new_tree, remaining)
 
 
-def convert_tree(sub_tree):
+def convert_tree(root_tree):
 
     graph = "root\t{root}\n".format(root=root)
 
     # get all the leaf nodes
-    nodes = sub_tree.findall('//*')
-    print len(nodes)
+    nodes = root_tree.findall('.//*')
 
     for node in nodes:
-        print node.tag
         # skip non-leaf nodes
         if len(node) == 0:
-            graph += "label\t{node}\t{node}\n".format(node=node)
+            graph += "label\t{node}\t{node}\n".format(node=node.tag)
 
-    graph += convert_node(sub_tree)
+    graph += convert_node(root_tree.getroot())
 
     return graph
 
@@ -131,6 +134,8 @@ for node in nodes:
 
     # setup the simplest 2-node tree
     root_node = ET.Element(root)
+    root_tree = ET.ElementTree(root_node)
+
     ET.SubElement(root_node, out)
     ET.SubElement(root_node, node)
 
@@ -144,6 +149,6 @@ for node in nodes:
 
     # print "Unplaced... %s" % unplaced
 
-    build_tree(root_node, unplaced)
+    build_tree(root_tree, unplaced)
 
     break
