@@ -8,7 +8,10 @@ import copy, hashlib
 root = 'R'
 out = 'O'
 
-nodes = ['A', 'B', 'C', 'X']
+nodes = ['A', 'B', 'C', 'X']  # 4
+# nodes = ['A', 'B', 'C', 'X', 'Q']  # 5
+# nodes = ['A', 'B', 'C', 'X', 'Q', 'D']  # 6
+# nodes = ['A', 'B', 'C', 'X', 'Q', 'D', 'S']  # 7
 
 
 def add_node(root_tree, new_node):
@@ -23,8 +26,6 @@ def add_node(root_tree, new_node):
 
         # clone the current tree
         new_tree = copy.deepcopy(root_tree)
-
-        ET.dump(new_tree)
 
         # get the target node in the new tree
         target_node = new_tree.find('.//' + node.tag)
@@ -43,12 +44,11 @@ def add_node(root_tree, new_node):
             ET.SubElement(parent_node, target_node.tag)
 
         # add the new node as a sibling to the target
-        ET.SubElement(root_node, new_node)
+        ET.SubElement(parent_node, new_node)
 
         yield new_tree
 
 def build_tree(root_tree, unplaced):
-    CNTR = 1
 
     for new_node in unplaced:
 
@@ -60,14 +60,8 @@ def build_tree(root_tree, unplaced):
         remaining.remove(new_node)
 
         for new_tree in new_trees:
-            ET.dump(new_tree)
 
             print convert_tree(new_tree)
-
-            CNTR += 1
-
-            if CNTR > 2:
-                quit()
 
         #     # TODO export tree to qpgraph format
         #
@@ -116,11 +110,10 @@ def convert_node(parent_node):
 
 
 def hash_text(text, len=7):
-    """
-    Hash a string
-    """
     return hashlib.sha1(text).hexdigest()[0:len]
 
+
+# TODO tidy this up
 def new_label():
     """
     Return a new label for a node
@@ -139,16 +132,8 @@ for node in nodes:
     ET.SubElement(root_node, out)
     ET.SubElement(root_node, node)
 
-    # TODO debugging
-    # print "--------"
-    # ET.dump(root_tree)
-
     # get the unplaced nodes
     unplaced = list(nodes)
     unplaced.remove(node)
 
-    # print "Unplaced... %s" % unplaced
-
     build_tree(root_tree, unplaced)
-
-    break
