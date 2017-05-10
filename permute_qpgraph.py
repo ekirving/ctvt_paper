@@ -17,18 +17,31 @@ def add_node(sub_tree, new_node):
     nodes = sub_tree.findall('*')
 
     for node in nodes:
-        # skip the outgroup
-        if node.tag == out:
+        # skip the outgroup and non-leaf nodes
+        if node.tag == out or len(node) > 1:
             continue
 
         # clone the current tree
         new_tree = copy.deepcopy(sub_tree)
 
-        # get the parent node
-        parent_node = new_tree.find(node.tag)
+        # get the target node in the new tree
+        target_node = new_tree.find(node.tag)
 
-        # add new node as child
-        ET.SubElement(parent_node, new_node)
+        # get the parent of the target
+        parent_node = new_tree.find(node.tag + '/..')
+
+        # does the target node have a sibling
+        if len(parent_node) > 1:
+            new_tree.remove(target_node)
+
+            # add an intermediate node, to act as the parent for the new node
+            parent_node = ET.SubElement(parent_node, new_label())
+
+            # move the target node
+            ET.SubElement(parent_node, target_node.tag)
+
+        # add the new node as a sibling to the target
+        ET.SubElement(root_node, new_node)
 
         yield new_tree
 
@@ -49,6 +62,7 @@ def build_tree(sub_tree, unplaced):
 
             print convert_tree(new_tree)
 
+            quit()
 
         #     # TODO export tree to qpgraph format
         #
@@ -63,40 +77,37 @@ def build_tree(sub_tree, unplaced):
 
 
 def convert_tree(sub_tree):
-    new_label.n = 0
 
     graph = "root\t{root}\n".format(root=root)
-    graph += "label\t{out}\t{out}\n".format(out=out)
+
+    # get all the leaf nodes
+    nodes = sub_tree.findall('//*')
+    print len(nodes)
 
     for node in nodes:
-        graph += "label\t{node}\t{node}\n".format(node=node)
+        print node.tag
+        # skip non-leaf nodes
+        if len(node) == 0:
+            graph += "label\t{node}\t{node}\n".format(node=node)
 
-    graph += convert_node(sub_tree, sub_tree.tag)
+    graph += convert_node(sub_tree)
 
     return graph
 
 
-def convert_node(parent_node, parent_tag):
+def convert_node(parent_node):
     graph = ""
 
     for child_node in parent_node:
 
         child_code = hash_text(child_node.tag)
 
+        graph += "edge\t{code}\t{parent}\t{inter}\n".format(code=child_code, parent=parent_node.tag, inter=child_node.tag)
+
         # leaf nodes
-        if len(child_node) == 0:
-            graph += "edge\t{code}\t{parent}\t{inter}\n".format(code=child_code, parent=parent_tag, inter=child_node.tag)
-
-        else:
-            # insert an intermediate node between the parent and child
-            inter = new_label()
-            parent_code = hash_text(inter)
-
-            graph += "edge\t{code}\t{parent}\t{inter}\n".format(code=parent_code, parent=parent_tag, inter=inter)
-            graph += "edge\t{code}\t{inter}\t{child}\n".format(code=child_code, inter=inter, child=child_node.tag)
-
+        if len(child_node) > 0:
             # now convert the children
-            graph += convert_node(child_node, inter)
+            graph += convert_node(child_node)
 
     return graph
 
@@ -113,13 +124,13 @@ def new_label():
     """
     new_label.n += 1
     return 'n{}'.format(new_label.n)
+new_label.n = 0
 
 # lets get started
 for node in nodes:
 
     # setup the simplest 2-node tree
     root_node = ET.Element(root)
-    # root_tree = ET.ElementTree(root_node)
     ET.SubElement(root_node, out)
     ET.SubElement(root_node, node)
 
@@ -134,3 +145,5 @@ for node in nodes:
     # print "Unplaced... %s" % unplaced
 
     build_tree(root_node, unplaced)
+
+    break
