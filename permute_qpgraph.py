@@ -8,6 +8,8 @@ import copy, hashlib
 root = 'R'
 out = 'O'
 
+# nodes = ['A', 'B']  # 2
+# nodes = ['A', 'B', 'C']  # 3
 nodes = ['A', 'B', 'C', 'X']  # 4
 # nodes = ['A', 'B', 'C', 'X', 'Q']  # 5
 # nodes = ['A', 'B', 'C', 'X', 'Q', 'D']  # 6
@@ -122,6 +124,8 @@ def new_label():
     return 'n{}'.format(new_label.n)
 new_label.n = 0
 
+unplaced = list(nodes)
+
 # lets get started
 for node in nodes:
 
@@ -133,7 +137,6 @@ for node in nodes:
     ET.SubElement(root_node, node)
 
     # get the unplaced nodes
-    unplaced = list(nodes)
     unplaced.remove(node)
 
     build_tree(root_tree, unplaced)
