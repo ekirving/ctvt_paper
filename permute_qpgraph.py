@@ -109,10 +109,8 @@ def build_tree(root_tree, unplaced):
             # parse the log and extract the outliers
             outliers, worst_fstat = extract_outliers(log.splitlines())
 
-            local_nodes = [node for node in nodes if node not in unplaced]
-
-            # TODO export_newicktree
-            newick = export_newick_tree(new_tree.getroot())
+            # export_newicktree
+            newick = export_newick_tree(new_tree.getroot()).ljust(len(nodes)*7)
 
             # print some summary stats
             print "{name}\ttree={tree}\toutliers={out}\tworst={worst}".format(name=graph_name, tree=newick,
