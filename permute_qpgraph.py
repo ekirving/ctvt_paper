@@ -112,11 +112,11 @@ def build_tree(root_tree, unplaced):
             local_nodes = [node for node in nodes if node not in unplaced]
 
             # TODO export_newicktree
-            # ET.dump(new_tree)
+            newick = export_newick_tree(new_tree.getroot())
 
             # print some summary stats
-            print "{name}\ttree={tree}\toutliers={out}\tworst={worst}".format(name=graph_name, tree=local_nodes,
-                                                                                out=len(outliers), worst=worst_fstat[-1])
+            print "{name}\ttree={tree}\toutliers={out}\tworst={worst}".format(name=graph_name, tree=newick,
+                                                                              out=len(outliers), worst=worst_fstat[-1])
 
             # for each new tree that passes threshold, lets add the remaining nodes
             if len(outliers) <= MAX_OUTLIER_THRESHOLD:
@@ -191,6 +191,16 @@ def new_label():
     new_label.n += 1
     return 'n{}'.format(new_label.n)
 new_label.n = 0
+
+
+def export_newick_tree(parent_node):
+    if len(parent_node) == 0:
+        return parent_node.tag
+    else:
+        children = [export_newick_tree(child_node) for child_node in parent_node]
+        return '(' + ','.join(children) + ')%s' % parent_node.tag
+
+
 
 unplaced = list(nodes)
 
