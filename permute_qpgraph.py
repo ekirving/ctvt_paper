@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Branch and bound
+# Branch and Bound Algorithm /
+# Randomised Stepwise Addition Order Algorithm
 
 # from Bio import Phylo
 import xml.etree.ElementTree as ET
@@ -51,7 +52,7 @@ def add_node(root_tree, new_node):
             # add an intermediate node, to act as the parent for the new node
             parent_node = ET.SubElement(parent_node, new_label())
 
-            # move the target node
+            # re add the target node
             ET.SubElement(parent_node, target_node.tag)
 
         # add the new node as a sibling to the target
@@ -74,13 +75,14 @@ def build_tree(root_tree, unplaced):
         for new_tree in new_trees:
 
             # convert the tree to qpGraph format
-            graph = convert_tree(new_tree)
+            graph = export_qpgraph(new_tree)
 
             # get a unique names for the output files
             graph_name = hash_text(graph)
             grp_file = 'permute/graphs/{name}.graph'.format(name=graph_name)
             dot_file = 'permute/graphs/{name}.dot'.format(name=graph_name)
             log_file = 'permute/graphs/{name}.log'.format(name=graph_name)
+            pdf_file = 'permute/graphs/{name}.pdf'.format(name=graph_name)
 
             # save the graph file
             with open(grp_file, 'w') as fout:
@@ -90,16 +92,31 @@ def build_tree(root_tree, unplaced):
             log = run_cmd(["qpGraph",
                            "-p", parfile,
                            "-g", grp_file,
-                           "-d", dot_file])
+                           "-d", dot_file],
+                          verbose=False)
+
+            # make the PDF
+            pdf = run_cmd(["dot", "-Tpdf", dot_file], verbose=False)
+
+            # save the ps file
+            with open(pdf_file, 'w') as fout:
+                fout.write(pdf)
 
             # save the log file
             with open(log_file, 'w') as fout:
                 fout.write(log)
 
             # parse the log and extract the outliers
-            outliers, worst_fstat = extract_outliers(log)
+            outliers, worst_fstat = extract_outliers(log.splitlines())
 
-            print "\t".join(worst_fstat)
+            local_nodes = [node for node in nodes if node not in unplaced]
+
+            # TODO export_newicktree
+            # ET.dump(new_tree)
+
+            # print some summary stats
+            print "{name}\ttree={tree}\toutliers={out}\tworst={worst}".format(name=graph_name, tree=local_nodes,
+                                                                                out=len(outliers), worst=worst_fstat[-1])
 
             # for each new tree that passes threshold, lets add the remaining nodes
             if len(outliers) <= MAX_OUTLIER_THRESHOLD:
@@ -128,7 +145,7 @@ def extract_outliers(log):
     return outliers, worst_fstat
 
 
-def convert_tree(root_tree):
+def export_qpgraph(root_tree):
 
     graph = "root\t{root}\n".format(root=root)
 
@@ -140,12 +157,12 @@ def convert_tree(root_tree):
         if len(node) == 0:
             graph += "label\t{node}\t{node}\n".format(node=node.tag)
 
-    graph += convert_node(root_tree.getroot())
+    graph += export_qpgraph_node(root_tree.getroot())
 
     return graph
 
 
-def convert_node(parent_node):
+def export_qpgraph_node(parent_node):
     graph = ""
 
     for child_node in parent_node:
@@ -157,7 +174,7 @@ def convert_node(parent_node):
         # leaf nodes
         if len(child_node) > 0:
             # now convert the children
-            graph += convert_node(child_node)
+            graph += export_qpgraph_node(child_node)
 
     return graph
 
