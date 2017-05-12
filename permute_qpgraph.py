@@ -1,12 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# Branch and bound
+
 # from Bio import Phylo
 import xml.etree.ElementTree as ET
-import copy, hashlib
+import copy, hashlib, re
+
+# import my custom modules
+from pipeline_utils import *
+
+MAX_OUTLIER_THRESHOLD = 0
+
+parfile = 'permute/permute.par'
 
 root = 'R'
-out = 'O'
+out = 'Out'
 
 # nodes = ['A', 'B']  # 2
 # nodes = ['A', 'B', 'C']  # 3
@@ -50,6 +59,7 @@ def add_node(root_tree, new_node):
 
         yield new_tree
 
+
 def build_tree(root_tree, unplaced):
 
     for new_node in unplaced:
@@ -63,18 +73,59 @@ def build_tree(root_tree, unplaced):
 
         for new_tree in new_trees:
 
-            print convert_tree(new_tree)
+            # convert the tree to qpGraph format
+            graph = convert_tree(new_tree)
 
-        #     # TODO export tree to qpgraph format
-        #
-        #     # TODO run qpgraph
-        #
-        #     # TODO parse the result, quantify the outliers
-        #     # count of outliers
-        #     # worst f-stat
-        #
-        #     # TODO for each new tree that passes threshold, lets add the remaining nodes
-            build_tree(new_tree, remaining)
+            # get a unique names for the output files
+            graph_name = hash_text(graph)
+            grp_file = 'permute/graphs/{name}.graph'.format(name=graph_name)
+            dot_file = 'permute/graphs/{name}.dot'.format(name=graph_name)
+            log_file = 'permute/graphs/{name}.log'.format(name=graph_name)
+
+            # save the graph file
+            with open(grp_file, 'w') as fout:
+                fout.write(graph)
+
+            # run qpGraph
+            log = run_cmd(["qpGraph",
+                           "-p", parfile,
+                           "-g", grp_file,
+                           "-d", dot_file])
+
+            # save the log file
+            with open(log_file, 'w') as fout:
+                fout.write(log)
+
+            # parse the log and extract the outliers
+            outliers, worst_fstat = extract_outliers(log)
+
+            print "\t".join(worst_fstat)
+
+            # for each new tree that passes threshold, lets add the remaining nodes
+            if len(outliers) <= MAX_OUTLIER_THRESHOLD:
+                build_tree(new_tree, remaining)
+
+
+def extract_outliers(log):
+
+    outliers = []
+    read_log = False
+    worst_fstat = ['No outliers!']
+
+    for line in log:
+        if 'outliers' in line:
+            read_log = True
+            continue
+        elif 'worst f-stat' in line:
+            worst_fstat = line.split()
+            read_log = False
+            continue
+
+        if read_log and len(line.strip()) > 0:
+            # save all the outliers
+            outliers.append(line.split())
+
+    return outliers, worst_fstat
 
 
 def convert_tree(root_tree):
