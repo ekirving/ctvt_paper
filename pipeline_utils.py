@@ -29,7 +29,7 @@ def parse_ped(ped_infile, ped_outfile):
 
                 fout.write(" ".join(new_line)+"\n")
 
-def run_cmd(cmd, returnout=True, shell=False, pwd='./'):
+def run_cmd(cmd, returnout=True, shell=False, pwd='./', verbose=True):
     """
     Executes the given command in a system subprocess
 
@@ -40,8 +40,9 @@ def run_cmd(cmd, returnout=True, shell=False, pwd='./'):
     # subprocess only accepts strings
     cmd = [str(args) for args in cmd]
 
-    # TODO remove when done testing
-    print cmd
+    # print the command
+    if verbose:
+        print cmd
 
     # has the command so we can match the logs together
     m = hashlib.md5()
