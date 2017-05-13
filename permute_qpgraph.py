@@ -215,18 +215,23 @@ def export_qpgraph_node(root_tree, parent_node=None):
         # is this an admixture node or a normal node
         matches = root_tree.findall('.//' + child_node.tag + '/..')
 
-        if len(matches) == 1:
-            # regular branch
-            code = hash_text(child_node.tag)
-            graph += "edge\t{code}\t{parent}\t{child}\n".format(code=code, parent=parent_node.tag, child=child_node.tag)
-        else:
+        if len(matches) > 1:
             # admixture branch
+            new_node = new_label()
             parent1, parent2 = matches
-            graph += "admix\t{child}\t{parent1}\t{parent2}\t50\t50\n".format(code=code, parent1=parent1.tag,
-                                                                             parent2=parent2.tag, child=child_node.tag)
+            graph += "admix\t{child}\t{parent1}\t{parent2}\t50\t50\n".format(parent1=parent1.tag,
+                                                                             parent2=parent2.tag,
+                                                                             child=new_node)
+
             # remove both nodes so we don't export them twice
             parent1.remove(parent1.find(child_node.tag))
             parent2.remove(parent2.find(child_node.tag))
+
+            parent_node.tag = new_node
+
+        # regular branch
+        code = hash_text(child_node.tag)
+        graph += "edge\t{code}\t{parent}\t{child}\n".format(code=code, parent=parent_node.tag, child=child_node.tag)
 
         # leaf nodes
         if len(child_node) > 0:
