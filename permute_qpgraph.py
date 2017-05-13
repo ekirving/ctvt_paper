@@ -112,11 +112,11 @@ def recurse_tree(root_tree, unplaced):
         for new_tree in new_trees:
 
             # run qpGraph to test the model
-            outliers = run_qpgraph(new_tree)
+            outliers, num_nodes = run_qpgraph(new_tree)
 
             # for each new tree that passes threshold, let's add the remaining nodes
             if len(outliers) <= MAX_OUTLIER_THRESHOLD:
-                if len(remaining) == 0:
+                if num_nodes == len(nodes)+1:
                     print "SUCCESS: Placed all nodes on a graph without outliers!"
                 else:
                     recurse_tree(new_tree, remaining)
@@ -125,7 +125,10 @@ def recurse_tree(root_tree, unplaced):
 def run_qpgraph(new_tree):
 
     # export newick tree
-    newick = export_newick_tree(new_tree.getroot()).ljust(len(nodes) * 7)
+    newick = export_newick_tree(new_tree.getroot()).ljust(len(nodes) * 8)
+
+    # count the leaf nodes
+    num_nodes = len(set([node.tag for node in new_tree.findall('.//*') if len(node) == 0]))
 
     # convert the tree to qpGraph format
     graph = export_qpgraph(new_tree)
@@ -159,10 +162,11 @@ def run_qpgraph(new_tree):
     outliers, worst_fstat = extract_outliers(log.splitlines())
 
     # print some summary stats
-    print "{name}\ttree={tree}\toutliers={out}\tworst={worst}".format(name=graph_name, tree=newick,
-                                                                      out=len(outliers), worst=worst_fstat[-1])
+    print "{name}\ttree={tree}\tnodes={num} \toutliers={out}\tworst={worst}".format(name=graph_name, tree=newick,
+                                                                                   num=num_nodes, out=len(outliers),
+                                                                                   worst=worst_fstat[-1])
 
-    return outliers
+    return outliers, num_nodes
 
 
 def extract_outliers(log):
