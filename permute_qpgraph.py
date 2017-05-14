@@ -5,8 +5,7 @@
 # Randomised Stepwise Addition Order Algorithm
 
 # from Bio import Phylo
-import xml.etree.ElementTree as ET
-import copy, hashlib, re
+import xml.etree.ElementTree as ElemTree
 
 # import my custom modules
 from pipeline_utils import *
@@ -23,8 +22,9 @@ root = 'R'
 # out = 'COY'
 # nodes = ['WAM','DEU','DCH','DPC','CTVT','DHU']
 
-out = 'WAM'
-nodes = ['DEU','DCH','DPC','CTVT','DHU']
+OUT = 'WAM'
+NODES = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU']
+
 
 def permute_tree(root_tree, new_node):
     """
@@ -43,7 +43,7 @@ def permute_tree(root_tree, new_node):
     for target_node in list(nodes):
 
         # skip the outgroup and non-leaf nodes
-        if target_node.tag == out or len(target_node) > 0:
+        if target_node.tag == OUT or len(target_node) > 0:
             nodes.remove(target_node)
             continue
 
@@ -89,13 +89,13 @@ def insert_node(new_tree, target_node, new_node):
         parent_node.remove(target_node)
 
         # add an intermediate node, to act as the parent for the new node
-        parent_node = ET.SubElement(parent_node, new_label())
+        parent_node = ElemTree.SubElement(parent_node, new_label())
 
         # re add the target node
-        ET.SubElement(parent_node, target_node.tag)
+        ElemTree.SubElement(parent_node, target_node.tag)
 
     # add the new node as a sibling to the target
-    ET.SubElement(parent_node, new_node)
+    ElemTree.SubElement(parent_node, new_node)
 
 
 def recurse_tree(root_tree, unplaced):
@@ -118,7 +118,7 @@ def recurse_tree(root_tree, unplaced):
 
             # for each new tree that passes threshold, let's add the remaining nodes
             if len(outliers) <= MAX_OUTLIER_THRESHOLD:
-                if num_nodes == len(nodes)+1:
+                if num_nodes == len(NODES)+1:
                     print "\tSUCCESS: Placed all nodes on a graph without outliers!"
                 else:
                     print "\tRECURSING tree %s + %s" % (newick, remaining)
@@ -130,7 +130,7 @@ def recurse_tree(root_tree, unplaced):
 def run_qpgraph(new_tree):
 
     # export newick tree
-    newick = export_newick_tree(new_tree.getroot()).ljust(len(''.join(nodes)) + len(nodes)*3)
+    newick = export_newick_tree(new_tree.getroot()).ljust(len(''.join(NODES)) + len(NODES) * 3)
 
     # count the leaf nodes
     num_nodes = len(set([node.tag for node in new_tree.findall('.//*') if len(node) == 0]))
@@ -168,8 +168,8 @@ def run_qpgraph(new_tree):
 
     # print some summary stats
     print "{name}\ttree={tree}\tnodes={num} \toutliers={out}\tworst={worst}".format(name=graph_name, tree=newick,
-                                                                                   num=num_nodes, out=len(outliers),
-                                                                                   worst=worst_fstat[-1])
+                                                                                    num=num_nodes, out=len(outliers),
+                                                                                    worst=worst_fstat[-1])
 
     return outliers, num_nodes
 
@@ -253,8 +253,8 @@ def export_qpgraph_node(root_tree, parent_node=None):
     return graph
 
 
-def hash_text(text, len=7):
-    return hashlib.sha1(text).hexdigest()[0:len]
+def hash_text(text, length=7):
+    return hashlib.sha1(text).hexdigest()[0:length]
 
 
 def new_label():
@@ -276,19 +276,24 @@ def export_newick_tree(parent_node):
         children = [export_newick_tree(child_node) for child_node in parent_node]
         return '(' + ','.join(children) + ')%s' % parent_node.tag
 
-unplaced = list(nodes)
 
-# lets get started
-for node in nodes:
+def run_analysis(nodes):
 
-    # initialise all of the simplest 2-node trees
-    root_node = ET.Element(root)
-    root_tree = ET.ElementTree(root_node)
+    unplaced = list(nodes)
 
-    ET.SubElement(root_node, out)
-    ET.SubElement(root_node, node)
+    # lets get started
+    for node in nodes:
 
-    # get the unplaced nodes
-    unplaced.remove(node)
+        # initialise all of the simplest 2-node trees
+        root_node = ElemTree.Element(root)
+        root_tree = ElemTree.ElementTree(root_node)
 
-    recurse_tree(root_tree, unplaced)
+        ElemTree.SubElement(root_node, OUT)
+        ElemTree.SubElement(root_node, node)
+
+        # get the unplaced nodes
+        unplaced.remove(node)
+
+        recurse_tree(root_tree, unplaced)
+
+run_analysis(NODES)
