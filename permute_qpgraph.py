@@ -13,18 +13,18 @@ from pipeline_utils import *
 
 MAX_OUTLIER_THRESHOLD = 0
 
-parfile = 'permute/permute.par'
+# parfile = 'permute/permute.par'
+# root = 'R'
+# out = 'Out'
+# nodes = ['A', 'B', 'C', 'X']
 
+parfile = 'permute/merged_v2_hq2_nomex2.par'
 root = 'R'
-out = 'Out'
+# out = 'COY'
+# nodes = ['WAM','DEU','DCH','DPC','CTVT','DHU']
 
-# nodes = ['A', 'B']  # 2
-# nodes = ['A', 'B', 'C']  # 3
-nodes = ['A', 'B', 'C', 'X']  # 4
-# nodes = ['A', 'B', 'C', 'X', 'Q']  # 5
-# nodes = ['A', 'B', 'C', 'X', 'Q', 'D']  # 6
-# nodes = ['A', 'B', 'C', 'X', 'Q', 'D', 'S']  # 7
-
+out = 'WAM'
+nodes = ['DEU','DCH','DPC','CTVT','DHU']
 
 def permute_tree(root_tree, new_node):
     """
@@ -114,23 +114,28 @@ def recurse_tree(root_tree, unplaced):
             # run qpGraph to test the model
             outliers, num_nodes = run_qpgraph(new_tree)
 
+            newick = export_newick_tree(new_tree.getroot())
+
             # for each new tree that passes threshold, let's add the remaining nodes
             if len(outliers) <= MAX_OUTLIER_THRESHOLD:
                 if num_nodes == len(nodes)+1:
-                    print "SUCCESS: Placed all nodes on a graph without outliers!"
+                    print "\tSUCCESS: Placed all nodes on a graph without outliers!"
                 else:
+                    print "\tRECURSING tree %s + %s" % (newick, remaining)
                     recurse_tree(new_tree, remaining)
+            else:
+                print "\tPRUNING tree %s" % newick
 
 
 def run_qpgraph(new_tree):
 
     # export newick tree
-    newick = export_newick_tree(new_tree.getroot()).ljust(len(nodes) * 8)
+    newick = export_newick_tree(new_tree.getroot()).ljust(len(''.join(nodes)) + len(nodes)*3)
 
     # count the leaf nodes
     num_nodes = len(set([node.tag for node in new_tree.findall('.//*') if len(node) == 0]))
 
-    # convert the tree to qpGraph format
+    # convert the tree to qpGraph format (NB destructive process)
     graph = export_qpgraph(new_tree)
 
     # get a unique names for the output files
@@ -193,17 +198,20 @@ def extract_outliers(log):
 
 def export_qpgraph(root_tree):
 
+    # clone the tree because this process is destructive
+    local_tree = copy.deepcopy(root_tree)
+
     graph = "root\t{root}\n".format(root=root)
 
     # get all the nodes
-    nodes = root_tree.findall('.//*')
+    nodes = local_tree.findall('.//*')
 
     for node in nodes:
         # skip non-leaf nodes
         if len(node) == 0:
             graph += "label\t{node}\t{node}\n".format(node=node.tag)
 
-    graph += export_qpgraph_node(root_tree)
+    graph += export_qpgraph_node(local_tree)
 
     return graph
 
@@ -267,7 +275,6 @@ def export_newick_tree(parent_node):
     else:
         children = [export_newick_tree(child_node) for child_node in parent_node]
         return '(' + ','.join(children) + ')%s' % parent_node.tag
-
 
 unplaced = list(nodes)
 
