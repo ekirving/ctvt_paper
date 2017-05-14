@@ -119,41 +119,49 @@ def run_qpgraph(new_tree):
     """
     Run qpGraph on the given tree 
     """
-    # convert the tree to qpGraph format
-    graph = export_qpgraph(new_tree)
+    # convert the tree to newick format
+    newick = export_newick_tree(new_tree.getroot()).ljust(90)
 
     # get unique names for the output files
-    graph_name = hash_text(graph)
+    graph_name = hash_text(newick)
     grp_file = 'permute/graphs/{name}.graph'.format(name=graph_name)
     dot_file = 'permute/graphs/{name}.dot'.format(name=graph_name)
     log_file = 'permute/graphs/{name}.log'.format(name=graph_name)
     pdf_file = 'permute/graphs/{name}.pdf'.format(name=graph_name)
 
-    # TODO check if this has run already
+    cached = False
 
-    # save the graph file
-    with open(grp_file, 'w') as fout:
-        fout.write(graph)
+    try:
+        # if the log file exists then we've run the analysis already
+        with open(log_file, 'r') as fin:
+            log = fin.read()
 
-    # run qpGraph
-    log = run_cmd(["qpGraph", "-p", parfile, "-g", grp_file, "-d", dot_file], verbose=False)
+        cached = True
 
-    # make the PDF
-    pdf = run_cmd(["dot", "-Tpdf", dot_file], verbose=False)
+    except IOError:
+        # convert the tree to qpGraph format
+        graph = export_qpgraph(new_tree)
 
-    # save the pdf file
-    with open(pdf_file, 'w') as fout:
-        fout.write(pdf)
+        # save the graph file
+        with open(grp_file, 'w') as fout:
+            fout.write(graph)
 
-    # save the log file
-    with open(log_file, 'w') as fout:
-        fout.write(log)
+        # run qpGraph
+        log = run_cmd(["qpGraph", "-p", parfile, "-g", grp_file, "-d", dot_file], verbose=False)
+
+        # save the log file
+        with open(log_file, 'w') as fout:
+            fout.write(log)
+
+        # make the PDF
+        pdf = run_cmd(["dot", "-Tpdf", dot_file], verbose=False)
+
+        # save the pdf file
+        with open(pdf_file, 'w') as fout:
+            fout.write(pdf)
 
     # parse the log and extract the outliers
     outliers, worst_fstat = extract_outliers(log.splitlines())
-
-    # export newick tree
-    newick = export_newick_tree(new_tree.getroot()).ljust(90)
 
     # count the leaf nodes
     leaf_nodes = [node.tag for node in new_tree.findall('.//*') if len(node) == 0]
@@ -161,12 +169,9 @@ def run_qpgraph(new_tree):
     num_admix = (len(leaf_nodes)-num_nodes)
 
     # print some summary stats
-    print "{name}\t{tree}\tnodes={nodes}\tadmix={admix}\toutliers={out}\tworst={worst}".format(name=graph_name,
-                                                                                               tree=newick,
-                                                                                               nodes=num_nodes,
-                                                                                               admix=num_admix,
-                                                                                               out=len(outliers),
-                                                                                               worst=worst_fstat[-1])
+    print "{name}\t{tree}\tnodes={nodes}\tadmix={admix}\toutliers={out}\tworst={worst}\t" \
+          "cached={cached}".format(name=graph_name, tree=newick, nodes=num_nodes, admix=num_admix, out=len(outliers),
+                                   worst=worst_fstat[-1], cached=cached)
 
     return outliers, num_nodes
 
