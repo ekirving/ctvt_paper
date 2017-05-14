@@ -38,8 +38,6 @@ def permute_tree(root_tree, new_node):
             target_nodes.remove(target_node)
             continue
 
-        # print "- - - target node %s" % target_node.tag
-
         # clone the current tree and add the node
         new_tree = copy.deepcopy(root_tree)
         insert_node(new_tree, target_node, new_node)
@@ -51,8 +49,6 @@ def permute_tree(root_tree, new_node):
         pairs = list(itertools.combinations(target_nodes, 2))
 
         for target1, target2 in pairs:
-
-            # print "- - - target nodes %s %s" % (target1.tag, target2.tag)
 
             # clone the current tree
             new_tree = copy.deepcopy(root_tree)
@@ -76,7 +72,6 @@ def insert_node(new_tree, target_node, new_node):
 
     # does the target node have a sibling
     if len(parent_node) > 1:
-        # print "\tParent of target has multiple children - removing %s" % target_node.tag
         parent_node.remove(target_node)
 
         # add an intermediate node, to act as the parent for the new node
