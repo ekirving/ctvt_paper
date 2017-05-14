@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Branch and Bound Algorithm /
-# Randomised Stepwise Addition Order Algorithm
+# Build all possible trees and graphs using a Randomised Stepwise Addition Order Algorithm
 
-# from Bio import Phylo
 import xml.etree.ElementTree as ElemTree
 
-# import my custom modules
+# import the custom modules
 from pipeline_utils import *
 
 MAX_OUTLIER_THRESHOLD = 0
@@ -19,33 +17,28 @@ MAX_OUTLIER_THRESHOLD = 0
 
 parfile = 'permute/merged_v2_hq2_nomex2.par'
 root = 'R'
-# out = 'COY'
-# nodes = ['WAM','DEU','DCH','DPC','CTVT','DHU']
 
 OUT = 'WAM'
-NODES = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU']
+NODES = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA']
 
 
 def permute_tree(root_tree, new_node):
     """
     Permute all possible new trees, by adding the new node to all external branches and all possible pairs of external
     branches.
-     
-    :param root_tree: The tree to permute 
-    :param new_node: The node to add
-    :return: One of the permuted trees
     """
-
     # get all the leaf nodes
-    nodes = root_tree.findall('.//*')
+    target_nodes = list(root_tree.findall('.//*'))
 
     # add the new node to every leaf node in the tree
-    for target_node in list(nodes):
+    for target_node in list(target_nodes):
 
         # skip the outgroup and non-leaf nodes
         if target_node.tag == OUT or len(target_node) > 0:
-            nodes.remove(target_node)
+            target_nodes.remove(target_node)
             continue
+
+        # print "- - - target node %s" % target_node.tag
 
         # clone the current tree and add the node
         new_tree = copy.deepcopy(root_tree)
@@ -53,11 +46,13 @@ def permute_tree(root_tree, new_node):
 
         yield new_tree
 
-    if len(nodes) > 1:
+    if len(target_nodes) > 1:
         # now permute all the two parent admixture possibilities
-        pairs = list(itertools.combinations(nodes, 2))
+        pairs = list(itertools.combinations(target_nodes, 2))
 
         for target1, target2 in pairs:
+
+            # print "- - - target nodes %s %s" % (target1.tag, target2.tag)
 
             # clone the current tree
             new_tree = copy.deepcopy(root_tree)
@@ -72,11 +67,6 @@ def permute_tree(root_tree, new_node):
 def insert_node(new_tree, target_node, new_node):
     """
     Helper function to add a new node to the branch leading to the target node.
-    
-    :param new_tree: The tree to add the node to 
-    :param target_node: The nodes attached to the target branch
-    :param new_node: The new node to add
-    :return: The new tree
     """
     # get the target node in the new tree
     target_node = new_tree.find('.//' + target_node.tag)
@@ -86,6 +76,7 @@ def insert_node(new_tree, target_node, new_node):
 
     # does the target node have a sibling
     if len(parent_node) > 1:
+        # print "\tParent of target has multiple children - removing %s" % target_node.tag
         parent_node.remove(target_node)
 
         # add an intermediate node, to act as the parent for the new node
@@ -99,7 +90,9 @@ def insert_node(new_tree, target_node, new_node):
 
 
 def recurse_tree(root_tree, unplaced):
-
+    """
+    Recursively add all the unplaced nodes to the given tree 
+    """
     for new_node in unplaced:
 
         # permute all possible new trees and graphs
@@ -114,36 +107,29 @@ def recurse_tree(root_tree, unplaced):
             # run qpGraph to test the model
             outliers, num_nodes = run_qpgraph(new_tree)
 
-            newick = export_newick_tree(new_tree.getroot())
-
             # for each new tree that passes threshold, let's add the remaining nodes
             if len(outliers) <= MAX_OUTLIER_THRESHOLD:
                 if num_nodes == len(NODES)+1:
                     print "\tSUCCESS: Placed all nodes on a graph without outliers!"
                 else:
-                    print "\tRECURSING tree %s + %s" % (newick, remaining)
                     recurse_tree(new_tree, remaining)
-            else:
-                print "\tPRUNING tree %s" % newick
 
 
 def run_qpgraph(new_tree):
-
-    # export newick tree
-    newick = export_newick_tree(new_tree.getroot()).ljust(len(''.join(NODES)) + len(NODES) * 3)
-
-    # count the leaf nodes
-    num_nodes = len(set([node.tag for node in new_tree.findall('.//*') if len(node) == 0]))
-
-    # convert the tree to qpGraph format (NB destructive process)
+    """
+    Run qpGraph on the given tree 
+    """
+    # convert the tree to qpGraph format
     graph = export_qpgraph(new_tree)
 
-    # get a unique names for the output files
+    # get unique names for the output files
     graph_name = hash_text(graph)
     grp_file = 'permute/graphs/{name}.graph'.format(name=graph_name)
     dot_file = 'permute/graphs/{name}.dot'.format(name=graph_name)
     log_file = 'permute/graphs/{name}.log'.format(name=graph_name)
     pdf_file = 'permute/graphs/{name}.pdf'.format(name=graph_name)
+
+    # TODO check if this has run already
 
     # save the graph file
     with open(grp_file, 'w') as fout:
@@ -155,7 +141,7 @@ def run_qpgraph(new_tree):
     # make the PDF
     pdf = run_cmd(["dot", "-Tpdf", dot_file], verbose=False)
 
-    # save the ps file
+    # save the pdf file
     with open(pdf_file, 'w') as fout:
         fout.write(pdf)
 
@@ -166,16 +152,29 @@ def run_qpgraph(new_tree):
     # parse the log and extract the outliers
     outliers, worst_fstat = extract_outliers(log.splitlines())
 
+    # export newick tree
+    newick = export_newick_tree(new_tree.getroot()).ljust(90)
+
+    # count the leaf nodes
+    leaf_nodes = [node.tag for node in new_tree.findall('.//*') if len(node) == 0]
+    num_nodes = len(set(leaf_nodes))
+    num_admix = (len(leaf_nodes)-num_nodes)
+
     # print some summary stats
-    print "{name}\ttree={tree}\tnodes={num} \toutliers={out}\tworst={worst}".format(name=graph_name, tree=newick,
-                                                                                    num=num_nodes, out=len(outliers),
-                                                                                    worst=worst_fstat[-1])
+    print "{name}\t{tree}\tnodes={nodes}\tadmix={admix}\toutliers={out}\tworst={worst}".format(name=graph_name,
+                                                                                               tree=newick,
+                                                                                               nodes=num_nodes,
+                                                                                               admix=num_admix,
+                                                                                               out=len(outliers),
+                                                                                               worst=worst_fstat[-1])
 
     return outliers, num_nodes
 
 
 def extract_outliers(log):
-
+    """
+    Parse the log file and extract the outliers
+    """
     outliers = []
     read_log = False
     worst_fstat = []
@@ -197,7 +196,9 @@ def extract_outliers(log):
 
 
 def export_qpgraph(root_tree):
-
+    """
+    Convert the ElementTree into qpGraph format
+    """
     # clone the tree because this process is destructive
     local_tree = copy.deepcopy(root_tree)
 
@@ -211,21 +212,30 @@ def export_qpgraph(root_tree):
         if len(node) == 0:
             graph += "label\t{node}\t{node}\n".format(node=node.tag)
 
+    # build the list of edges
     graph += export_qpgraph_node(local_tree)
 
     return graph
 
 
 def export_qpgraph_node(root_tree, parent_node=None):
+    """
+    Recursively export all the edges in the graph
+    """
     graph = ""
 
     if parent_node is None:
         parent_node = root_tree.getroot()
 
-    for child_node in parent_node:
+    for child_node in list(parent_node):
+
+        if child_node.get('printed') == '1':
+            continue
 
         # is this an admixture node or a normal node
         matches = root_tree.findall('.//' + child_node.tag + '/..')
+
+        parent_name = parent_node.tag
 
         if len(matches) > 1:
             # admixture branch
@@ -235,15 +245,15 @@ def export_qpgraph_node(root_tree, parent_node=None):
                                                                              parent2=parent2.tag,
                                                                              child=new_node)
 
-            # remove both nodes so we don't export them twice
-            parent1.remove(parent1.find(child_node.tag))
-            parent2.remove(parent2.find(child_node.tag))
+            # flag both nodes so we don't export them twice
+            parent1.find(child_node.tag).set('printed', '1')
+            parent2.find(child_node.tag).set('printed', '1')
 
-            parent_node.tag = new_node
+            parent_name = new_node
 
         # regular branch
         code = hash_text(child_node.tag)
-        graph += "edge\t{code}\t{parent}\t{child}\n".format(code=code, parent=parent_node.tag, child=child_node.tag)
+        graph += "edge\t{code}\t{parent}\t{child}\n".format(code=code, parent=parent_name, child=child_node.tag)
 
         # leaf nodes
         if len(child_node) > 0:
@@ -254,6 +264,9 @@ def export_qpgraph_node(root_tree, parent_node=None):
 
 
 def hash_text(text, length=7):
+    """
+    Generate a unique key by hashing a string
+    """
     return hashlib.sha1(text).hexdigest()[0:length]
 
 
@@ -268,7 +281,7 @@ new_label.n = 0
 
 def export_newick_tree(parent_node):
     """
-    Convert an XML tree into Newick format
+    Convert an ElementTree tree into Newick format
     """
     if len(parent_node) == 0:
         return parent_node.tag
@@ -278,7 +291,9 @@ def export_newick_tree(parent_node):
 
 
 def run_analysis(nodes):
-
+    """
+    Build and test all possible trees and graphs
+    """
     unplaced = list(nodes)
 
     # lets get started
@@ -296,4 +311,5 @@ def run_analysis(nodes):
 
         recurse_tree(root_tree, unplaced)
 
+# perform the analysis
 run_analysis(NODES)
