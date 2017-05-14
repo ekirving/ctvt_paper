@@ -938,5 +938,14 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
                     yield QPGraphPlot(group, dataset, m)
 
 
+class CTVTCustomPipelineV3(luigi.WrapperTask):
+    """
+    Run the specific elements of the CTVT pipeline
+    """
+
+    def requires(self):
+        yield TreemixPlotM('qpgraph-pops', 'merged_v2_hq2_nomex', GROUP_BY_POPS, 0)
+        yield QPGraphPlot('qpgraph-pops', 'merged_v2_hq2_nomex', 0)
+
 if __name__ == '__main__':
     luigi.run()

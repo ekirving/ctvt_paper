@@ -44,6 +44,7 @@ def permute_tree(root_tree, new_node):
 
         yield new_tree
 
+    # TODO change code to only test admix brances if we can't place a node properly
     if len(target_nodes) > 1:
         # now permute all the two parent admixture possibilities
         pairs = list(itertools.combinations(target_nodes, 2))
