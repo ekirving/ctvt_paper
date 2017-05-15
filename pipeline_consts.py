@@ -21,8 +21,7 @@ SNP_ARRAY_POPS = ['BAS', 'BAS2', 'DNA', 'BEA', 'BOX', 'DAE', 'DEU', 'DGS', 'DLB'
                   'VDVCB', 'VDVHG', 'VDVLS', 'VDVLC', 'DPC', 'CTVT', 'DIN', 'COY', 'WAM', 'WAS', 'WEU', 'WME',
                   'TAI', 'OUT']
 
-QPGRAPH_POPS = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA', 'WEU', 'WAM', 'TAI', 'COY', 'OUT']
-QPGRAPH_SIMPLE = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'WAM', 'COY']
+QPGRAPH_POPS = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA', 'WAM']
 
 # groups of populations for running analyses
 GROUPS = {
@@ -57,10 +56,10 @@ GROUPS = {
     'merged_v2_TV_hq':  {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
 
     # qpGraph analysis
-    'merged_v2_hq_nomex':     {'qpgraph-pops': QPGRAPH_POPS, 'qpgraph-simple': QPGRAPH_SIMPLE},
-    'merged_v2_hq2_nomex':    {'qpgraph-pops': QPGRAPH_POPS, 'qpgraph-simple': QPGRAPH_SIMPLE},
-    'merged_v2_TV_hq_nomex':  {'qpgraph-pops': QPGRAPH_POPS, 'qpgraph-simple': QPGRAPH_SIMPLE},
-    'merged_v2_TV_hq2_nomex': {'qpgraph-pops': QPGRAPH_POPS, 'qpgraph-simple': QPGRAPH_SIMPLE},
+    # 'merged_v2_hq_nomex':     {'qpgraph-pops': QPGRAPH_POPS},
+    'merged_v2_hq2_nomex_ctvt':    {'qpgraph-pops': QPGRAPH_POPS},
+    # 'merged_v2_TV_hq_nomex':  {'qpgraph-pops': QPGRAPH_POPS},
+    # 'merged_v2_TV_hq2_nomex': {'qpgraph-pops': QPGRAPH_POPS},
 
 
     'merged_SNParray':           {'all-pops': SNP_ARRAY_POPS},
