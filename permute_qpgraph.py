@@ -6,6 +6,9 @@
 import xml.etree.ElementTree as ElemTree
 import re
 
+import itertools
+from multiprocessing import Pool
+
 # import the custom modules
 from pipeline_utils import *
 
@@ -294,26 +297,38 @@ def export_newick_tree(parent_node):
         return '(' + ','.join(node for tag, node in children) + ')%s' % tag_name
 
 
-def run_analysis(nodes):
+def run_analysis(all_nodes):
     """
     Build and test all possible trees and graphs
     """
-    unplaced = list(nodes)
+    data = []
+    unplaced = list(all_nodes)
 
-    # lets get started
-    for node in nodes:
-
-        # initialise all of the simplest 2-node trees
-        root_node = ElemTree.Element(root)
-        root_tree = ElemTree.ElementTree(root_node)
-
-        ElemTree.SubElement(root_node, OUT)
-        ElemTree.SubElement(root_node, node)
-
-        # get the unplaced nodes
+    for node in all_nodes:
+        # make a nested list of all the nodes to place
+        # e.g. (A,[B,C,D]), (B,[C,D]), (C,[D])
         unplaced.remove(node)
+        data.append(list(unplaced))
 
-        recurse_tree(root_tree, unplaced)
+    # with Pool(MAX_CPU_CORES) as pool:
+    pool = Pool(MAX_CPU_CORES)
+    # initialise all of the simplest 2-node trees
+    pool.map(initialise_tree, itertools.izip(all_nodes, data))
+
+
+def initialise_tree(args):
+    """
+    Setup a simple 2-node tree, then recursively add all the unplaced nodes.
+    """
+    node, unplaced = args
+
+    root_node = ElemTree.Element(root)
+    root_tree = ElemTree.ElementTree(root_node)
+
+    ElemTree.SubElement(root_node, OUT)
+    ElemTree.SubElement(root_node, node)
+
+    recurse_tree(root_tree, unplaced)
 
 # perform the analysis
 run_analysis(NODES)
