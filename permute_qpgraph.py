@@ -19,7 +19,7 @@ MAX_OUTLIER_THRESHOLD = 0
 # out = 'Out'
 # nodes = ['A', 'B', 'C', 'X']
 
-parfile = 'permute/merged_v2_hq2_nomex2.par'
+parfile = 'permute/merged_v2_hq2_nomex_ctvt.par'
 root = 'R'
 
 OUT = 'WAM'
