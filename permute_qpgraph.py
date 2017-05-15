@@ -288,9 +288,10 @@ def export_newick_tree(parent_node):
     if len(parent_node) == 0:
         return parent_node.tag
     else:
-        children = [export_newick_tree(child_node) for child_node in parent_node]
+        children = [(child_node.tag ,export_newick_tree(child_node)) for child_node in parent_node]
+        children.sort()
         tag_name = '' if re.match('n[0-9]+|R', parent_node.tag) else parent_node.tag
-        return '(' + ','.join(children) + ')%s' % tag_name
+        return '(' + ','.join(node for tag, node in children) + ')%s' % tag_name
 
 
 def run_analysis(nodes):
