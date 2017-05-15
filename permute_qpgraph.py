@@ -4,6 +4,7 @@
 # Build all possible trees and graphs using a Randomised Stepwise Addition Order Algorithm
 
 import xml.etree.ElementTree as ElemTree
+import re
 
 # import the custom modules
 from pipeline_utils import *
@@ -288,7 +289,8 @@ def export_newick_tree(parent_node):
         return parent_node.tag
     else:
         children = [export_newick_tree(child_node) for child_node in parent_node]
-        return '(' + ','.join(children) + ')%s' % parent_node.tag
+        tag_name = '' if re.match('n[0-9]+|R', parent_node.tag) else parent_node.tag
+        return '(' + ','.join(children) + ')%s' % tag_name
 
 
 def run_analysis(nodes):
