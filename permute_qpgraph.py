@@ -12,6 +12,8 @@ from multiprocessing import Pool
 # import the custom modules
 from pipeline_utils import *
 
+MULTITHREAD_SEARCH = True
+
 MAX_OUTLIER_THRESHOLD = 0
 
 OUTPUT_FOLDER = 'permute/graphs/'
@@ -319,10 +321,14 @@ def run_analysis(all_nodes):
         unplaced.remove(node)
         data.append(list(unplaced))
 
-    # with Pool(MAX_CPU_CORES) as pool:
-    pool = Pool(MAX_CPU_CORES)
-    # initialise all of the simplest 2-node trees
-    pool.map(initialise_tree, itertools.izip(all_nodes, data))
+    if MULTITHREAD_SEARCH:
+        with Pool(MAX_CPU_CORES) as pool:
+            # initialise all of the simplest 2-node trees
+            pool.map(initialise_tree, itertools.izip(all_nodes, data))
+    else:
+        # initialise trees without multi-threading
+        for args in itertools.izip(all_nodes, data):
+            initialise_tree(args)
 
 
 def initialise_tree(args):
