@@ -14,14 +14,15 @@ from pipeline_utils import *
 
 MAX_OUTLIER_THRESHOLD = 0
 
+OUTPUT_FOLDER = 'permute/graphs/'
+
 # parfile = 'permute/permute.par'
-# root = 'R'
-# out = 'Out'
-# nodes = ['A', 'B', 'C', 'X']
+# ROOT = 'R'
+# OUT = 'Out'
+# NODES = ['A', 'B', 'C', 'X']
 
 parfile = 'permute/merged_v2_hq2_nomex_ctvt.par'
 root = 'R'
-
 OUT = 'WAM'
 NODES = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA']
 
@@ -124,9 +125,9 @@ def run_qpgraph(new_tree):
 
     # get unique names for the output files
     graph_name = hash_text(newick)
-    grp_file = 'permute/graphs/{name}.graph'.format(name=graph_name)
-    dot_file = 'permute/graphs/{name}.dot'.format(name=graph_name)
-    log_file = 'permute/graphs/{name}.log'.format(name=graph_name)
+    grp_file = OUTPUT_FOLDER + '{name}.graph'.format(name=graph_name)
+    dot_file = OUTPUT_FOLDER + '{name}.dot'.format(name=graph_name)
+    log_file = OUTPUT_FOLDER + '{name}.log'.format(name=graph_name)
 
     cached = False
 
@@ -162,7 +163,7 @@ def run_qpgraph(new_tree):
     num_outliers = len(outliers)
 
     # embed some useful info in the PDF name
-    pdf_file = 'permute/graphs/{name}-n{nodes}-o{out}-a{admix}.pdf'.format(name=graph_name,
+    pdf_file = OUTPUT_FOLDER + '{name}-n{nodes}-o{out}-a{admix}.pdf'.format(name=graph_name,
                                                                            nodes=num_nodes,
                                                                            out=num_outliers,
                                                                            admix=num_admix)
@@ -215,7 +216,7 @@ def export_qpgraph(root_tree):
     # clone the tree because this process is destructive
     local_tree = copy.deepcopy(root_tree)
 
-    graph = "root\t{root}\n".format(root=root)
+    graph = "root\t{root}\n".format(root=ROOT)
 
     # get all the nodes
     nodes = local_tree.findall('.//*')
@@ -330,7 +331,7 @@ def initialise_tree(args):
     """
     node, unplaced = args
 
-    root_node = ElemTree.Element(root)
+    root_node = ElemTree.Element(ROOT)
     root_tree = ElemTree.ElementTree(root_node)
 
     ElemTree.SubElement(root_node, OUT)
