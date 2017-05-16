@@ -29,31 +29,37 @@ OUT = 'WAM'
 NODES = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA']
 
 
-def permute_tree(root_tree, new_node):
+def recurse_tree(root_tree, new_node, remaining, depth=0):
     """
-    Permute all possible new trees, by adding the new node to all external branches and all possible pairs of external
-    branches.
+    Permute all possible new trees, by adding the new node to all branches.
+
+    If no resulting tree passes the outlier threshold then try adding the node to all possible pairs of branches.
     """
-    # get all the leaf nodes
-    target_nodes = list(root_tree.findall('.//*'))
+    new_trees = []
 
-    # add the new node to every leaf node in the tree
-    for target_node in list(target_nodes):
+    # get all the nodes in the tree (skip the outgroup)
+    target_nodes = [node for node in root_tree.findall('.//*') if node.tag != OUT]
 
-        # skip the outgroup and non-leaf nodes
-        if target_node.tag == OUT or len(target_node) > 0:
-            target_nodes.remove(target_node)
-            continue
+    # add the new node to every branch in the tree
+    for target_node in target_nodes:
 
-        # clone the current tree and add the node
+        # clone the current tree and add the new node
         new_tree = copy.deepcopy(root_tree)
         insert_node(new_tree, target_node, new_node)
+        new_trees.append(new_tree)
 
-        yield new_tree
+    # test all the trees
+    results = test_trees(new_trees, depth)
 
-    # TODO change code to only test admix brances if we can't place a node properly
-    if len(target_nodes) > 1:
-        # now permute all the two parent admixture possibilities
+    # process the results
+    placed_node = check_results(results, remaining, depth)
+
+    # if we could not place the new node then we need to test all the admixture possibilities
+    if not placed_node:
+
+        admix_trees = []
+
+        # permute all the two parent admixture possibilities
         pairs = list(itertools.combinations(target_nodes, 2))
 
         for target1, target2 in pairs:
@@ -65,13 +71,75 @@ def permute_tree(root_tree, new_node):
             insert_node(new_tree, target1, new_node)
             insert_node(new_tree, target2, new_node)
 
-            yield new_tree
+            admix_trees.append(new_tree)
+
+        # test all the admixture trees
+        results = test_trees(admix_trees, depth)
+
+        # process the results
+        placed_node = check_results(results, remaining, depth)
+
+        if not placed_node:
+            # we could not place the node via either method :(
+            if new_node not in PROBLEM_NODES:
+                PROBLEM_NODES.append(new_node)
+
+                # add the problem node to end of the list, as we may be able to add it later on
+                remaining.append(new_node)
+
+                # try and add the other nodes
+                recurse_tree(root_tree, remaining[0], remaining[1:], depth)
+
+
+def test_trees(new_trees, depth):
+    """
+    Run qpGraph on a list of trees
+    """
+    if MULTITHREAD_SEARCH:
+        # we need to buffer the results to use multi-threading
+        pool = Pool(MAX_CPU_CORES)
+        results = pool.map(run_qpgraph, itertools.izip(new_trees, itertools.repeat(depth)))
+    else:
+        # test the trees without multi-threading
+        results = []
+        for new_tree in new_trees:
+            result = run_qpgraph((new_tree, depth))
+            results.append(result)
+
+    return results
+
+
+def check_results(results, remaining, depth):
+    """
+    Check the results from qpGraph
+    """
+
+    # were we able to place the new node
+    placed_node = False
+
+    for new_tree, outliers in results:
+
+        # did our new trees pass the threshold
+        if len(outliers) <= MAX_OUTLIER_THRESHOLD:
+
+            # recursively add any remaining nodes
+            if remaining:
+                recurse_tree(new_tree, remaining[0], remaining[1:], depth + 1)
+            else:
+                # print "\tSUCCESS: Placed all nodes on a graph without outliers!"
+                pass
+
+            # we successfully placed the new node!
+            placed_node = True
+
+    return False
 
 
 def insert_node(new_tree, target_node, new_node):
     """
-    Helper function to add a new node to the branch leading to the target node.
+    Helper function to add a new node on the branch leading to the target node.
     """
+
     # get the target node in the new tree
     target_node = new_tree.find('.//' + target_node.tag)
 
@@ -86,44 +154,26 @@ def insert_node(new_tree, target_node, new_node):
         parent_node = ElemTree.SubElement(parent_node, new_label())
 
         # re add the target node
-        ElemTree.SubElement(parent_node, target_node.tag)
+        # ElemTree.SubElement(parent_node, target_node.tag)
+        parent_node.append(target_node)
 
     # add the new node as a sibling to the target
     ElemTree.SubElement(parent_node, new_node)
 
 
-def recurse_tree(root_tree, unplaced):
-    """
-    Recursively add all the unplaced nodes to the given tree 
-    """
-    for new_node in unplaced:
-
-        # permute all possible new trees and graphs
-        new_trees = permute_tree(root_tree, new_node)
-
-        # get the remaining nodes
-        remaining = list(unplaced)
-        remaining.remove(new_node)
-
-        for new_tree in new_trees:
-
-            # run qpGraph to test the model
-            outliers, num_nodes = run_qpgraph(new_tree)
-
-            # for each new tree that passes threshold, let's add the remaining nodes
-            if len(outliers) <= MAX_OUTLIER_THRESHOLD:
-                if num_nodes == len(NODES)+1:
-                    print "\tSUCCESS: Placed all nodes on a graph without outliers!"
-                else:
-                    recurse_tree(new_tree, remaining)
-
-
-def run_qpgraph(new_tree):
+def run_qpgraph(args):
     """
     Run qpGraph on the given tree 
     """
+    # extract the tuple of arguments
+    new_tree, depth = args
+
     # convert the tree to newick format
     newick = export_newick_tree(new_tree.getroot()).ljust(90)
+
+    # TODO remove me
+    print "  " * depth + newick
+    return new_tree, []
 
     # get unique names for the output files
     graph_name = hash_text(newick)
@@ -184,7 +234,7 @@ def run_qpgraph(new_tree):
         print "{name}\t{tree}\tnodes={nodes}\tadmix={admix}\toutliers={out}\tworst={worst}".format(
             name=graph_name, tree=newick, nodes=num_nodes, admix=num_admix, out=len(outliers), worst=worst_fstat[-1])
 
-    return outliers, num_nodes
+    return new_tree, outliers
 
 
 def extract_outliers(log):
@@ -312,38 +362,16 @@ def run_analysis(all_nodes):
     """
     Build and test all possible trees and graphs
     """
-    data = []
-    unplaced = list(all_nodes)
 
-    # make a nested list of all the nodes to place
-    for node in all_nodes:
-        # e.g. (A,[B,C,D]), (B,[C,D]), (C,[D])
-        unplaced.remove(node)
-        data.append(list(unplaced))
-
-    if MULTITHREAD_SEARCH:
-        with Pool(MAX_CPU_CORES) as pool:
-            # initialise all of the simplest 2-node trees
-            pool.map(initialise_tree, itertools.izip(all_nodes, data))
-    else:
-        # initialise trees without multi-threading
-        for args in itertools.izip(all_nodes, data):
-            initialise_tree(args)
-
-
-def initialise_tree(args):
-    """
-    Setup a simple 2-node tree, then recursively add all the unplaced nodes.
-    """
-    node, unplaced = args
-
+    # setup a simple 2-node tree
     root_node = ElemTree.Element(ROOT)
     root_tree = ElemTree.ElementTree(root_node)
 
     ElemTree.SubElement(root_node, OUT)
-    ElemTree.SubElement(root_node, node)
+    ElemTree.SubElement(root_node, all_nodes.pop(0))
 
-    recurse_tree(root_tree, unplaced)
+    # recursively add all the other nodes
+    recurse_tree(root_tree, all_nodes[0], all_nodes[1:])
 
 # perform the analysis
 run_analysis(NODES)
