@@ -6,28 +6,28 @@
 import xml.etree.ElementTree as ElemTree
 import re
 
-import itertools
 from multiprocessing import Pool
 
 # import the custom modules
 from pipeline_utils import *
 
-MULTITHREAD_SEARCH = True
-
+# MULTITHREAD_SEARCH = True
+MULTITHREAD_SEARCH = False
 MAX_OUTLIER_THRESHOLD = 0
+PROBLEM_NODES = []
 
-OUTPUT_FOLDER = 'permute/graphs/'
+PAR_FILE = 'permute/simulated.par'
+OUTPUT_FOLDER = 'permute/simulated/'
+ROOT = 'R'
+OUT = 'Out'
+NODES = ['A', 'B', 'C', 'X']
 
-# parfile = 'permute/permute.par'
+
+# PAR_FILE = 'permute/merged_v2_hq2_nomex_ctvt.par'
+# OUTPUT_FOLDER = 'permute/graphs/'
 # ROOT = 'R'
-# OUT = 'Out'
-# NODES = ['A', 'B', 'C', 'X']
-
-parfile = 'permute/merged_v2_hq2_nomex_ctvt.par'
-root = 'R'
-OUT = 'WAM'
-NODES = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA']
-
+# OUT = 'WAM'
+# NODES = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA']
 
 
 def recurse_tree(root_tree, new_tag, remaining, depth=0):
@@ -145,7 +145,6 @@ def insert_node(new_tree, target_node, new_tag):
     """
     Helper function to add a new node on the branch leading to the target node.
     """
-
     # get the target node in the new tree
     target_node = new_tree.find('.//' + target_node.tag)
 
@@ -201,7 +200,7 @@ def run_qpgraph(args):
             fout.write(graph)
 
         # run qpGraph
-        log = run_cmd(["qpGraph", "-p", parfile, "-g", grp_file, "-d", dot_file], verbose=False)
+        log = run_cmd(["qpGraph", "-p", PAR_FILE, "-g", grp_file, "-d", dot_file], verbose=False)
 
         # save the log file
         with open(log_file, 'w') as fout:
