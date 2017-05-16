@@ -29,7 +29,8 @@ OUT = 'WAM'
 NODES = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA']
 
 
-def recurse_tree(root_tree, new_node, remaining, depth=0):
+
+def recurse_tree(root_tree, new_tag, remaining, depth=0):
     """
     Permute all possible new trees, by adding the new node to all branches.
 
@@ -45,7 +46,7 @@ def recurse_tree(root_tree, new_node, remaining, depth=0):
 
         # clone the current tree and add the new node
         new_tree = copy.deepcopy(root_tree)
-        insert_node(new_tree, target_node, new_node)
+        insert_node(new_tree, target_node, new_tag)
         new_trees.append(new_tree)
 
     # test all the trees
@@ -68,8 +69,8 @@ def recurse_tree(root_tree, new_node, remaining, depth=0):
             new_tree = copy.deepcopy(root_tree)
 
             # add the new node as the child of both targets
-            insert_node(new_tree, target1, new_node)
-            insert_node(new_tree, target2, new_node)
+            insert_node(new_tree, target1, new_tag)
+            insert_node(new_tree, target2, new_tag)
 
             admix_trees.append(new_tree)
 
@@ -80,15 +81,21 @@ def recurse_tree(root_tree, new_node, remaining, depth=0):
         placed_node = check_results(results, remaining, depth)
 
         if not placed_node:
+
             # we could not place the node via either method :(
-            if new_node not in PROBLEM_NODES:
-                PROBLEM_NODES.append(new_node)
+            if new_tag not in PROBLEM_NODES and remaining:
+                print "\tWARNING: Unable to place node '%s' at this time." % new_tag
+
+                PROBLEM_NODES.append(new_tag)
 
                 # add the problem node to end of the list, as we may be able to add it later on
-                remaining.append(new_node)
+                remaining.append(new_tag)
 
                 # try and add the other nodes
                 recurse_tree(root_tree, remaining[0], remaining[1:], depth)
+
+            else:
+                print "\tERROR: Cannot place node '%s' in the graph." % new_tag
 
 
 def test_trees(new_trees, depth):
@@ -126,8 +133,7 @@ def check_results(results, remaining, depth):
             if remaining:
                 recurse_tree(new_tree, remaining[0], remaining[1:], depth + 1)
             else:
-                # print "\tSUCCESS: Placed all nodes on a graph without outliers!"
-                pass
+                print "\tSUCCESS: Placed all nodes on a graph without outliers!"
 
             # we successfully placed the new node!
             placed_node = True
@@ -135,7 +141,7 @@ def check_results(results, remaining, depth):
     return False
 
 
-def insert_node(new_tree, target_node, new_node):
+def insert_node(new_tree, target_node, new_tag):
     """
     Helper function to add a new node on the branch leading to the target node.
     """
@@ -158,7 +164,7 @@ def insert_node(new_tree, target_node, new_node):
         parent_node.append(target_node)
 
     # add the new node as a sibling to the target
-    ElemTree.SubElement(parent_node, new_node)
+    ElemTree.SubElement(parent_node, new_tag)
 
 
 def run_qpgraph(args):
@@ -169,11 +175,7 @@ def run_qpgraph(args):
     new_tree, depth = args
 
     # convert the tree to newick format
-    newick = export_newick_tree(new_tree.getroot()).ljust(90)
-
-    # TODO remove me
-    print "  " * depth + newick
-    return new_tree, []
+    newick = export_newick_tree(new_tree.getroot())
 
     # get unique names for the output files
     graph_name = hash_text(newick)
@@ -220,8 +222,7 @@ def run_qpgraph(args):
                                                                            out=num_outliers,
                                                                            admix=num_admix)
 
-    # TODO and not cached
-    if num_outliers <= MAX_OUTLIER_THRESHOLD:
+    if num_outliers <= MAX_OUTLIER_THRESHOLD and not cached:
         # generate the PDF
         pdf = run_cmd(["dot", "-Tpdf", dot_file], verbose=False)
 
@@ -229,10 +230,11 @@ def run_qpgraph(args):
         with open(pdf_file, 'w') as fout:
             fout.write(pdf)
 
-    if not cached:
-        # print some summary stats
-        print "{name}\t{tree}\tnodes={nodes}\tadmix={admix}\toutliers={out}\tworst={worst}".format(
-            name=graph_name, tree=newick, nodes=num_nodes, admix=num_admix, out=len(outliers), worst=worst_fstat[-1])
+
+    # print some summary stats
+    print "{padding}{tree} nodes={nodes}\t admix={admix}\t outliers={out}\t worst={worst}\t {name}".format(
+        padding="  "*depth, name=graph_name, tree=newick.ljust(80), nodes=num_nodes, admix=num_admix,
+        out=len(outliers), worst=worst_fstat[-1])
 
     return new_tree, outliers
 
