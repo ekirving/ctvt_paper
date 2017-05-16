@@ -127,7 +127,6 @@ def run_qpgraph(new_tree):
     grp_file = 'permute/graphs/{name}.graph'.format(name=graph_name)
     dot_file = 'permute/graphs/{name}.dot'.format(name=graph_name)
     log_file = 'permute/graphs/{name}.log'.format(name=graph_name)
-    pdf_file = 'permute/graphs/{name}.pdf'.format(name=graph_name)
 
     cached = False
 
@@ -153,13 +152,6 @@ def run_qpgraph(new_tree):
         with open(log_file, 'w') as fout:
             fout.write(log)
 
-        # make the PDF
-        pdf = run_cmd(["dot", "-Tpdf", dot_file], verbose=False)
-
-        # save the pdf file
-        with open(pdf_file, 'w') as fout:
-            fout.write(pdf)
-
     # parse the log and extract the outliers
     outliers, worst_fstat = extract_outliers(log.splitlines())
 
@@ -167,11 +159,27 @@ def run_qpgraph(new_tree):
     leaf_nodes = [node.tag for node in new_tree.findall('.//*') if len(node) == 0]
     num_nodes = len(set(leaf_nodes))
     num_admix = (len(leaf_nodes)-num_nodes)
+    num_outliers = len(outliers)
 
-    # print some summary stats
-    print "{name}\t{tree}\tnodes={nodes}\tadmix={admix}\toutliers={out}\tworst={worst}\t" \
-          "cached={cached}".format(name=graph_name, tree=newick, nodes=num_nodes, admix=num_admix, out=len(outliers),
-                                   worst=worst_fstat[-1], cached=cached)
+    # embed some useful info in the PDF name
+    pdf_file = 'permute/graphs/{name}-n{nodes}-o{out}-a{admix}.pdf'.format(name=graph_name,
+                                                                           nodes=num_nodes,
+                                                                           out=num_outliers,
+                                                                           admix=num_admix)
+
+    # TODO and not cached
+    if num_outliers <= MAX_OUTLIER_THRESHOLD:
+        # generate the PDF
+        pdf = run_cmd(["dot", "-Tpdf", dot_file], verbose=False)
+
+        # save the pdf file
+        with open(pdf_file, 'w') as fout:
+            fout.write(pdf)
+
+    if not cached:
+        # print some summary stats
+        print "{name}\t{tree}\tnodes={nodes}\tadmix={admix}\toutliers={out}\tworst={worst}".format(
+            name=graph_name, tree=newick, nodes=num_nodes, admix=num_admix, out=len(outliers), worst=worst_fstat[-1])
 
     return outliers, num_nodes
 
@@ -304,8 +312,8 @@ def run_analysis(all_nodes):
     data = []
     unplaced = list(all_nodes)
 
+    # make a nested list of all the nodes to place
     for node in all_nodes:
-        # make a nested list of all the nodes to place
         # e.g. (A,[B,C,D]), (B,[C,D]), (C,[D])
         unplaced.remove(node)
         data.append(list(unplaced))
