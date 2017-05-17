@@ -53,10 +53,10 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
     results = test_trees(new_trees, depth)
 
     # process the results
-    placed_node = check_results(results, remaining, depth)
+    node_placed = check_results(results, remaining, depth)
 
     # if we could not place the new node then we need to test all the admixture possibilities
-    if not placed_node:
+    if not node_placed:
 
         admix_trees = []
 
@@ -78,9 +78,9 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
         results = test_trees(admix_trees, depth)
 
         # process the results
-        placed_node = check_results(results, remaining, depth)
+        node_placed = check_results(results, remaining, depth)
 
-        if not placed_node:
+        if not node_placed:
 
             # we could not place the node via either method :(
             if new_tag not in PROBLEM_NODES and remaining:
@@ -120,7 +120,6 @@ def check_results(results, remaining, depth):
     """
     Check the results from qpGraph
     """
-
     # were we able to place the new node
     placed_node = False
 
@@ -217,9 +216,9 @@ def run_qpgraph(args):
 
     # embed some useful info in the PDF name
     pdf_file = OUTPUT_FOLDER + '{name}-n{nodes}-o{out}-a{admix}.pdf'.format(name=graph_name,
-                                                                           nodes=num_nodes,
-                                                                           out=num_outliers,
-                                                                           admix=num_admix)
+                                                                            nodes=num_nodes,
+                                                                            out=num_outliers,
+                                                                            admix=num_admix)
 
     if num_outliers <= MAX_OUTLIER_THRESHOLD and not cached:
         # generate the PDF
@@ -228,7 +227,6 @@ def run_qpgraph(args):
         # save the pdf file
         with open(pdf_file, 'w') as fout:
             fout.write(pdf)
-
 
     # print some summary stats
     print "{padding}{tree} nodes={nodes}\t admix={admix}\t outliers={out}\t worst={worst}\t {name}".format(
