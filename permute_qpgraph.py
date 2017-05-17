@@ -11,23 +11,21 @@ from multiprocessing import Pool
 # import the custom modules
 from pipeline_utils import *
 
-# MULTITHREAD_SEARCH = True
-MULTITHREAD_SEARCH = False
+MULTITHREAD_SEARCH = True
 MAX_OUTLIER_THRESHOLD = 0
 PROBLEM_NODES = []
 
-PAR_FILE = 'permute/simulated.par'
-OUTPUT_FOLDER = 'permute/simulated/'
-ROOT = 'R'
-OUT = 'Out'
-NODES = ['A', 'B', 'C', 'X']
-
-
-# PAR_FILE = 'permute/merged_v2_hq2_nomex_ctvt.par'
-# OUTPUT_FOLDER = 'permute/graphs/'
+# PAR_FILE = 'permute/simulated.par'
+# OUTPUT_FOLDER = 'permute/simulated/'
 # ROOT = 'R'
-# OUT = 'WAM'
-# NODES = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA']
+# OUT = 'Out'
+# NODES = ['A', 'B', 'X', 'C']
+
+PAR_FILE = 'permute/merged_v2_hq2_nomex_ctvt.par'
+OUTPUT_FOLDER = 'permute/graphs/'
+ROOT = 'R'
+OUT = 'WAM'
+NODES = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA']
 
 
 def recurse_tree(root_tree, new_tag, remaining, depth=0):
