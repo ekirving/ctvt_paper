@@ -4,7 +4,8 @@
 # Build all possible trees and graphs using a Randomised Stepwise Addition Order Algorithm
 
 import xml.etree.ElementTree as ElemTree
-import re, random
+import re
+import sys
 
 from multiprocessing import Pool
 
@@ -73,23 +74,18 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
             if target1.tag == target2.tag:
                 continue
 
-            # TODO handle targets with matching tag names
-            # replace the two targets with an intermediary node
-            # add one target as a child to the intermediate node
-            # add the new node as a sibling to the target node
-
             # clone the current tree
             new_tree = copy.deepcopy(root_tree)
 
             # make a new intermediate node
             admix_label = new_label(new_tree, admix=True)
 
-            # add the two admix nodes as the child of both targets
-            admix1 = insert_node(new_tree, target1, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'l'})
-            admix2 = insert_node(new_tree, target2, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'r'})
+            # add two admix nodes as the children of both targets
+            admix_left = insert_node(new_tree, target1, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'l'})
+            admix_rght = insert_node(new_tree, target2, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'r'})
 
             # add the new node as the child of one of the admix nodes
-            insert_node(new_tree, admix1, new_tag, append=True)
+            insert_node(new_tree, admix_left, new_tag, append=True)
 
             admix_trees.append(new_tree)
 
@@ -105,7 +101,7 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
 
         # we could not place the node via either method :(
         if new_tag not in PROBLEM_NODES and remaining:
-            print "WARNING: Unable to place node '%s' at this time." % new_tag
+            print >> sys.stderr, "WARNING: Unable to place node '%s' at this time." % new_tag
 
             PROBLEM_NODES.append(new_tag)
 
@@ -153,7 +149,7 @@ def check_results(results, remaining, depth):
             if remaining:
                 recurse_tree(new_tree, remaining[0], remaining[1:], depth + 1)
             else:
-                print "SUCCESS: Placed all nodes on a graph without outliers!"
+                print >> sys.stderr, "SUCCESS: Placed all nodes on a graph without outliers!"
 
             # we successfully placed the new node!
             placed_node = True
@@ -261,9 +257,7 @@ def run_qpgraph(args):
                                                                                     name=graph_name)
 
     # TODO fixme
-    # if num_outliers <= MAX_OUTLIER_THRESHOLD and not cached:
-    # if True:
-    if num_outliers <= MAX_OUTLIER_THRESHOLD:
+    if num_outliers <= MAX_OUTLIER_THRESHOLD and not cached:
         # generate the PDF
         pdf = run_cmd(["dot", "-Tpdf", dot_file], verbose=False)
 
@@ -421,7 +415,7 @@ def run_analysis(all_nodes):
 
     except NodeUnplaceable as error:
         # if a node was unplacable then try shuffling the node order and building the graph again
-        print error
+        print >> sys.stderr, error
         run_analysis(all_nodes)
 
 
