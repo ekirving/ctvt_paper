@@ -82,7 +82,7 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
 
             # add two admix nodes as the children of both targets
             admix_left = insert_node(new_tree, target1, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'l'})
-            admix_rght = insert_node(new_tree, target2, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'r'})
+            insert_node(new_tree, target2, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'r'})
 
             # add the new node as the child of one of the admix nodes
             insert_node(new_tree, admix_left, new_tag, append=True)
@@ -94,8 +94,6 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
 
         # process the results
         node_placed = check_results(results, remaining, depth)
-
-    # TODO should not admix from a branch
 
     if not node_placed:
 
@@ -256,7 +254,6 @@ def run_qpgraph(args):
                                                                                     admix=num_admix,
                                                                                     name=graph_name)
 
-    # TODO fixme
     if num_outliers <= MAX_OUTLIER_THRESHOLD and not cached:
         # generate the PDF
         pdf = run_cmd(["dot", "-Tpdf", dot_file], verbose=False)
@@ -350,7 +347,8 @@ def export_qpgraph_node(root_tree, parent_node=None):
             else:
                 # regular branch
                 code = hash_text(child_node.tag)
-                graph += "edge\t{code}\t{parent}\t{child}\n".format(code=code, parent=parent_node.tag, child=child_node.tag)
+                graph += "edge\t{code}\t{parent}\t{child}\n".format(code=code, parent=parent_node.tag,
+                                                                    child=child_node.tag)
 
         # leaf nodes
         if len(child_node) > 0:
