@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 # Build all possible trees and graphs using a Randomised Stepwise Addition Order Algorithm
+# Usage...
+# python -u permute_qpgraph.py 1> permute-std.log 2> permute-err.log
 
 import xml.etree.ElementTree as ElemTree
 import re
@@ -12,9 +14,7 @@ from multiprocessing import Pool
 # import the custom modules
 from pipeline_utils import *
 
-# MULTITHREAD_SEARCH = True
-MULTITHREAD_SEARCH = False
-
+MULTITHREAD_SEARCH = True
 MAX_OUTLIER_THRESHOLD = 0
 PROBLEM_NODES = []
 
@@ -33,6 +33,9 @@ NODES = ['A', 'B', 'X', 'C']
 
 
 class NodeUnplaceable(Exception):
+    """
+    Node cannot be placed in the graph without exceeding outlier threshold
+    """
     pass
 
 
@@ -245,7 +248,7 @@ def run_qpgraph(args):
     # count the leaf nodes
     all_nodes = new_tree.findall('.//*')
     num_nodes = len([node for node in all_nodes if node.get('internal') != '1'])
-    num_admix = len([node for node in all_nodes if node.get('admix') == '1'])
+    num_admix = len([node for node in all_nodes if node.get('admix') == '1']) / 2
     num_outliers = len(outliers)
 
     # embed some useful info in the PDF name
@@ -400,6 +403,8 @@ def run_analysis(all_nodes):
     try:
         # randomise node order
         random.shuffle(all_nodes)
+
+        print >> sys.stderr, 'INFO: Starting list %s' % all_nodes
 
         # setup a simple 2-node tree
         root_node = ElemTree.Element(ROOT)
