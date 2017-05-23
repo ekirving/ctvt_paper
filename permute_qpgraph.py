@@ -4,7 +4,7 @@
 # Build all possible trees and graphs using a Randomised Stepwise Addition Order Algorithm
 
 import xml.etree.ElementTree as ElemTree
-import re
+import re, random
 
 from multiprocessing import Pool
 
@@ -29,6 +29,10 @@ NODES = ['A', 'B', 'X', 'C']
 # ROOT = 'R'
 # OUT = 'WAM'
 # NODES = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA']
+
+
+class NodeUnplaceable(Exception):
+    pass
 
 
 def recurse_tree(root_tree, new_tag, remaining, depth=0):
@@ -64,11 +68,10 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
         # permute all the two parent admixture possibilities
         pairs = list(itertools.combinations(target_nodes, 2))
 
-        print "\nPairs to check admixture..."
-
         for target1, target2 in pairs:
-            # TODO fixme
-            print target1.tag + " " + target2.tag
+            # skip duplicate targets (this happens when there is already an admixture node in the tree)
+            if target1.tag == target2.tag:
+                continue
 
             # TODO handle targets with matching tag names
             # replace the two targets with an intermediary node
@@ -78,13 +81,17 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
             # clone the current tree
             new_tree = copy.deepcopy(root_tree)
 
-            # add the new node as the child of both targets
-            insert_node(new_tree, target1, new_tag)
-            insert_node(new_tree, target2, new_tag)
+            # make a new intermediate node
+            admix_label = new_label(new_tree, admix=True)
+
+            # add the two admix nodes as the child of both targets
+            admix1 = insert_node(new_tree, target1, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'l'})
+            admix2 = insert_node(new_tree, target2, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'r'})
+
+            # add the new node as the child of one of the admix nodes
+            insert_node(new_tree, admix1, new_tag, append=True)
 
             admix_trees.append(new_tree)
-
-        print "\n"
 
         # test all the admixture trees
         results = test_trees(admix_trees, depth)
@@ -92,7 +99,6 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
         # process the results
         node_placed = check_results(results, remaining, depth)
 
-    # TODO if still not placed then test inserting into a branch
     # TODO should not admix from a branch
 
     if not node_placed:
@@ -110,7 +116,7 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
             recurse_tree(root_tree, remaining[0], remaining[1:], depth)
 
         else:
-            print "\tERROR: Cannot place node '%s' in the graph." % new_tag
+            raise NodeUnplaceable("ERROR: Cannot place node '%s' in the graph." % new_tag)
 
 
 def test_trees(new_trees, depth):
@@ -155,29 +161,48 @@ def check_results(results, remaining, depth):
     return placed_node
 
 
-def insert_node(new_tree, target_node, new_tag):
+def insert_node(new_tree, target_node, new_tag, attrs=None, append=False):
     """
     Helper function to add a new node on the branch leading to the target node.
     """
     # get the target node in the new tree
-    target_node = new_tree.find('.//' + target_node.tag)
+    target_xpath = './/' + target_node.tag
 
-    # get the parent of the target
-    parent_node = new_tree.find('.//' + target_node.tag + '/..')
+    if target_node.get('side'):
+        target_xpath += '[@side="%s"]' % target_node.get('side')
 
-    # does the target node have a sibling
-    if len(parent_node) > 1:
-        parent_node.remove(target_node)
+    target_node = new_tree.find(target_xpath)
 
-        # add an intermediate node, to act as the parent for the new node
-        parent_node = ElemTree.SubElement(parent_node, new_label())
+    if append:
+        # append the new node directly to the target
+        parent_node = target_node
 
-        # re add the target node
-        # ElemTree.SubElement(parent_node, target_node.tag)
-        parent_node.append(target_node)
+    else:
+        # get the parent of the target
+        parent_node = new_tree.find(target_xpath + '/..')
+
+        # does the target node have a sibling
+        if len(parent_node) > 1:
+            label = new_label(new_tree)
+            parent_node.remove(target_node)
+
+            # add an intermediate node, to act as the parent for the new node
+            parent_node = ElemTree.SubElement(parent_node, label)
+            parent_node.set('internal', '1')
+
+            # re add the target node
+            # ElemTree.SubElement(parent_node, target_node.tag)
+            parent_node.append(target_node)
 
     # add the new node as a sibling to the target
-    ElemTree.SubElement(parent_node, new_tag)
+    new_node = ElemTree.SubElement(parent_node, new_tag)
+
+    if attrs:
+        # add any node attributes
+        for key, value in attrs.iteritems():
+            new_node.set(key, value)
+
+    return new_node
 
 
 def run_qpgraph(args):
@@ -224,9 +249,9 @@ def run_qpgraph(args):
     outliers, worst_fstat = extract_outliers(log.splitlines())
 
     # count the leaf nodes
-    leaf_nodes = [node.tag for node in new_tree.findall('.//*') if len(node) == 0]
-    num_nodes = len(set(leaf_nodes))
-    num_admix = (len(leaf_nodes)-num_nodes)
+    all_nodes = new_tree.findall('.//*')
+    num_nodes = len([node for node in all_nodes if node.get('internal') != '1'])
+    num_admix = len([node for node in all_nodes if node.get('admix') == '1'])
     num_outliers = len(outliers)
 
     # embed some useful info in the PDF name
@@ -246,7 +271,7 @@ def run_qpgraph(args):
         with open(pdf_file, 'w') as fout:
             fout.write(pdf)
 
-    # print some summary stats
+    # output some summary stats
     print "{padding}{tree} nodes={nodes}\t admix={admix}\t outliers={out}\t worst={worst}\t {name}".format(
         padding="  "*depth, name=graph_name, tree=newick.ljust(80), nodes=num_nodes, admix=num_admix,
         out=len(outliers), worst=worst_fstat[-1])
@@ -292,7 +317,7 @@ def export_qpgraph(root_tree):
 
     for node in nodes:
         # skip non-leaf nodes
-        if len(node) == 0:
+        if len(node) == 0 and node.get('admix') != '1':
             graph += "label\t{node}\t{node}\n".format(node=node.tag)
 
     # build the list of edges
@@ -312,31 +337,26 @@ def export_qpgraph_node(root_tree, parent_node=None):
 
     for child_node in list(parent_node):
 
-        if child_node.get('printed') == '1':
-            continue
+        if child_node.get('printed') != '1':
 
-        # is this an admixture node or a normal node
-        matches = root_tree.findall('.//' + child_node.tag + '/..')
+            # is this an admixture node or a normal node
+            matches = root_tree.findall('.//' + child_node.tag + '/..')
 
-        parent_name = parent_node.tag
+            if len(matches) > 1:
+                # admixture branch
+                parent1, parent2 = matches
+                graph += "admix\t{child}\t{parent1}\t{parent2}\t50\t50\n".format(parent1=parent1.tag,
+                                                                                 parent2=parent2.tag,
+                                                                                 child=child_node.tag)
 
-        if len(matches) > 1:
-            # admixture branch
-            new_node = new_label()
-            parent1, parent2 = matches
-            graph += "admix\t{child}\t{parent1}\t{parent2}\t50\t50\n".format(parent1=parent1.tag,
-                                                                             parent2=parent2.tag,
-                                                                             child=new_node)
+                # flag both nodes so we don't export them twice
+                parent1.find(child_node.tag).set('printed', '1')
+                parent2.find(child_node.tag).set('printed', '1')
 
-            # flag both nodes so we don't export them twice
-            parent1.find(child_node.tag).set('printed', '1')
-            parent2.find(child_node.tag).set('printed', '1')
-
-            parent_name = new_node
-
-        # regular branch
-        code = hash_text(child_node.tag)
-        graph += "edge\t{code}\t{parent}\t{child}\n".format(code=code, parent=parent_name, child=child_node.tag)
+            else:
+                # regular branch
+                code = hash_text(child_node.tag)
+                graph += "edge\t{code}\t{parent}\t{child}\n".format(code=code, parent=parent_node.tag, child=child_node.tag)
 
         # leaf nodes
         if len(child_node) > 0:
@@ -353,13 +373,18 @@ def hash_text(text, length=7):
     return hashlib.sha1(text).hexdigest()[0:length]
 
 
-def new_label():
+def new_label(root_tree, admix=False):
     """
     Return a new label for a node
     """
-    new_label.n += 1
-    return 'n{}'.format(new_label.n)
-new_label.n = 0
+    all_nodes = root_tree.findall('.//*')
+
+    if admix:
+        num = len([node for node in all_nodes if node.get('admix') == '1']) / 2
+    else:
+        num = len([node for node in all_nodes if node.get('internal') == '1' and node.get('admix') != '1'])
+
+    return '{pre}{num}'.format(pre='a' if admix else 'n', num=num+1)
 
 
 def export_newick_tree(parent_node):
@@ -380,15 +405,25 @@ def run_analysis(all_nodes):
     Build and test all possible trees and graphs
     """
 
-    # setup a simple 2-node tree
-    root_node = ElemTree.Element(ROOT)
-    root_tree = ElemTree.ElementTree(root_node)
+    try:
+        # randomise node order
+        random.shuffle(all_nodes)
 
-    ElemTree.SubElement(root_node, OUT)
-    ElemTree.SubElement(root_node, all_nodes.pop(0))
+        # setup a simple 2-node tree
+        root_node = ElemTree.Element(ROOT)
+        root_tree = ElemTree.ElementTree(root_node)
 
-    # recursively add all the other nodes
-    recurse_tree(root_tree, all_nodes[0], all_nodes[1:])
+        ElemTree.SubElement(root_node, OUT)
+        ElemTree.SubElement(root_node, all_nodes.pop(0))
+
+        # recursively add all the other nodes
+        recurse_tree(root_tree, all_nodes[0], all_nodes[1:])
+
+    except NodeUnplaceable as error:
+        # if a node was unplacable then try shuffling the node order and building the graph again
+        print error
+        run_analysis(all_nodes)
+
 
 # perform the analysis
 run_analysis(NODES)
