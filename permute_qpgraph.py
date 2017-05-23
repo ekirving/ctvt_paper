@@ -105,7 +105,7 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
 
         # we could not place the node via either method :(
         if new_tag not in PROBLEM_NODES and remaining:
-            print "\tWARNING: Unable to place node '%s' at this time." % new_tag
+            print "WARNING: Unable to place node '%s' at this time." % new_tag
 
             PROBLEM_NODES.append(new_tag)
 
@@ -153,7 +153,7 @@ def check_results(results, remaining, depth):
             if remaining:
                 recurse_tree(new_tree, remaining[0], remaining[1:], depth + 1)
             else:
-                print "\tSUCCESS: Placed all nodes on a graph without outliers!"
+                print "SUCCESS: Placed all nodes on a graph without outliers!"
 
             # we successfully placed the new node!
             placed_node = True
@@ -414,10 +414,10 @@ def run_analysis(all_nodes):
         root_tree = ElemTree.ElementTree(root_node)
 
         ElemTree.SubElement(root_node, OUT)
-        ElemTree.SubElement(root_node, all_nodes.pop(0))
+        ElemTree.SubElement(root_node, all_nodes[0])
 
         # recursively add all the other nodes
-        recurse_tree(root_tree, all_nodes[0], all_nodes[1:])
+        recurse_tree(root_tree, all_nodes[1], all_nodes[2:])
 
     except NodeUnplaceable as error:
         # if a node was unplacable then try shuffling the node order and building the graph again
