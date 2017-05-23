@@ -13,6 +13,7 @@ from pipeline_utils import *
 
 # MULTITHREAD_SEARCH = True
 MULTITHREAD_SEARCH = False
+
 MAX_OUTLIER_THRESHOLD = 0
 PROBLEM_NODES = []
 
@@ -20,7 +21,7 @@ PAR_FILE = 'permute/simulated.par'
 OUTPUT_FOLDER = 'permute/simulated/'
 ROOT = 'R'
 OUT = 'Out'
-NODES = ['A', 'B', 'C', 'X']
+NODES = ['A', 'B', 'X', 'C']
 
 
 # PAR_FILE = 'permute/merged_v2_hq2_nomex_ctvt.par'
@@ -55,7 +56,7 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
     # process the results
     node_placed = check_results(results, remaining, depth)
 
-    # if we could not place the new node then we need to test all the admixture possibilities
+    # test all the admixture possibilities
     if not node_placed:
 
         admix_trees = []
@@ -63,7 +64,16 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
         # permute all the two parent admixture possibilities
         pairs = list(itertools.combinations(target_nodes, 2))
 
+        print "\nPairs to check admixture..."
+
         for target1, target2 in pairs:
+            # TODO fixme
+            print target1.tag + " " + target2.tag
+
+            # TODO handle targets with matching tag names
+            # replace the two targets with an intermediary node
+            # add one target as a child to the intermediate node
+            # add the new node as a sibling to the target node
 
             # clone the current tree
             new_tree = copy.deepcopy(root_tree)
@@ -74,28 +84,33 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
 
             admix_trees.append(new_tree)
 
+        print "\n"
+
         # test all the admixture trees
         results = test_trees(admix_trees, depth)
 
         # process the results
         node_placed = check_results(results, remaining, depth)
 
-        if not node_placed:
+    # TODO if still not placed then test inserting into a branch
+    # TODO should not admix from a branch
 
-            # we could not place the node via either method :(
-            if new_tag not in PROBLEM_NODES and remaining:
-                print "\tWARNING: Unable to place node '%s' at this time." % new_tag
+    if not node_placed:
 
-                PROBLEM_NODES.append(new_tag)
+        # we could not place the node via either method :(
+        if new_tag not in PROBLEM_NODES and remaining:
+            print "\tWARNING: Unable to place node '%s' at this time." % new_tag
 
-                # add the problem node to end of the list, as we may be able to add it later on
-                remaining.append(new_tag)
+            PROBLEM_NODES.append(new_tag)
 
-                # try and add the other nodes
-                recurse_tree(root_tree, remaining[0], remaining[1:], depth)
+            # add the problem node to end of the list, as we may be able to add it later on
+            remaining.append(new_tag)
 
-            else:
-                print "\tERROR: Cannot place node '%s' in the graph." % new_tag
+            # try and add the other nodes
+            recurse_tree(root_tree, remaining[0], remaining[1:], depth)
+
+        else:
+            print "\tERROR: Cannot place node '%s' in the graph." % new_tag
 
 
 def test_trees(new_trees, depth):
@@ -137,7 +152,7 @@ def check_results(results, remaining, depth):
             # we successfully placed the new node!
             placed_node = True
 
-    return False
+    return placed_node
 
 
 def insert_node(new_tree, target_node, new_tag):
@@ -215,12 +230,15 @@ def run_qpgraph(args):
     num_outliers = len(outliers)
 
     # embed some useful info in the PDF name
-    pdf_file = OUTPUT_FOLDER + '{name}-n{nodes}-o{out}-a{admix}.pdf'.format(name=graph_name,
-                                                                            nodes=num_nodes,
-                                                                            out=num_outliers,
-                                                                            admix=num_admix)
+    pdf_file = OUTPUT_FOLDER + 'qpgraph-n{nodes}-o{out}-a{admix}-{name}.pdf'.format(nodes=num_nodes,
+                                                                                    out=num_outliers,
+                                                                                    admix=num_admix,
+                                                                                    name=graph_name)
 
-    if num_outliers <= MAX_OUTLIER_THRESHOLD and not cached:
+    # TODO fixme
+    # if num_outliers <= MAX_OUTLIER_THRESHOLD and not cached:
+    # if True:
+    if num_outliers <= MAX_OUTLIER_THRESHOLD:
         # generate the PDF
         pdf = run_cmd(["dot", "-Tpdf", dot_file], verbose=False)
 
@@ -351,7 +369,7 @@ def export_newick_tree(parent_node):
     if len(parent_node) == 0:
         return parent_node.tag
     else:
-        children = [(child_node.tag ,export_newick_tree(child_node)) for child_node in parent_node]
+        children = [(child_node.tag, export_newick_tree(child_node)) for child_node in parent_node]
         children.sort()
         tag_name = '' if re.match('n[0-9]+|R', parent_node.tag) else parent_node.tag
         return '(' + ','.join(node for tag, node in children) + ')%s' % tag_name
