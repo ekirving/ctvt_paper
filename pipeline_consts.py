@@ -197,5 +197,14 @@ TREEMIX_K = 1000
 GROUP_BY_POPS = 'grp-pops'
 GROUP_BY_SMPL = 'grp-smpl'
 
+# the maximum number of ancestral populatons to run admixture for
+ADMIXTURE_MAX_K = 5
+
+# the number of bootstrap replicates to run
+ADMIXTURE_BOOTSTRAP = 0  # TODO put this back to 100
+
+# the species flag for plink telling it how many chromosomes to expect
+PLINK_TAXA = '--dog'
+
 # no single worker should use more than 50% of the available cores
 MAX_CPU_CORES = int(multiprocessing.cpu_count() * 0.5)

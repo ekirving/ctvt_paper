@@ -41,11 +41,65 @@ class PlinkFilterPops(PrioritisedTask):
 
         # apply the prune list
         run_cmd(["plink",
-                 "--dog",
+                 PLINK_TAXA,
                  "--make-bed",
                  "--keep-fam", poplist,
                  "--bfile", trim_ext(self.input()[0].path),
                  "--out", "bed/{0}.{1}".format(self.group, self.dataset)])
+
+
+class PlinkIndepPairwise(PrioritisedTask):
+    """
+    Produce a list of SNPs with high discriminating power, by filtering out minor allele frequency and sites under
+    linkage disequilibrium
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+
+    def requires(self):
+        return PlinkFilterPops(self.group, self.dataset)
+
+    def output(self):
+        extensions = ['in', 'out', 'log']
+        return [luigi.LocalTarget("bed/{0}.{1}.prune.{2}".format(self.group, self.dataset, ext)) for ext in extensions]
+
+    def run(self):
+
+        # calculate the prune list (prune.in / prune.out)
+        log = run_cmd(["plink",
+                       PLINK_TAXA,
+                       "--indep-pairwise", 50, 10, 0.5,  # accept R^2 coefficient of up to 0.5
+                        "--bfile", "bed/{0}.{1}".format(self.group, self.dataset),
+                        "--out", "bed/{0}.{1}".format(self.group, self.dataset)])
+
+        # write the log file
+        with open(self.output()[2].path, 'w') as fout:
+            fout.write(log)
+
+
+class PlinkPruneBed(PrioritisedTask):
+    """
+    Prune the merged group BED file using the prune.in list from PlinkIndepPairwise()
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+
+    def requires(self):
+        return PlinkIndepPairwise(self.group, self.dataset)
+
+    def output(self):
+        extensions = ['bed', 'bim', 'fam']
+        return [luigi.LocalTarget("bed/{0}.{1}.pruned.{2}".format(self.group, self.dataset, ext)) for ext in extensions]
+
+    def run(self):
+
+        # apply the prune list
+        run_cmd(["plink",
+                 PLINK_TAXA,
+                 "--make-bed",
+                 "--extract", self.input()[0].path,
+                 "--bfile", "bed/{0}.{1}".format(self.group, self.dataset),
+                 "--out", "bed/{0}.{1}.pruned".format(self.group, self.dataset)])
 
 
 class PlinkExtractPop(PrioritisedTask):
@@ -70,7 +124,7 @@ class PlinkExtractPop(PrioritisedTask):
 
         # apply the prune list
         run_cmd(["plink",
-                 "--dog",
+                 PLINK_TAXA,
                  "--make-bed",
                  "--geno", "0.999",  # drop sites with no coverage, or rather, where less than 0.1% is missing
                  "--keep-fam", poplist,
@@ -115,7 +169,7 @@ class PlinkFilterGenoByPops(PrioritisedTask):
 
         # filter the big BED file using that list of variants
         run_cmd(["plink",
-                 "--dog",
+                 PLINK_TAXA,
                  "--make-bed",
                  "--extract", varlist,
                  "--bfile", "bed/{0}.{1}".format(self.group, self.dataset),
@@ -140,7 +194,7 @@ class PlinkHighGeno(PrioritisedTask):
 
         # conver to PED so it's easier to parse the data
         run_cmd(["plink",
-                 "--dog",
+                 PLINK_TAXA,
                  "--make-bed",
                  # "--maf", "0.05",
                  "--geno", "0.05",
@@ -180,9 +234,9 @@ class PlinkBedToFreq(PrioritisedTask):
                 fout.write(fam)
 
         run_cmd(["plink",
-                 "--dog",
-                 "--freq", "gz",     # make a gzipped MAF report
-                 "--family",         # group by population
+                 PLINK_TAXA,
+                 "--freq", "gz",  # make a gzipped MAF report
+                 "--family",  # group by population
                  "--bed", bed_file,
                  "--bim", bim_file,
                  "--fam", fam_file,
@@ -315,6 +369,180 @@ class SmartPCAPlot(PrioritisedTask):
                          labeled])                                                       # show point labels (0/1)
 
 
+
+
+class AdmixtureK(PrioritisedTask):
+    """
+    Run admixture, with K ancestral populations, on the pruned reference data BED file.
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+    k = luigi.IntParameter()
+
+    def requires(self):
+        return PlinkPruneBed(self.group, self.dataset)
+
+    def output(self):
+        extensions = ['P', 'Q', 'log']
+        return [luigi.LocalTarget("admix/{0}.{1}.pruned.{2}.{3}".format(self.group, self.dataset, self.k, ext))
+                    for ext in extensions]
+
+    def run(self):
+
+        # admixture only outputs to the current directory
+        os.chdir('./admix')
+
+        log = run_cmd(["admixture", 
+                       "-j{0}".format(MAX_CPU_CORES),          # use multi-threading
+                       "-B{}".format(ADMIXTURE_BOOTSTRAP),     # the number of bootstrap replicates to run
+                       "--cv=10",                              # generate cross-validation estimates
+                       "../{0}".format(self.input()[0].path),  # using the pruned data file
+                       self.k],                                # for K ancestral populations
+                      pwd='../')
+
+        # restore previous working directory
+        os.chdir('..')
+
+        # save the log file
+        with self.output()[2].open('w') as fout:
+            fout.write(log)
+
+
+class AdmixtureSortK(PrioritisedTask):
+    """
+    Sort the admixture Q matrix for the given value of K, such that the column orders maintain optimal relative
+    relationships.
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+    k = luigi.IntParameter()
+
+    def requires(self):
+        yield AdmixtureK(self.group, self.dataset, self.k)
+
+        # sorting of k requires that k-1 also be sorted (because we need something to compare against)
+        if self.k > 1:
+            yield AdmixtureSortK(self.group, self.dataset, self.k - 1)
+
+    def output(self):
+        return luigi.LocalTarget("admix/{0}.{1}.pruned.sorted.{2}.Q".format(self.group, self.dataset, self.k))
+
+    def run(self):
+
+        # no need to sort a file with only one k
+        if self.k == 1:
+            copyfile(self.input()[0][1].path, self.output().path)
+            return
+
+        # sort all the matricies
+        run_cmd(["Rscript",
+                 "rscript/admix-sort-k.R",
+                 self.input()[0][1].path,
+                 self.input()[1].path,
+                 self.output().path])
+
+
+class AdmixturePlotK(PrioritisedTask):
+    """
+    Use ggplot to plot the admixture Q stats
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+    maxk = luigi.IntParameter()
+    k = luigi.IntParameter()
+
+    def requires(self):
+        return AdmixtureSortK(self.group, self.dataset, self.k)
+
+    def output(self):
+        return [luigi.LocalTarget("admix/{0}.{1}.pruned.sorted.{2}.data".format(self.group, self.dataset, self.k)),
+                luigi.LocalTarget("pdf/{0}.{1}.admix.K.{2}.pdf".format(self.group, self.dataset, self.k))]
+
+    def run(self):
+
+        fam = "bed/{0}.{1}.pruned.fam".format(self.group, self.dataset)
+        q = "admix/{0}.{1}.pruned.sorted.{2}.Q".format(self.group, self.dataset, self.k)
+
+        # use awk and paste to add population and sample names, needed for the plot
+        awk = "awk '{ print $1 \" \" $2 }' " + fam + " | paste - " + q
+
+        # get the admix data
+        data = run_cmd([awk], returnout=True, shell=True)
+
+        # parse the data into a dict, so it can be output in a specific order
+        datadict = defaultdict(list)
+        for line in data.strip().split("\n"):
+            datadict[line.split()[0]].append(line)
+
+        # compose the header row
+        header = ["Pop{}".format(i) for i in range(1, int(self.k) + 1)]
+        header.insert(0, "Sample")
+        header.insert(0, "Population")
+
+        # save the labeled file
+        with self.output()[0].open('w') as fout:
+            # output the header row
+            fout.write("\t".join(header)+"\n")
+
+            # output the populations, in the chosen order
+            for pop in GROUPS[self.dataset][self.group]:
+                for line in datadict[pop]:
+                    fout.write(line+"\n")
+
+        # generate a PDF of the admixture stacked column chart
+        run_cmd(["Rscript",
+                 "rscript/admix-plot-k.R",
+                 self.output()[0].path,
+                 self.output()[1].path,
+                 self.maxk])
+
+
+class AdmixtureCV(PrioritisedTask):
+    """
+    Run admixture for the given population, determine the optimal K value, and plot the graphs
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+
+    def requires(self):
+        # set maximum K to be the number of actual populations + 10
+        maxk = len(GROUPS[self.dataset][self.group]) + ADMIXTURE_MAX_K
+
+        # run admixture or each population and each value of K
+        for k in range(1, maxk + 1):
+            yield AdmixturePlotK(self.group, self.dataset, maxk, k)
+
+    def output(self):
+        return [luigi.LocalTarget("admix/{0}.{1}.pruned.CV.data".format(self.group, self.dataset)),
+                luigi.LocalTarget("pdf/{0}.{1}.admix.CV.pdf".format(self.group, self.dataset))]
+
+    def run(self):
+
+        # use grep to extract the cross-validation scores from all the log files
+        cvs = run_cmd(["grep -h CV admix/{0}.{1}.*.log".format(self.group, self.dataset)], returnout=True, shell=True)
+
+        # extract the K value and CV score
+        # e.g. "CV error (K=1): 1.20340"
+        data = [tuple([re.sub(r'[^\d.]+', "", val) for val in cv.split(":")]) for cv in cvs.splitlines()]
+
+        # get the three lowest CV scores
+        # bestfit = sorted(data, key=lambda x: x[1])[0:3]
+
+        # write the scores to a data file
+        with self.output()[0].open('w') as fout:
+            fout.write("\t".join(["K", "CV"]) + "\n")
+            for row in data:
+                fout.write("\t".join(str(datum) for datum in row) + "\n")
+
+        # plot the CV values as a line graph
+        run_cmd(["Rscript",
+                 "rscript/plot-line-graph.R",
+                 self.output()[0].path,
+                 self.output()[1].path,
+                 "Ancestral populations (K)",
+                 "Cross-validation Error"])
+
+
 class NeighborJoiningTree(PrioritisedTask):
     """
     Create a neighbor joining phylogenetic tree from a pruned BED file
@@ -336,7 +564,7 @@ class NeighborJoiningTree(PrioritisedTask):
         # TODO what about bootstrapping?
         # make the distance matrix
         run_cmd(["plink",
-                 "--dog",
+                 PLINK_TAXA,
                  "--distance", "square", "1-ibs",
                  "--bfile", "bed/{0}.{1}.geno".format(self.group, self.dataset),
                  "--out", "njtree/{0}.{1}.geno".format(self.group, self.dataset)])
@@ -944,8 +1172,9 @@ class CTVTCustomPipelineV3(luigi.WrapperTask):
     """
 
     def requires(self):
-        yield TreemixPlotM('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', GROUP_BY_POPS, 0)
-        yield QPGraphPlot('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', 0)
+        yield AdmixtureCV('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt')
+        # yield TreemixPlotM('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', GROUP_BY_POPS, 0)
+        # yield QPGraphPlot('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', 0)
 
 if __name__ == '__main__':
     luigi.run()
