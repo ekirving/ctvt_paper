@@ -530,14 +530,14 @@ class QPGraph(PrioritisedTask):
             "outpop:        {}".format(OUTGROUP_POP[self.dataset]),
             "blgsize:       1",
             # TODO review these defaults
-            # "lsqmode:       YES",
-            # "diag:          .0001",
-            # "hires:         YES",
-            # "initmix:       1000",
-            # "precision:     .0001",
-            # "zthresh:       3.0",
-            # "terse:         NO",
-            # "useallsnps:    NO",
+            "lsqmode:       YES",
+            "diag:          .0001",
+            "hires:         YES",
+            "initmix:       1000",
+            "precision:     .0001",
+            "zthresh:       3.0",
+            "terse:         NO",
+            "useallsnps:    NO",
         ]
 
         # qpGraph needs the params to be defined in a .par file
