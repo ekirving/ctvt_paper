@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import luigi, os, os.path, glob, re, shutil, sys, random, itertools
+import os.path
+import re
+from collections import defaultdict
 
 # import my custom modules
 from pipeline_utils import *
-
-from collections import defaultdict
 
 
 class AscertainedBed(luigi.ExternalTask):
@@ -30,7 +30,8 @@ class PlinkFilterPops(PrioritisedTask):
         return AscertainedBed(self.dataset)
 
     def output(self):
-        return [luigi.LocalTarget("bed/{0}.{1}.{2}".format(self.group, self.dataset, ext)) for ext in ['bed', 'bim', 'fam']]
+        return [luigi.LocalTarget("bed/{0}.{1}.{2}".format(self.group, self.dataset, ext))
+                for ext in ['bed', 'bim', 'fam']]
 
     def run(self):
         poplist = "bed/{0}.{1}.poplist".format(self.group, self.dataset)
@@ -64,13 +65,12 @@ class PlinkIndepPairwise(PrioritisedTask):
         return [luigi.LocalTarget("bed/{0}.{1}.prune.{2}".format(self.group, self.dataset, ext)) for ext in extensions]
 
     def run(self):
-
         # calculate the prune list (prune.in / prune.out)
         log = run_cmd(["plink",
                        PLINK_TAXA,
                        "--indep-pairwise", 50, 10, 0.5,  # accept R^2 coefficient of up to 0.5
-                        "--bfile", "bed/{0}.{1}".format(self.group, self.dataset),
-                        "--out", "bed/{0}.{1}".format(self.group, self.dataset)])
+                       "--bfile", "bed/{0}.{1}".format(self.group, self.dataset),
+                       "--out", "bed/{0}.{1}".format(self.group, self.dataset)])
 
         # write the log file
         with open(self.output()[2].path, 'w') as fout:
@@ -92,7 +92,6 @@ class PlinkPruneBed(PrioritisedTask):
         return [luigi.LocalTarget("bed/{0}.{1}.pruned.{2}".format(self.group, self.dataset, ext)) for ext in extensions]
 
     def run(self):
-
         # apply the prune list
         run_cmd(["plink",
                  PLINK_TAXA,
@@ -113,14 +112,15 @@ class PlinkExtractPop(PrioritisedTask):
         return AscertainedBed(self.dataset)
 
     def output(self):
-        return [luigi.LocalTarget("bed/{0}.{1}.{2}".format(self.dataset, self.population, ext)) for ext in ['bed', 'bim', 'fam']]
+        return [luigi.LocalTarget("bed/{0}.{1}.{2}".format(self.dataset, self.population, ext)) for ext in
+                ['bed', 'bim', 'fam']]
 
     def run(self):
         poplist = "bed/{0}.{1}.poplist".format(self.dataset, self.population)
 
         # write the population IDs to disk so we can filter out any unwanted "families"
         with open(poplist, 'w') as par:
-            par.write(self.population)
+            par.write(str(self.population))
 
         # apply the prune list
         run_cmd(["plink",
@@ -142,8 +142,8 @@ class PlinkFilterGenoByPops(PrioritisedTask):
     def requires(self):
         yield PlinkFilterPops(self.group, self.dataset)
 
-        for population in ANCIENT_POPS:
-            yield PlinkExtractPop(self.dataset, population)
+        for pop in ANCIENT_POPS:
+            yield PlinkExtractPop(self.dataset, pop)
 
     def output(self):
         extensions = ['bed', 'bim', 'fam']
@@ -152,15 +152,15 @@ class PlinkFilterGenoByPops(PrioritisedTask):
 
     def run(self):
 
-        vars = []
+        variants = []
 
         # get the list of all the variant IDs which have coverage in each ancient population
         for pop in ANCIENT_POPS:
             bimfile = "bed/{0}.{1}.bim".format(self.dataset, pop)
-            vars.append([line.split()[1] for line in open(bimfile).readlines()])
+            variants.append([line.split()[1] for line in open(bimfile).readlines()])
 
         # get the intersection of those variant lists (i.e. only sites covered in all populations)
-        unqvars = set(vars[0]).intersection(*vars)
+        unqvars = set(variants[0]).intersection(*variants)
 
         # save the variant list
         varlist = 'bed/{0}.{1}.varlist'.format(self.group, self.dataset)
@@ -188,10 +188,9 @@ class PlinkHighGeno(PrioritisedTask):
 
     def output(self):
         return [luigi.LocalTarget("bed/{0}.{1}.geno.hq.{2}".format(self.group, self.dataset, ext)) for ext in
-                    ['bed', 'bim', 'fam']]
+                ['bed', 'bim', 'fam']]
 
     def run(self):
-
         # conver to PED so it's easier to parse the data
         run_cmd(["plink",
                  PLINK_TAXA,
@@ -215,16 +214,14 @@ class PlinkBedToFreq(PrioritisedTask):
 
     def output(self):
         return [luigi.LocalTarget("bed/{0}.{1}.geno.{2}.{3}".format(self.group, self.dataset, self.groupby, ext))
-                    for ext in ['frq.strat.gz', 'log']]
+                for ext in ['frq.strat.gz', 'log']]
 
     def run(self):
-
         # get the paths for the input files
-        bed_file, bim_file, fam_file = [file.path for file in self.input()]
+        bed_file, bim_file, fam_file = [inputfile.path for inputfile in self.input()]
 
         # to group by samples, we need to reassign them to their own families
         if self.groupby == GROUP_BY_SMPL:
-
             # replace family with sample code
             fam = run_cmd(["awk '{$1=$2}$0' " + fam_file], shell=True)
 
@@ -242,6 +239,7 @@ class PlinkBedToFreq(PrioritisedTask):
                  "--fam", fam_file,
                  "--out", "bed/{0}.{1}.geno.{2}".format(self.group, self.dataset, self.groupby)])
 
+
 class SmartPCA(PrioritisedTask):
     """
     Calcualte the eigenvectors for the given population
@@ -255,14 +253,14 @@ class SmartPCA(PrioritisedTask):
 
     def output(self):
         prj = "-".join(self.projectpops)
-        return [luigi.LocalTarget("smartpca/{0}.{1}.prj-{2}.{3}".format(self.group, self.dataset, prj, ext)) for ext in ['pca.evec', 'eval']]
+        return [luigi.LocalTarget("smartpca/{0}.{1}.prj-{2}.{3}".format(self.group, self.dataset, prj, ext)) for ext in
+                ['pca.evec', 'eval']]
 
     def run(self):
-
         # tell smartpca which pops to use for calculating the eigenvectors, and by inference, which to project
         pops = [pop for pop in GROUPS[self.dataset][self.group] if pop not in self.projectpops]
 
-        prj = "-".join(self.projectpops)
+        prj = "-".join(list(self.projectpops))
 
         # save the pop list
         poplist = 'smartpca/{0}.{1}.prj-{2}.poplist'.format(self.group, self.dataset, prj)
@@ -282,16 +280,16 @@ class SmartPCA(PrioritisedTask):
 
         # compose the config settings for smartpca
         config = [
-            "genotypename:   {0}".format(self.input()[0].path),   # .bed
-            "snpname:        {0}".format(self.input()[1].path),   # .bim
-            "indivname:      {0}".format(famfile),                # invalid .fam
+            "genotypename:   {0}".format(self.input()[0].path),  # .bed
+            "snpname:        {0}".format(self.input()[1].path),  # .bim
+            "indivname:      {0}".format(famfile),  # invalid .fam
             "evecoutname:    {0}".format(self.output()[0].path),  # .pca.evec
             "evaloutname:    {0}".format(self.output()[1].path),  # .eval
-            "numthreads:     {0}".format(MAX_CPU_CORES),          # number of threads to use
-            "poplistname:    {0}".format(poplist),                # the list of pops to calculate the eigenvectors from
-            "lsqproject:     YES",                                # use least squares projection, best for missing data
-            "numoutlieriter: 0",                                  # don't exclude outliers
-            "inbreed:        YES",                                # compute inbreeding stats
+            "numthreads:     {0}".format(MAX_CPU_CORES),  # number of threads to use
+            "poplistname:    {0}".format(poplist),  # the list of pops to calculate the eigenvectors from
+            "lsqproject:     YES",  # use least squares projection, best for missing data
+            "numoutlieriter: 0",  # don't exclude outliers
+            "inbreed:        YES",  # compute inbreeding stats
         ]
 
         # smartpca needs the params to be defined in a .par file
@@ -319,18 +317,20 @@ class SmartPCAPlot(PrioritisedTask):
     def output(self):
         prj = "-".join(self.projectpops)
         for pc1, pc2 in [(1, 2), (3, 4), (5, 6)]:
-            yield luigi.LocalTarget("pdf/{0}.{1}.prj-{2}.PCA.{3}.{4}.pdf".format(self.group, self.dataset, prj, pc1, pc2))
+            yield luigi.LocalTarget("pdf/{0}.{1}.prj-{2}.PCA.{3}.{4}.pdf".format(self.group,
+                                                                                 self.dataset,
+                                                                                 prj, pc1, pc2))
 
     def run(self):
-        prj = "-".join(self.projectpops)
+        prj = "-".join(list(self.projectpops))
 
         # calculate the percentage of variance explained by each PC, by dividing each eigenvalue by the sum total
-        sum = run_cmd(["awk '{ sum+=$1 } END {print sum}' " + self.input()[1].path], shell=True)
-        pve = run_cmd(["awk '{print $1/" + sum.strip() +"}' " + self.input()[1].path], shell=True)
+        sum_variance = run_cmd(["awk '{ sum+=$1 } END {print sum}' " + self.input()[1].path], shell=True)
+        percent_var = run_cmd(["awk '{print $1/" + sum_variance.strip() + "}' " + self.input()[1].path], shell=True)
 
         # save the percentage variance
         with open("smartpca/{0}.{1}.prj-{2}.pve".format(self.group, self.dataset, prj), 'w') as fout:
-            fout.write(pve)
+            fout.write(percent_var)
 
         # copy the population name into the first column, skip the header row (to make things easier for the Rscript)
         awk = "awk 'NR>1 {print $NF $0}' " + self.input()[0].path
@@ -343,7 +343,7 @@ class SmartPCAPlot(PrioritisedTask):
         proj = run_cmd([awk + ' | grep -E  "{}"'.format(projectpops)], shell=True)
 
         # save the pca data
-        for suffix, data in [('calc', calc), ('proj',proj)]:
+        for suffix, data in [('calc', calc), ('proj', proj)]:
             with open("smartpca/{0}.{1}.prj-{2}.{3}.pca".format(self.group, self.dataset, prj, suffix), 'w') as fout:
                 fout.write(data)
 
@@ -360,15 +360,15 @@ class SmartPCAPlot(PrioritisedTask):
                 # generate a PDF of the PCA plot
                 run_cmd(["Rscript",
                          "rscript/smartpca-plot.R",
-                         "smartpca/{0}.{1}.prj-{2}.calc.pca".format(self.group, self.dataset, prj),  # pca data, used for calculating the eigenvectors
-                         "smartpca/{0}.{1}.prj-{2}.proj.pca".format(self.group, self.dataset, prj),  # projected pca data
-                         "smartpca/{0}.{1}.prj-{2}.pve".format(self.group, self.dataset, prj),       # pve data (% variance)
-                         pdf_path,                                                       # location to save the pdf file
-                         pc1,                                                            # component num for x-axis
-                         pc2,                                                            # component num for y-axis
-                         labeled])                                                       # show point labels (0/1)
-
-
+                         "smartpca/{0}.{1}.prj-{2}.calc.pca".format(self.group, self.dataset, prj),
+                         # pca data, used for calculating the eigenvectors
+                         "smartpca/{0}.{1}.prj-{2}.proj.pca".format(self.group, self.dataset, prj),
+                         # projected pca data
+                         "smartpca/{0}.{1}.prj-{2}.pve".format(self.group, self.dataset, prj),  # pve data (% variance)
+                         pdf_path,  # location to save the pdf file
+                         pc1,  # component num for x-axis
+                         pc2,  # component num for y-axis
+                         labeled])  # show point labels (0/1)
 
 
 class AdmixtureK(PrioritisedTask):
@@ -385,19 +385,18 @@ class AdmixtureK(PrioritisedTask):
     def output(self):
         extensions = ['P', 'Q', 'log']
         return [luigi.LocalTarget("admix/{0}.{1}.pruned.{2}.{3}".format(self.group, self.dataset, self.k, ext))
-                    for ext in extensions]
+                for ext in extensions]
 
     def run(self):
-
         # admixture only outputs to the current directory
         os.chdir('./admix')
 
-        log = run_cmd(["admixture", 
-                       "-j{0}".format(MAX_CPU_CORES),          # use multi-threading
-                       "-B{}".format(ADMIXTURE_BOOTSTRAP),     # the number of bootstrap replicates to run
-                       "--cv=10",                              # generate cross-validation estimates
+        log = run_cmd(["admixture",
+                       "-j{0}".format(MAX_CPU_CORES),  # use multi-threading
+                       "-B{}".format(ADMIXTURE_BOOTSTRAP),  # the number of bootstrap replicates to run
+                       "--cv=10",  # generate cross-validation estimates
                        "../{0}".format(self.input()[0].path),  # using the pruned data file
-                       self.k],                                # for K ancestral populations
+                       self.k],  # for K ancestral populations
                       pwd='../')
 
         # restore previous working directory
@@ -475,19 +474,19 @@ class AdmixturePlotK(PrioritisedTask):
             datadict[line.split()[0]].append(line)
 
         # compose the header row
-        header = ["Pop{}".format(i) for i in range(1, int(self.k) + 1)]
+        header = ["Pop{}".format(i) for i in range(1, self.k + 1)]
         header.insert(0, "Sample")
         header.insert(0, "Population")
 
         # save the labeled file
         with self.output()[0].open('w') as fout:
             # output the header row
-            fout.write("\t".join(header)+"\n")
+            fout.write("\t".join(header) + "\n")
 
             # output the populations, in the chosen order
             for pop in GROUPS[self.dataset][self.group]:
                 for line in datadict[pop]:
-                    fout.write(line+"\n")
+                    fout.write(line + "\n")
 
         # generate a PDF of the admixture stacked column chart
         run_cmd(["Rscript",
@@ -555,12 +554,11 @@ class NeighborJoiningTree(PrioritisedTask):
         return PlinkFilterGenoByPops(self.group, self.dataset)
 
     def output(self):
-            return [luigi.LocalTarget("njtree/{0}.{1}.geno.data".format(self.group, self.dataset)),
-                    luigi.LocalTarget("njtree/{0}.{1}.geno.tree".format(self.group, self.dataset)),
-                    luigi.LocalTarget("pdf/{0}.{1}.njtree.pdf".format(self.group, self.dataset))]
+        return [luigi.LocalTarget("njtree/{0}.{1}.geno.data".format(self.group, self.dataset)),
+                luigi.LocalTarget("njtree/{0}.{1}.geno.tree".format(self.group, self.dataset)),
+                luigi.LocalTarget("pdf/{0}.{1}.njtree.pdf".format(self.group, self.dataset))]
 
     def run(self):
-
         # TODO what about bootstrapping?
         # make the distance matrix
         run_cmd(["plink",
@@ -613,7 +611,6 @@ class TreemixPlinkFreq(PrioritisedTask):
         return luigi.LocalTarget("treemix/{0}.{1}.geno.{2}.frq.gz".format(self.group, self.dataset, self.groupby))
 
     def run(self):
-
         # convert the file
         run_cmd(["python",
                  "plink2treemix.py",
@@ -634,8 +631,9 @@ class TreemixM(PrioritisedTask):
         return TreemixPlinkFreq(self.group, self.dataset, self.groupby)
 
     def output(self):
-        return [luigi.LocalTarget("treemix/{0}.{1}.geno.{2}.m{3}.{4}".format(self.group, self.dataset, self.groupby, self.m, ext))
-                    for ext in ['cov.gz', 'covse.gz', 'edges.gz', 'llik', 'modelcov.gz', 'treeout.gz', 'vertices.gz']]
+        return [luigi.LocalTarget(
+            "treemix/{0}.{1}.geno.{2}.m{3}.{4}".format(self.group, self.dataset, self.groupby, self.m, ext))
+                for ext in ['cov.gz', 'covse.gz', 'edges.gz', 'llik', 'modelcov.gz', 'treeout.gz', 'vertices.gz']]
 
     def run(self):
 
@@ -646,10 +644,10 @@ class TreemixM(PrioritisedTask):
 
         # run treemix
         run_cmd(["treemix",
-                 "-i", self.input().path,   # the input file
+                 "-i", self.input().path,  # the input file
                  "-root", outgroup,
-                 "-k", TREEMIX_K,           # group together "k" SNPs to account for linkage disequilibrium
-                 "-m", self.m,              # build the ML graph with "m" migration events
+                 "-k", TREEMIX_K,  # group together "k" SNPs to account for linkage disequilibrium
+                 "-m", self.m,  # build the ML graph with "m" migration events
                  "-o", trim_ext(self.output()[0].path, 2)])
 
 
@@ -666,7 +664,8 @@ class TreemixPlotM(PrioritisedTask):
         return TreemixM(self.group, self.dataset, self.groupby, self.m)
 
     def output(self):
-        return luigi.LocalTarget("pdf/{0}.{1}.treemix.geno.{2}.m{3}.pdf".format(self.group, self.dataset, self.groupby, self.m))
+        return luigi.LocalTarget(
+            "pdf/{0}.{1}.treemix.geno.{2}.m{3}.pdf".format(self.group, self.dataset, self.groupby, self.m))
 
     def run(self):
 
@@ -713,7 +712,6 @@ class TreemixToQPGraph(PrioritisedTask):
         return luigi.LocalTarget("qpgraph/{0}.{1}.treemix.m{2}.graph".format(self.group, self.dataset, self.m))
 
     def run(self):
-
         # the path to treemix treeout file
         treeout = self.input()[5].path
 
@@ -737,10 +735,9 @@ class QPGraph(PrioritisedTask):
 
     def output(self):
         return [luigi.LocalTarget("qpgraph/{0}.{1}.treemix.m{2}.{3}".format(self.group, self.dataset, self.m, ext))
-                    for ext in ['par', 'dot', 'log']]
+                for ext in ['par', 'dot', 'log']]
 
     def run(self):
-
         # NB admixtools requires a non-standard fam file format
         fam = run_cmd(["awk '$6=$1' bed/{0}.{1}.geno.fam".format(self.group, self.dataset)], shell=True)
 
@@ -749,7 +746,6 @@ class QPGraph(PrioritisedTask):
         with open(famfile, 'w') as fout:
             fout.write(fam)
 
-        # TODO comment these options
         # compose the config settings for qpGraph
         config = [
             "genotypename:  bed/{0}.{1}.geno.bed".format(self.group, self.dataset),
@@ -777,7 +773,7 @@ class QPGraph(PrioritisedTask):
         # run qpGraph
         log = run_cmd(["qpGraph",
                        "-p", parfile,
-                       "-g", self.input()[0].path,    # graph file
+                       "-g", self.input()[0].path,  # graph file
                        "-d", self.output()[1].path])  # dot file
 
         # save the log file
@@ -800,7 +796,6 @@ class QPGraphPlot(PrioritisedTask):
         return luigi.LocalTarget("pdf/{0}.{1}.qpgraph.m{2}.pdf".format(self.group, self.dataset, self.m))
 
     def run(self):
-
         # conver to postscript format
         ps = run_cmd(["dot", "-Tpdf", self.input()[1].path])
 
@@ -822,7 +817,8 @@ class ConvertfBedToEigenstrat(PrioritisedTask):
 
     def output(self):
         extensions = ['par', 'eigenstratgeno', 'snp', 'ind', 'log']
-        return [luigi.LocalTarget("eigenstrat/{0}.{1}.{2}.{3}".format(self.group, self.dataset, self.groupby, ext)) for ext in extensions]
+        return [luigi.LocalTarget("eigenstrat/{0}.{1}.{2}.{3}".format(self.group, self.dataset, self.groupby, ext)) for
+                ext in extensions]
 
     def run(self):
 
@@ -830,7 +826,8 @@ class ConvertfBedToEigenstrat(PrioritisedTask):
         if self.groupby == GROUP_BY_POPS:
             fam = run_cmd(["awk '$6=$1' " + self.input()[2].path], shell=True)
 
-        elif self.groupby == GROUP_BY_SMPL:
+        else:
+            # GROUP_BY_SMPL
             # also... we want to pretend that all our samples are populations!
             fam = run_cmd(["awk '$6=$2' " + self.input()[2].path], shell=True)
 
@@ -883,7 +880,7 @@ class QPDstat(PrioritisedTask):
 
     def output(self):
         return [luigi.LocalTarget("qpdstat/{0}.{1}.blgsize-{2}.{3}".format(self.group, self.dataset, self.blgsize, ext))
-                    for ext in ['par', 'log', 'poplist']]
+                for ext in ['par', 'log', 'poplist']]
 
     def run(self):
 
@@ -941,7 +938,7 @@ class QP3Pop(PrioritisedTask):
 
     def output(self):
         return [luigi.LocalTarget("qp3pop/{0}.{1}.{2}".format(self.group, self.dataset, ext))
-                    for ext in ['par', 'log', 'poplist']]
+                for ext in ['par', 'log', 'poplist']]
 
     def run(self):
 
@@ -1002,8 +999,10 @@ class QPF4ratio(PrioritisedTask):
         c = '-'.join([re.sub('[^A-Z]', '', meta) for meta in self.meta_c])
         x = '-'.join([re.sub('[^A-Z]', '', meta) for meta in self.meta_x])
 
-        return [luigi.LocalTarget("qpf4ratio/{0}.{1}.a-{2}.b-{3}.c-{4}.x-{5}.blgsize-{6}.{7}".format(self.group, self.dataset, a, b, c, x, self.blgsize, ext))
-                    for ext in ['par', 'log', 'poplist']]
+        return [luigi.LocalTarget(
+            "qpf4ratio/{0}.{1}.a-{2}.b-{3}.c-{4}.x-{5}.blgsize-{6}.{7}".format(self.group, self.dataset, a, b, c, x,
+                                                                               self.blgsize, ext))
+                for ext in ['par', 'log', 'poplist']]
 
     def run(self):
 
@@ -1020,7 +1019,7 @@ class QPF4ratio(PrioritisedTask):
         with self.output()[2].open('w') as fout:
             for a, b, c, x in itertools.product(a_pops, b_pops, c_pops, x_pops):
                 # skip any duplicates
-                if len(set([a, b, c, x])) == 4:
+                if len({a, b, c, x}) == 4:
                     # f4(A,O; X,C) / f4(A,O; B,C)
                     fout.write("{a} {o} : {x} {c} :: {a} {o} : {b} {c}".format(a=a, b=b, c=c, x=x, o=o) + "\n")
 
@@ -1066,7 +1065,6 @@ class CTVTPipeline(luigi.WrapperTask):
                 if group not in NO_OUTGROUPS:
 
                     for m in range(0, TREEMIX_MAX_M + 1):
-
                         yield TreemixPlotM(group, dataset, GROUP_BY_POPS, m)
                         yield TreemixPlotM(group, dataset, GROUP_BY_SMPL, m)
                         yield QPGraphPlot(group, dataset, m)
@@ -1082,7 +1080,6 @@ class CTVTCustomPipeline(luigi.WrapperTask):
         # all the data
 
         for dataset in ['merged_map', 'merged_map_Taimyr', 'merged_SNParray']:
-
             yield SmartPCAPlot('all-pops', dataset)
             yield NeighborJoiningTree('all-pops', dataset)
 
@@ -1112,7 +1109,6 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
     def requires(self):
 
         for dataset in ['merged_v1', 'merged_v2']:
-
             yield SmartPCAPlot('all-pops', dataset, ['DPC'])
             yield SmartPCAPlot('all-pops', dataset, ['DPC', 'CTVT'])
 
@@ -1176,6 +1172,7 @@ class CTVTCustomPipelineV3(luigi.WrapperTask):
         yield AdmixtureCV('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt')
         # yield TreemixPlotM('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', GROUP_BY_POPS, 0)
         # yield QPGraphPlot('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', 0)
+
 
 if __name__ == '__main__':
     luigi.run()

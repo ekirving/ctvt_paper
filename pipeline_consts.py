@@ -74,8 +74,8 @@ GROUPS['merged_map_hq2'] = {'all-pops': list(GROUPS['merged_map']['all-pops'])}
 
 # added the Taimyr (Ancient Wolf)
 GROUPS['merged_map_Taimyr'] = copy.deepcopy(GROUPS['merged_map'])
-for pop in GROUPS['merged_map_Taimyr'] :
-    GROUPS['merged_map_Taimyr'][pop].append('Taimyr')
+for population in GROUPS['merged_map_Taimyr'] :
+    GROUPS['merged_map_Taimyr'][population].append('Taimyr')
 
 # the population and sample to use for rooting the NJ tree
 OUTGROUP_POP = {group: 'OUT' for group in GROUPS}
