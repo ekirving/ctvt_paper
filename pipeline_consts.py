@@ -21,7 +21,7 @@ SNP_ARRAY_POPS = ['BAS', 'BAS2', 'DNA', 'BEA', 'BOX', 'DAE', 'DEU', 'DGS', 'DLB'
                   'VDVCB', 'VDVHG', 'VDVLS', 'VDVLC', 'DPC', 'CTVT', 'DIN', 'COY', 'WAM', 'WAS', 'WEU', 'WME',
                   'TAI', 'OUT']
 
-QPGRAPH_POPS = ['DEU', 'DCH', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA', 'WAM', 'OUT']
+QPGRAPH_POPS = ['DEU', 'DVN', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA', 'WAM', 'OUT']
 
 # groups of populations for running analyses
 GROUPS = {

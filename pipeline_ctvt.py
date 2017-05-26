@@ -1174,8 +1174,8 @@ class CTVTCustomPipelineV3(luigi.WrapperTask):
     def requires(self):
         yield AdmixtureCV('all-pops', 'merged_v2')
         yield AdmixtureCV('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt')
-        # yield TreemixPlotM('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', GROUP_BY_POPS, 0)
-        # yield QPGraphPlot('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', 0)
+        yield TreemixPlotM('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', GROUP_BY_POPS, 0)
+        yield QPGraphPlot('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', 0)
 
 if __name__ == '__main__':
     luigi.run()
