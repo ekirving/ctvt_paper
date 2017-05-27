@@ -338,8 +338,18 @@ def export_qpgraph_node(root_tree, parent_node=None):
             if len(matches) > 1:
                 # admixture branch
                 parent1, parent2 = matches
-                graph += "admix\t{child}\t{parent1}\t{parent2}\t50\t50\n".format(parent1=parent1.tag,
-                                                                                 parent2=parent2.tag,
+
+                middle1 = child_node.tag + 'a'
+                middle2 = child_node.tag + 'b'
+                code1 = hash_text(middle1)
+                code2 = hash_text(middle2)
+
+                # don't admix from a bifurcating node; intermediate nodes to accommodate drift
+                graph += "edge\t{code}\t{parent}\t{middle}\n".format(code=code1, parent=parent1.tag, middle=middle1)
+                graph += "edge\t{code}\t{parent}\t{middle}\n".format(code=code2, parent=parent2.tag, middle=middle2)
+
+                # now admix from the two middle nodes
+                graph += "admix\t{child}\t{parent1}\t{parent2}\t50\t50\n".format(parent1=middle1, parent2=middle2,
                                                                                  child=child_node.tag)
 
                 # flag both nodes so we don't export them twice
