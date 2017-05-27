@@ -46,8 +46,8 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
     """
     new_trees = []
 
-    # get all the nodes in the tree
-    target_nodes = root_tree.findall('.//*')
+    # get all the nodes in the tree (skip the outgroup)
+    target_nodes = [node for node in root_tree.findall('.//*') if node.tag != OUT]
 
     # add the new node to every branch in the tree
     for target_node in target_nodes:
