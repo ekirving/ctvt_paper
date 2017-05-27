@@ -46,8 +46,8 @@ def recurse_tree(root_tree, new_tag, remaining, depth=0):
     """
     new_trees = []
 
-    # get all the nodes in the tree (skip the outgroup)
-    target_nodes = [node for node in root_tree.findall('.//*') if node.tag != OUT]
+    # get all the nodes in the tree
+    target_nodes = root_tree.findall('.//*')
 
     # add the new node to every branch in the tree
     for target_node in target_nodes:
@@ -400,9 +400,6 @@ def run_analysis(all_nodes):
     """
 
     try:
-        # randomise node order
-        random.shuffle(all_nodes)
-
         print >> sys.stderr, 'INFO: Starting list %s' % all_nodes
 
         # setup a simple 2-node tree
@@ -416,8 +413,10 @@ def run_analysis(all_nodes):
         recurse_tree(root_tree, all_nodes[1], all_nodes[2:])
 
     except NodeUnplaceable as error:
-        # if a node was unplacable then try shuffling the node order and building the graph again
         print >> sys.stderr, error
+
+        # if a node was unplaceable then try shuffling the node order and building the graph again
+        random.shuffle(all_nodes)
         run_analysis(all_nodes)
 
 
