@@ -216,8 +216,12 @@ def run_qpgraph(args):
     grp_file = OUTPUT_FOLDER + '{name}.graph'.format(name=graph_name)
     dot_file = OUTPUT_FOLDER + '{name}.dot'.format(name=graph_name)
     log_file = OUTPUT_FOLDER + '{name}.log'.format(name=graph_name)
+    xml_file = OUTPUT_FOLDER + '{name}.xml'.format(name=graph_name)
 
     cached = False
+
+    # TODO remove me
+    new_tree.write(xml_file)
 
     try:
         # if the log file exists then we've run the analysis already
@@ -227,6 +231,9 @@ def run_qpgraph(args):
         cached = True
 
     except IOError:
+        # save the xml file
+        new_tree.write(xml_file)
+
         # convert the tree to qpGraph format
         graph = export_qpgraph(new_tree)
 
