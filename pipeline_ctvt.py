@@ -1175,7 +1175,8 @@ class CTVTCustomPipelineV3(luigi.WrapperTask):
         yield AdmixtureCV('all-pops', 'merged_v2')
         yield AdmixtureCV('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt')
         # yield QPGraph('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', 0)
-        yield QPGraphPlot('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', 5)
+        for m in range(0, 6):
+            yield QPGraphPlot('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', m)
 
 if __name__ == '__main__':
     luigi.run()
