@@ -429,7 +429,7 @@ def run_analysis(all_nodes):
         # recursively add all the other nodes
         recurse_tree(root_tree, all_nodes[1], all_nodes[2:])
 
-    except Exception as error:
+    except NodeUnplaceable as error:
         print >> sys.stderr, error
 
         # if a node was unplaceable then try shuffling the node order and building the graph again
