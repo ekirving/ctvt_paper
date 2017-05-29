@@ -24,12 +24,28 @@ PROBLEM_NODES = []
 # OUT = 'Out'
 # NODES = ['A', 'B', 'X', 'C']
 
-PAR_FILE = 'permute/merged_v2_hq2_nomex_ctvt.par'
-OUTPUT_FOLDER = 'permute/graphs/'
-ROOT = 'R'
-OUT = 'WAM'
-NODES = ['DEU', 'DVN', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA']
+# PAR_FILE = 'permute/merged_v2_hq2_nomex_ctvt.par'
+# OUTPUT_FOLDER = 'permute/graphs/'
+# ROOT = 'R'
+# OUT = 'WAM'
+# NODES = ['DEU', 'DVN', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA']
 
+PAR_FILE = 'permute/merged_v2_hq2_nomex_ctvt.par'
+OUTPUT_FOLDER = 'permute/graphs2/'
+ROOT = 'R'
+OUT = 'OUT'
+NODES = ['WAM', 'DEU', 'DVN', 'DPC', 'DMA']
+
+# TODO 1...
+# 1. disable admixing
+# 2. find all good non-admixed trees
+# 3. take the biggest and then add admix branches
+
+# TODO 2....
+# on first pass, only allow non-admix insertion
+# if can't be added, then send to back of list
+# if it fails admix insertion (when it's turn comes up again)
+# then throw
 
 class NodeUnplaceable(Exception):
     """
@@ -219,9 +235,6 @@ def run_qpgraph(args):
     xml_file = OUTPUT_FOLDER + '{name}.xml'.format(name=graph_name)
 
     cached = False
-
-    # TODO remove me
-    new_tree.write(xml_file)
 
     try:
         # if the log file exists then we've run the analysis already
