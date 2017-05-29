@@ -31,10 +31,10 @@ PROBLEM_NODES = []
 # NODES = ['DEU', 'DVN', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA']
 
 PAR_FILE = 'permute/merged_v2_hq2_nomex_ctvt.par'
-OUTPUT_FOLDER = 'permute/graphs2/'
+OUTPUT_FOLDER = 'permute/graphs3/'
 ROOT = 'R'
-OUT = 'OUT'
-NODES = ['WAM', 'DEU', 'DVN', 'DPC', 'DMA']
+OUT = 'WAM'
+NODES = ['DEU', 'DVN', 'DPC', 'DMA']
 
 # TODO 1...
 # 1. disable admixing
