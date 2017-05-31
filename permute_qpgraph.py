@@ -9,43 +9,46 @@ import xml.etree.ElementTree as ElemTree
 import re
 import sys
 
-from multiprocessing import Pool
+# use the Pathos library for improved multi-processing
 import pathos.multiprocessing as mp
 
 # import the custom modules
 from pipeline_utils import *
 
-MULTITHREAD_SEARCH = True
+# shoud we use multi-threading to speed up the graph search
+MULTITHREADED_SEARCH = True
+
+# how many outliers should we allow before pruning a branch in graph space
 MAX_OUTLIER_THRESHOLD = 0
-PROBLEM_NODES = []
 
-# TODO 1...
-# 1. disable admixing
-# 2. find all good non-admixed trees
-# 3. take the biggest and then add admix branches
+# how many remaining nodes should we permit before we start printing PDFs
+REMAINING_PRINT_OFFSET = 0
 
-# TODO 2....
+# should we try all possible graphs, or should we stop when we find something reasonable
+# EXHAUSTIVE_SEARCH = False
+EXHAUSTIVE_SEARCH = True
+
+# TODO improve parsimony...
 # on first pass, only allow non-admix insertion
 # if can't be added, then send to back of list
 # if it fails admix insertion (when it's turn comes up again)
 # then throw
 
-
-class NodeUnplaceable(Exception):
-    """
-    Node cannot be placed in the graph without exceeding outlier threshold
-    """
-    pass
-
+# TODO sort newick trees before hashing, to avoid duplicate solutions
 
 class PermuteQpgraph:
 
-    def __init__(self, par_file, basename, root_node, outgroup, nodes):
+    root_node = 'R'
+
+    def __init__(self, par_file, basename, outgroup, nodes):
+        """
+        Initialise the object attributes 
+        """
         self.par_file = par_file
         self.basename = basename
-        self.root_node = root_node
         self.outgroup = outgroup
         self.nodes = nodes
+        self.problem_nodes = []
 
     def recurse_tree(self, root_tree, new_tag, remaining, depth=0):
         """
@@ -110,10 +113,10 @@ class PermuteQpgraph:
         if not node_placed:
 
             # we could not place the node via either method :(
-            if new_tag not in PROBLEM_NODES and remaining:
+            if new_tag not in self.problem_nodes and remaining and not EXHAUSTIVE_SEARCH:
                 print >> sys.stderr, "WARNING: Unable to place node '%s' at this time." % new_tag
 
-                PROBLEM_NODES.append(new_tag)
+                self.problem_nodes.append(new_tag)
 
                 # add the problem node to end of the list, as we may be able to add it later on
                 remaining.append(new_tag)
@@ -128,7 +131,7 @@ class PermuteQpgraph:
         """
         Run qpGraph on a list of trees
         """
-        if MULTITHREAD_SEARCH:
+        if MULTITHREADED_SEARCH:
             # we need to buffer the results to use multi-threading
             pool = mp.ProcessingPool(MAX_CPU_CORES)
             results = pool.map(self.run_qpgraph, itertools.izip(new_trees, itertools.repeat(depth)))
@@ -260,18 +263,18 @@ class PermuteQpgraph:
         num_admix = len([node for node in all_nodes if node.get('admix') == '1']) / 2
         num_outliers = len(outliers)
 
-        # embed some useful info in the PDF name
-        pdf_file = self.basename + 'qpgraph-n{nodes}-o{out}-a{admix}-{name}.pdf'.format(nodes=num_nodes,
-                                                                                        out=num_outliers,
-                                                                                        admix=num_admix,
-                                                                                        name=graph_name)
+        if num_outliers <= MAX_OUTLIER_THRESHOLD and num_nodes > len(self.nodes) - REMAINING_PRINT_OFFSET:
+            # embed some useful info in the PDF name
+            pdf_file = self.basename + 'qpgraph-n{nodes}-o{out}-a{admix}-{name}.pdf'.format(nodes=num_nodes,
+                                                                                            out=num_outliers,
+                                                                                            admix=num_admix,
+                                                                                            name=graph_name)
 
-        if num_outliers <= MAX_OUTLIER_THRESHOLD and not cached:
             # only print PDFs for graphs that pass the threshold
             pprint_qpgraph(dot_file, pdf_file)
 
         # output some summary stats
-        print "{padding}{tree} nodes={nodes}\t admix={admix}\t outliers={out}\t worst={worst}\t {name}".format(
+        print "{padding}{tree} \tnodes={nodes}\t admix={admix}\t outliers={out}\t worst={worst}\t {name}".format(
             padding="  "*depth, name=graph_name, tree=newick.ljust(80), nodes=num_nodes, admix=num_admix,
             out=len(outliers), worst=worst_fstat[-1])
 
@@ -427,19 +430,13 @@ class PermuteQpgraph:
         return True
 
 
-def permute_qpgraph():
+def permute_qpgraph(par_file, basename, outgroup, nodes):
     """
     Find the best fitting graph for a given set of nodes, but permuting all possible graphs.
     """
 
-    par_file = 'qpgraph/qpgraph-pops.merged_v2_hq2_nomex_ctvt.treemix.m0.par'
-    basename = 'qpgraph/permute/'
-    root = 'R'
-    outgroup = 'OUT'
-    nodes = ['WAM', 'DEU', 'DVN', 'DPC', 'DMA']
-
     # instantiate the class
-    qp = PermuteQpgraph(par_file, basename, root, outgroup, nodes)
+    qp = PermuteQpgraph(par_file, basename, outgroup, nodes)
 
     # get all the permutations of possible node orders
     all_nodes_perms = list(itertools.permutations(nodes, len(nodes)))
@@ -449,26 +446,45 @@ def permute_qpgraph():
     print >> sys.stderr, "INFO: There are %s possible starting orders for the given nodes." % len(all_nodes_perms)
 
     # keep looping until we find a solution
-    while not successful:
+    while not successful or EXHAUSTIVE_SEARCH:
 
         try:
             # perform the analysis
             successful = qp.find_graph()
 
         except NodeUnplaceable as error:
-
             # log the error
             print >> sys.stderr, error
 
-            try:
-                # try starting with a different node order
-                qp.nodes = list(all_nodes_perms.pop())
+        try:
+            # try starting with a different node order
+            qp.nodes = list(all_nodes_perms.pop())
 
-            except IndexError:
-                # we've run out of node perms to try
+        except IndexError:
+            # we've run out of node orders to try
+            if not EXHAUSTIVE_SEARCH:
                 print >> sys.stderr, "ERROR: Cannot resolve the graph from any permutation of the given nodes."
-                break
+            break
 
     print >> sys.stderr, "FINISHED."
 
-permute_qpgraph()
+
+class NodeUnplaceable(Exception):
+    """
+    Node cannot be placed in the graph without exceeding outlier threshold
+    """
+    pass
+
+
+# par_file = 'qpgraph/qpgraph-pops.merged_v2_hq2_nomex_ctvt.treemix.m0.par'
+# basename = 'qpgraph/permute/'
+# outgroup = 'OUT'
+# nodes = ['WAM', 'DEU', 'DVN', 'DPC', 'DMA']
+
+
+par_file = "permute/simulated.par"
+basename = 'permute/graphs/'
+outgroup = 'Out'
+nodes = ['A', 'B', 'C', 'X']
+
+permute_qpgraph(par_file, basename, outgroup, nodes)
