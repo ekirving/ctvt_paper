@@ -1,8 +1,0 @@
-indivname:       permute/data/sim1.ind
-snpname:         permute/data/sim1.snp
-genotypename:    permute/data/sim1.geno
-outpop:          Out
-blgsize:         0.005
-lsqmode:         YES
-diag:            .0001
-hires:           YES
