@@ -1232,21 +1232,24 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
                     yield QPGraphPlot(group, dataset, m)
 
 
-class CTVTCustomPipelineV3(luigi.WrapperTask):
+class CTVTqpGraphPipeline(luigi.WrapperTask):
     """
-    Run the specific elements of the CTVT pipeline
+    Run these specific qpGraph tasks from the CTVT pipeline
     """
 
     def requires(self):
-        # yield AdmixtureCV('all-pops', 'merged_v2')
-        # yield AdmixtureCV('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt')
-        # # yield QPGraph('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', 0)
-        # for m in range(0, 6):
-        #     yield QPGraphPlot('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', m)
-        #     yield TreemixPlotM('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', m)
 
-        yield QPGraphPermute('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt')
-        yield QPGraphPermute('simple-pops', 'merged_v2_hq2_nomex_ctvt')
+        for dataset in ['merged_v2_hq2_nomex_ctvt']:
+
+            for group in ['qpgraph-pops',
+                          'qpgraph-simple']:
+
+                yield AdmixtureCV(group, dataset)
+
+                for m in range(0, TREEMIX_MAX_M + 1):
+                    yield TreemixPlotM(group, dataset, m)
+
+                yield QPGraphPermute(group, dataset)
 
 if __name__ == '__main__':
     luigi.run()

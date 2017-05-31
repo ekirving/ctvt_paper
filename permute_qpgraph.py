@@ -523,9 +523,9 @@ if __name__ == "__main__":
     # nodes = QPGRAPH_POPS
     # outgroup = 'COY'
 
-    group = 'simple-pops'
+    group = 'qpgraph-simple'
     dataset = 'merged_v2_hq2_nomex_ctvt'
-    nodes = SIMPLE_POPS
+    nodes = QPSIMPLE_POPS
     outgroup = 'WAM'
 
     par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
