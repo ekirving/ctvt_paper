@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Build all possible trees and graphs using a Randomised Stepwise Addition Order Algorithm
+# Build all possible graphs using a Randomised Stepwise Addition Order Algorithm w/ Branch and Bound.
 # Usage...
 # python -u permute_qpgraph.py 1> permute-std.log 2> permute-err.log
 
@@ -232,16 +232,7 @@ class PermuteQpgraph:
         new_tree, depth = args
 
         # convert the tree to newick format
-        newick = self.export_newick_tree(new_tree.getroot())
-
-        # load into Phylo so we can sort the tree (i.e. ladderize)
-        tree = Phylo.read(StringIO(newick), 'newick')
-        tree.ladderize()
-
-        # export the tree back to a string
-        fout = StringIO()
-        Phylo.write(tree, fout, 'newick')
-        newick = fout.getvalue().replace(':0.00000', '').strip()
+        newick = self.print_newick_tree(new_tree)
 
         # get unique names for the output files
         graph_name = self.hash_text(newick)
@@ -250,14 +241,10 @@ class PermuteQpgraph:
         log_file = self.basename + '{name}.log'.format(name=graph_name)
         xml_file = self.basename + '{name}.xml'.format(name=graph_name)
 
-        cached = False
-
         try:
             # if the log file exists then we've run the analysis already
             with open(log_file, 'r') as fin:
                 log = fin.read()
-
-            cached = True
 
         except IOError:
             # save the xml file
@@ -286,14 +273,16 @@ class PermuteQpgraph:
         num_admix = len([node for node in all_nodes if node.get('admix') == '1']) / 2
         num_outliers = len(outliers)
 
+        # only print PDFs for graphs that pass the threshold
         if num_outliers <= MAX_OUTLIER_THRESHOLD and num_nodes > len(self.nodes) - REMAINING_PRINT_OFFSET:
+
             # embed some useful info in the PDF name
             pdf_file = self.basename + 'qpgraph-n{nodes}-o{out}-a{admix}-{name}.pdf'.format(nodes=num_nodes,
                                                                                             out=num_outliers,
                                                                                             admix=num_admix,
                                                                                             name=graph_name)
 
-            # only print PDFs for graphs that pass the threshold
+            # pretty print the qpgraph dot file
             pprint_qpgraph(dot_file, pdf_file)
 
         # output some summary stats
@@ -420,6 +409,22 @@ class PermuteQpgraph:
 
         return '{pre}{num}'.format(pre='a' if admix else 'n', num=num+1)
 
+    def print_newick_tree(self, root_tee):
+        """
+        Convert an ElementTree into a ladderized Newick tree.
+        """
+        newick = self.export_newick_tree(root_tee.getroot())
+
+        # load into Phylo so we can sort the tree (i.e. ladderize)
+        tree = Phylo.read(StringIO(newick), 'newick')
+        tree.ladderize()
+
+        # export the tree back to a string
+        fout = StringIO()
+        Phylo.write(tree, fout, 'newick')
+
+        return fout.getvalue().replace(':0.00000', '').strip()
+
     def export_newick_tree(self, parent_node):
         """
         Convert an ElementTree tree into Newick format
@@ -455,7 +460,7 @@ class PermuteQpgraph:
 
 def permute_qpgraph(par_file, basename, outgroup, nodes):
     """
-    Find the best fitting graph for a given set of nodes, but permuting all possible graphs.
+    Find the best fitting graph for a given set of nodes, by permuting all possible graphs.
     """
 
     # instantiate the class
