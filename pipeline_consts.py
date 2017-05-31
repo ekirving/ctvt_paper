@@ -21,7 +21,7 @@ SNP_ARRAY_POPS = ['BAS', 'BAS2', 'DNA', 'BEA', 'BOX', 'DAE', 'DEU', 'DGS', 'DLB'
                   'VDVCB', 'VDVHG', 'VDVLS', 'VDVLC', 'DPC', 'CTVT', 'DIN', 'COY', 'WAM', 'WAS', 'WEU', 'WME',
                   'TAI', 'OUT']
 
-QPGRAPH_POPS = ['DEU', 'DVN', 'DPC', 'CTVT', 'DHU', 'DGL', 'DMA', 'WAM', 'OUT']
+QPGRAPH_POPS = ['COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
 
 # groups of populations for running analyses
 GROUPS = {
@@ -82,8 +82,8 @@ OUTGROUP_POP = {group: 'OUT' for group in GROUPS}
 OUTGROUP_SAMPLE = {group: 'AndeanFox' for group in GROUPS}
 
 # sepcial case for qpgraph simple
-OUTGROUP_POP['qpgraph-simple'] = 'COY'
-OUTGROUP_SAMPLE['qpgraph-simple'] = 'C_Cal'
+OUTGROUP_POP['qpgraph-pops'] = 'COY'
+OUTGROUP_SAMPLE['qpgraph-pops'] = 'C_Cal'
 
 NO_OUTGROUPS = ['all-no-out', 'dog-ctvt']
 
