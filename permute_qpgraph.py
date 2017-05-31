@@ -47,6 +47,10 @@ class PermuteQpgraph:
         self.par_file = par_file
         self.dot_path = dot_path
         self.pdf_path = pdf_path
+
+        if outgroup in nodes:
+            nodes.remove(outgroup)
+
         self.nodes = nodes
         self.outgroup = outgroup
 

@@ -5,7 +5,9 @@ import luigi, os, os.path, glob, re, shutil, sys, random, itertools
 
 # import my custom modules
 from pipeline_utils import *
+from permute_qpgraph import *
 
+from shutil import copyfile
 from collections import defaultdict
 
 
@@ -781,6 +783,63 @@ class QPGraph(PrioritisedTask):
 
         # save the log file
         with self.output()[2].open('w') as logfile:
+            logfile.write(log)
+
+
+class QPGraphPermute(PrioritisedTask):
+    """
+    Permute all possible graphs to find a qpGraph model which fits the data
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+
+    def requires(self):
+        return ConvertfBedToEigenstrat(self.group, self.dataset, GROUP_BY_POPS)
+
+    def output(self):
+        return [luigi.LocalTarget("qpgraph/{0}.{1}.permute.{2}".format(self.group, self.dataset, ext))
+                for ext in ['par', 'log']]
+
+    def run(self):
+
+        # get the populations and the outgroup
+        populations = GROUPS[self.dataset][self.group]
+        outgroup = OUTGROUP_POP[self.group] if self.group in OUTGROUP_POP else OUTGROUP_POP[self.dataset]
+
+        # compose the config settings for qpGraph
+        config = [
+            "genotypename:  {}".format(self.input()[1].path),
+            "snpname:       {}".format(self.input()[2].path),
+            "indivname:     {}".format(self.input()[3].path),
+            "outpop:        {}".format(outgroup),
+            # TODO really?
+            "blgsize:       1",
+            # TODO review these defaults
+            "lsqmode:       YES",
+            "diag:          .0001",
+            "hires:         YES",
+            "initmix:       1000",
+            "precision:     .0001",
+            "zthresh:       3.0",
+            "terse:         NO",
+            "useallsnps:    NO",
+        ]
+
+        # qpGraph needs the params to be defined in a .par file
+        par_file = self.output()[0].path
+
+        with open(par_file, 'w') as par:
+            par.write("\n".join(config))
+
+        # TODO fix these
+        dot_path = 'permute/graphs/{0}.{1}.permute'.format(self.group, self.dataset)
+        pdf_path = 'permute/pdf/{0}.{1}.permute'.format(self.group, self.dataset)
+
+        # run qpGraph
+        log = permute_qpgraph(par_file, dot_path, pdf_path, populations, outgroup)
+
+        # save the log file
+        with self.output()[1].open('w') as logfile:
             logfile.write(log)
 
 
