@@ -40,11 +40,11 @@ class NodeUnplaceable(Exception):
 
 class PermuteQpgraph:
 
-    def __init__(self, par_file, base_name, root, out, nodes):
+    def __init__(self, par_file, basename, root_node, outgroup, nodes):
         self.par_file = par_file
-        self.base_name = base_name
-        self.root = root
-        self.out = out
+        self.basename = basename
+        self.root_node = root_node
+        self.outgroup = outgroup
         self.nodes = nodes
 
     def recurse_tree(self, root_tree, new_tag, remaining, depth=0):
@@ -56,7 +56,7 @@ class PermuteQpgraph:
         new_trees = []
 
         # get all the nodes in the tree (skip the outgroup)
-        target_nodes = [node for node in root_tree.findall('.//*') if node.tag != self.out]
+        target_nodes = [node for node in root_tree.findall('.//*') if node.tag != self.outgroup]
 
         # add the new node to every branch in the tree
         for target_node in target_nodes:
@@ -219,10 +219,10 @@ class PermuteQpgraph:
 
         # get unique names for the output files
         graph_name = self.hash_text(newick)
-        grp_file = self.base_name + '{name}.graph'.format(name=graph_name)
-        dot_file = self.base_name + '{name}.dot'.format(name=graph_name)
-        log_file = self.base_name + '{name}.log'.format(name=graph_name)
-        xml_file = self.base_name + '{name}.xml'.format(name=graph_name)
+        grp_file = self.basename + '{name}.graph'.format(name=graph_name)
+        dot_file = self.basename + '{name}.dot'.format(name=graph_name)
+        log_file = self.basename + '{name}.log'.format(name=graph_name)
+        xml_file = self.basename + '{name}.xml'.format(name=graph_name)
 
         cached = False
 
@@ -261,10 +261,10 @@ class PermuteQpgraph:
         num_outliers = len(outliers)
 
         # embed some useful info in the PDF name
-        pdf_file = self.base_name + 'qpgraph-n{nodes}-o{out}-a{admix}-{name}.pdf'.format(nodes=num_nodes,
-                                                                                         out=num_outliers,
-                                                                                         admix=num_admix,
-                                                                                         name=graph_name)
+        pdf_file = self.basename + 'qpgraph-n{nodes}-o{out}-a{admix}-{name}.pdf'.format(nodes=num_nodes,
+                                                                                        out=num_outliers,
+                                                                                        admix=num_admix,
+                                                                                        name=graph_name)
 
         if num_outliers <= MAX_OUTLIER_THRESHOLD and not cached:
             # only print PDFs for graphs that pass the threshold
@@ -308,7 +308,7 @@ class PermuteQpgraph:
         # clone the tree because this process is destructive
         local_tree = copy.deepcopy(root_tree)
 
-        graph = "root\t{root}\n".format(root=self.root)
+        graph = "root\t{root}\n".format(root=self.root_node)
 
         # get all the nodes
         nodes = local_tree.findall('.//*')
@@ -406,7 +406,7 @@ class PermuteQpgraph:
             tag_name = '' if re.match('n[0-9]+|R', parent_node.tag) else parent_node.tag
             return '(' + ','.join(node for tag, node in children) + ')%s' % tag_name
 
-    def run_analysis(self):
+    def find_graph(self):
         """
         Build and test all possible trees and graphs
         """
@@ -414,10 +414,10 @@ class PermuteQpgraph:
         print >> sys.stderr, 'INFO: Starting list %s' % self.nodes
 
         # setup a simple 2-node tree
-        root_node = ElemTree.Element(self.root)
+        root_node = ElemTree.Element(self.root_node)
         root_tree = ElemTree.ElementTree(root_node)
 
-        ElemTree.SubElement(root_node, self.out)
+        ElemTree.SubElement(root_node, self.outgroup)
         ElemTree.SubElement(root_node, self.nodes[0])
 
         # recursively add all the other nodes
@@ -427,25 +427,48 @@ class PermuteQpgraph:
         return True
 
 
-PAR_FILE = 'qpgraph/qpgraph-pops.merged_v2_hq2_nomex_ctvt.treemix.m0.par'
-BASE_NAME = 'qpgraph/permute/'
-ROOT = 'R'
-OUT = 'OUT'
-NODES = ['WAM', 'DEU', 'DVN', 'DPC', 'DMA']
+def permute_qpgraph():
+    """
+    Find the best fitting graph for a given set of nodes, but permuting all possible graphs.
+    """
 
+    par_file = 'qpgraph/qpgraph-pops.merged_v2_hq2_nomex_ctvt.treemix.m0.par'
+    basename = 'qpgraph/permute/'
+    root = 'R'
+    outgroup = 'OUT'
+    nodes = ['WAM', 'DEU', 'DVN', 'DPC', 'DMA']
 
-# perform the analysis
-qp = PermuteQpgraph(PAR_FILE, BASE_NAME, ROOT, OUT, NODES)
+    # instantiate the class
+    qp = PermuteQpgraph(par_file, basename, root, outgroup, nodes)
 
-successful = False
+    # get all the permutations of possible node orders
+    all_nodes_perms = list(itertools.permutations(nodes, len(nodes)))
 
-while not successful:
+    successful = False
 
-    try:
-        successful = qp.run_analysis()
+    print >> sys.stderr, "INFO: There are %s possible starting orders for the given nodes." % len(all_nodes_perms)
 
-    except NodeUnplaceable as error:
-        print >> sys.stderr, error
-        # if a node was unplaceable then try shuffling the node order
-        random.shuffle(qp.nodes)
+    # keep looping until we find a solution
+    while not successful:
 
+        try:
+            # perform the analysis
+            successful = qp.find_graph()
+
+        except NodeUnplaceable as error:
+
+            # log the error
+            print >> sys.stderr, error
+
+            try:
+                # try starting with a different node order
+                qp.nodes = list(all_nodes_perms.pop())
+
+            except IndexError:
+                # we've run out of node perms to try
+                print >> sys.stderr, "ERROR: Cannot resolve the graph from any permutation of the given nodes."
+                break
+
+    print >> sys.stderr, "FINISHED."
+
+permute_qpgraph()
