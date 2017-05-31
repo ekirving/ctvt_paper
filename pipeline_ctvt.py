@@ -749,7 +749,6 @@ class QPGraph(PrioritisedTask):
         with open(famfile, 'w') as fout:
             fout.write(fam)
 
-        # TODO comment these options
         # compose the config settings for qpGraph
         config = [
             "genotypename:  bed/{0}.{1}.geno.bed".format(self.group, self.dataset),
@@ -801,12 +800,11 @@ class QPGraphPlot(PrioritisedTask):
 
     def run(self):
 
-        # conver to postscript format
-        ps = run_cmd(["dot", "-Tpdf", self.input()[1].path])
+        dot_file = self.input()[1].path
+        pdf_file = self.output().path
 
-        # save the ps file
-        with self.output().open('w') as psfile:
-            psfile.write(ps)
+        # pretty print the qpgraph dot file
+        pprint_qpgraph(dot_file, pdf_file)
 
 
 class ConvertfBedToEigenstrat(PrioritisedTask):

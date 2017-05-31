@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import luigi, subprocess, datetime, hashlib, os, pysam, random, itertools
-
-from shutil import copyfile
+import luigi, subprocess, datetime, hashlib, os, random, itertools
 
 # import all the constants
 from pipeline_consts import *
@@ -109,7 +107,7 @@ def pprint_qpgraph(dot_file, pdf_file):
         body = re.search("{(.+)}", fin.read(), re.DOTALL).group(1).strip().split("\n")
 
     # make a new direct graph
-    dot = graphviz.Digraph(body=body, format='pdf')
+    dot = graphviz.Digraph(filename=trim_ext(pdf_file), body=body, format='pdf')
 
     # remove the messy graph label
     dot.attr('graph', label='')
@@ -139,7 +137,7 @@ def pprint_qpgraph(dot_file, pdf_file):
         dot.node(node, shape='ellipse', color=colour, fontcolor=colour)
 
     # render the graph (basename.pdf)
-    dot.render(trim_ext(pdf_file))
+    dot.render(cleanup=True)
 
 
 class PrioritisedTask(luigi.Task):
