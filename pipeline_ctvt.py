@@ -1245,7 +1245,7 @@ class CTVTCustomPipelineV3(luigi.WrapperTask):
         #     yield QPGraphPlot('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', m)
         #     yield TreemixPlotM('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', m)
 
-        # yield QPGraphPermute('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt')
+        yield QPGraphPermute('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt')
         yield QPGraphPermute('simple-pops', 'merged_v2_hq2_nomex_ctvt')
 
 if __name__ == '__main__':
