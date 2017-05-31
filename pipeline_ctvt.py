@@ -831,9 +831,8 @@ class QPGraphPermute(PrioritisedTask):
         with open(par_file, 'w') as par:
             par.write("\n".join(config))
 
-        # TODO fix these
-        dot_path = 'permute/graphs/{0}.{1}.permute'.format(self.group, self.dataset)
-        pdf_path = 'permute/pdf/{0}.{1}.permute'.format(self.group, self.dataset)
+        dot_path = 'qpgraph/{0}.{1}.permute'.format(self.group, self.dataset)
+        pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(self.group, self.dataset)
 
         log_file = self.output()[1].path
 
@@ -851,7 +850,6 @@ class QPGraphPermute(PrioritisedTask):
         if not success:
             os.remove(par_file)
             raise Exception("Error: The graph cannot be resolved.")
-
 
 
 class QPGraphPlot(PrioritisedTask):
