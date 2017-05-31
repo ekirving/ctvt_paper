@@ -37,6 +37,7 @@ EXHAUSTIVE_SEARCH = True
 # if it fails admix insertion (when it's turn comes up again)
 # then throw
 
+
 class PermuteQpgraph:
 
     root_node = 'R'
@@ -50,6 +51,8 @@ class PermuteQpgraph:
         self.outgroup = outgroup
         self.nodes = nodes
         self.problem_nodes = []
+        self.tested_graphs = set()
+        self.solutions = set()
 
     def recurse_tree(self, root_tree, new_tag, remaining, depth=0):
         """
@@ -97,8 +100,8 @@ class PermuteQpgraph:
 
                 # add two admix nodes as the children of both targets
                 admix_nodes = [
-                    self.insert_node(new_tree, target1, admix_label, attrs={'internal':'1', 'admix':'1', 'side':'l'}),
-                    self.insert_node(new_tree, target2, admix_label, attrs={'internal':'1', 'admix':'1', 'side':'r'})
+                    self.insert_node(new_tree, target1, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'l'}),
+                    self.insert_node(new_tree, target2, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'r'})
                 ]
 
                 # choose the actual parent based on the sort order of the tag name (needed for unique tree hashing)
@@ -156,7 +159,10 @@ class PermuteQpgraph:
         # were we able to place the new node
         placed_node = False
 
-        for new_tree, outliers in results:
+        for new_tree, outliers, graph_name in results:
+
+            # add this graph to the list of those we've tested
+            self.tested_graphs.add(graph_name)
 
             # did our new trees pass the threshold
             if len(outliers) <= MAX_OUTLIER_THRESHOLD:
@@ -166,6 +172,9 @@ class PermuteQpgraph:
                     self.recurse_tree(new_tree, remaining[0], remaining[1:], depth + 1)
                 else:
                     print >> sys.stderr, "SUCCESS: Placed all nodes on a graph without outliers!"
+
+                    # add this graph to the list of solutions
+                    self.solutions.add(graph_name)
 
                 # we successfully placed the new node!
                 placed_node = True
@@ -292,7 +301,7 @@ class PermuteQpgraph:
             padding="  "*depth, name=graph_name, tree=newick.ljust(80), nodes=num_nodes, admix=num_admix,
             out=len(outliers), worst=worst_fstat[-1])
 
-        return new_tree, outliers
+        return new_tree, outliers, graph_name
 
     @staticmethod
     def extract_outliers(log):
@@ -476,11 +485,13 @@ def permute_qpgraph(par_file, basename, outgroup, nodes):
 
         except IndexError:
             # we've run out of node orders to try
-            if not EXHAUSTIVE_SEARCH:
+            if not qp.solutions:
                 print >> sys.stderr, "ERROR: Cannot resolve the graph from any permutation of the given nodes."
+
             break
 
-    print >> sys.stderr, "FINISHED."
+    print >> sys.stderr, "FINISHED: Found %s unique solution(s) from a total of %s tested graphs!" % \
+                         (len(qp.solutions), len(qp.tested_graphs))
 
 
 class NodeUnplaceable(Exception):
