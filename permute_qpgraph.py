@@ -15,6 +15,9 @@ import pathos.multiprocessing as mp
 # import the custom modules
 from pipeline_utils import *
 
+from cStringIO import StringIO
+from Bio import Phylo
+
 # shoud we use multi-threading to speed up the graph search
 MULTITHREADED_SEARCH = True
 
@@ -33,8 +36,6 @@ EXHAUSTIVE_SEARCH = True
 # if can't be added, then send to back of list
 # if it fails admix insertion (when it's turn comes up again)
 # then throw
-
-# TODO sort newick trees before hashing, to avoid duplicate solutions
 
 class PermuteQpgraph:
 
@@ -95,12 +96,16 @@ class PermuteQpgraph:
                 admix_label = self.new_label(new_tree, admix=True)
 
                 # add two admix nodes as the children of both targets
-                admix_left = self.insert_node(new_tree, target1, admix_label, attrs={'internal': '1', 'admix': '1',
-                                                                                     'side': 'l'})
-                self.insert_node(new_tree, target2, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'r'})
+                admix_nodes = [
+                    self.insert_node(new_tree, target1, admix_label, attrs={'internal':'1', 'admix':'1', 'side':'l'}),
+                    self.insert_node(new_tree, target2, admix_label, attrs={'internal':'1', 'admix':'1', 'side':'r'})
+                ]
 
-                # add the new node as the child of one of the admix nodes
-                self.insert_node(new_tree, admix_left, new_tag, append=True)
+                # choose the actual parent based on the sort order of the tag name (needed for unique tree hashing)
+                admix_node = admix_nodes[0] if target1.tag < target2.tag else admix_nodes[1]
+
+                # add the new node as the child of the preferred admix node
+                self.insert_node(new_tree, admix_node, new_tag, append=True)
 
                 admix_trees.append(new_tree)
 
@@ -219,6 +224,15 @@ class PermuteQpgraph:
 
         # convert the tree to newick format
         newick = self.export_newick_tree(new_tree.getroot())
+
+        # load into Phylo so we can sort the tree (i.e. ladderize)
+        tree = Phylo.read(StringIO(newick), 'newick')
+        tree.ladderize()
+
+        # export the tree back to a string
+        fout = StringIO()
+        Phylo.write(tree, fout, 'newick')
+        newick = fout.getvalue().replace(':0.00000', '').strip()
 
         # get unique names for the output files
         graph_name = self.hash_text(newick)
