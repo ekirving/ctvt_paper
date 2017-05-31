@@ -590,12 +590,14 @@ class NeighborJoiningTree(PrioritisedTask):
             fout.write("Code\tSample\t" + head)
             fout.write(data)
 
+        outgroup = OUTGROUP_SAMPLE[self.group] if self.group in OUTGROUP_SAMPLE else OUTGROUP_SAMPLE[self.dataset]
+
         # generate a tree from the labeled data
         run_cmd(["Rscript",
                  "rscript/plot-phylo-tree.R",
                  self.output()[0].path,
                  self.treetype,
-                 OUTGROUP_SAMPLE[self.dataset],
+                 outgroup,
                  self.output()[1].path,
                  self.output()[2].path])
 
@@ -642,9 +644,9 @@ class TreemixM(PrioritisedTask):
     def run(self):
 
         if self.groupby == GROUP_BY_POPS:
-            outgroup = OUTGROUP_POP[self.dataset]
+            outgroup = OUTGROUP_POP[self.group] if self.group in OUTGROUP_POP else OUTGROUP_POP[self.dataset]
         else:
-            outgroup = OUTGROUP_SAMPLE[self.dataset]
+            outgroup = OUTGROUP_SAMPLE[self.group] if self.group in OUTGROUP_SAMPLE else OUTGROUP_SAMPLE[self.dataset]
 
         # run treemix
         run_cmd(["treemix",
@@ -751,12 +753,14 @@ class QPGraph(PrioritisedTask):
         with open(famfile, 'w') as fout:
             fout.write(fam)
 
+        outgroup = OUTGROUP_POP[self.group] if self.group in OUTGROUP_POP else OUTGROUP_POP[self.dataset]
+
         # compose the config settings for qpGraph
         config = [
             "genotypename:  bed/{0}.{1}.geno.bed".format(self.group, self.dataset),
             "snpname:       bed/{0}.{1}.geno.bim".format(self.group, self.dataset),
             "indivname:     bed/{0}.{1}.qpgraph.fam".format(self.group, self.dataset),
-            "outpop:        {}".format(OUTGROUP_POP[self.dataset]),
+            "outpop:        {}".format(outgroup),
             "blgsize:       1",
             # TODO review these defaults
             "lsqmode:       YES",
@@ -954,7 +958,7 @@ class QPDstat(PrioritisedTask):
     def run(self):
 
         # get the out group pop
-        outpop = OUTGROUP_POP[self.dataset]
+        outpop = OUTGROUP_POP[self.group] if self.group in OUTGROUP_POP else OUTGROUP_POP[self.dataset]
 
         famfile = "bed/{0}.{1}.{2}.fam".format(self.group, self.dataset, GROUP_BY_SMPL)
 
@@ -1012,7 +1016,7 @@ class QP3Pop(PrioritisedTask):
     def run(self):
 
         # get the out group pop
-        outpop = OUTGROUP_POP[self.dataset]
+        outpop = OUTGROUP_POP[self.group] if self.group in OUTGROUP_POP else OUTGROUP_POP[self.dataset]
 
         # write the list of 3-way tests
         with self.output()[2].open('w') as fout:
@@ -1080,7 +1084,7 @@ class QPF4ratio(PrioritisedTask):
         x_pops = get_metapops(self.group, self.dataset, self.meta_x)
 
         # get the outgroup
-        o = OUTGROUP_POP[self.dataset]
+        o = OUTGROUP_POP[self.group] if self.group in OUTGROUP_POP else OUTGROUP_POP[self.dataset]
 
         # write the list of F4 ratio tests
         with self.output()[2].open('w') as fout:
