@@ -29,6 +29,7 @@ def parse_ped(ped_infile, ped_outfile):
 
                 fout.write(" ".join(new_line)+"\n")
 
+
 def run_cmd(cmd, returnout=True, shell=False, pwd='./', verbose=True):
     """
     Executes the given command in a system subprocess
@@ -88,11 +89,57 @@ def insert_suffix(fullpath, suffix):
     splitpath.insert(-1, suffix)
     return ('.').join(splitpath)
 
+
 def get_metapops(group, dataset, metalist):
     """
     Get all the populations belonging to the given meta groups.
     """
     return [pop for pop in GROUPS[dataset][group] if POPULATIONS[pop] in metalist]
+
+
+def pprint_qpgraph(dot_file, pdf_file):
+    """
+    Pretty print a qpGraph dot file using the graphviz library.
+    """
+    import graphviz
+    import re
+
+    # extract the body contents from the dot file
+    with open(dot_file, 'rU') as fin:
+        body = re.search("{(.+)}", fin.read(), re.DOTALL).group(1).strip().split("\n")
+
+    # make a new direct graph
+    dot = graphviz.Digraph(body=body, format='pdf')
+
+    # remove the messy graph label
+    dot.attr('graph', label='')
+
+    # set Node defaults
+    dot.node_attr['shape'] = 'point'
+    dot.node_attr['fontname'] = 'arial'
+    dot.node_attr['fontsize'] = '11'
+
+    # set Edge defaults
+    dot.edge_attr['arrowhead'] = 'vee'
+    dot.edge_attr['fontcolor'] = '#838b8b'  # grey
+    dot.edge_attr['fontname'] = 'arial'
+    dot.edge_attr['fontsize'] = '11'
+
+    nodes = []
+
+    # extract the leaf nodes from the body of the graph
+    for line in dot:
+        match = re.search("^ +([a-z]+) +\[", line, re.IGNORECASE)
+        if match:
+            nodes.append(match.group(1))
+
+    # set leaf node attributes
+    for node in nodes:
+        colour = COLOURS.get(POPULATIONS.get(node), DEFAULT_COLOUR)
+        dot.node(node, shape='ellipse', color=colour, fontcolor=colour)
+
+    # render the graph (basename.pdf)
+    dot.render(trim_ext(pdf_file))
 
 
 class PrioritisedTask(luigi.Task):
