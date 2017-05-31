@@ -10,6 +10,7 @@ import re
 import sys
 
 from multiprocessing import Pool
+import pathos.multiprocessing as mp
 
 # import the custom modules
 from pipeline_utils import *
@@ -129,7 +130,7 @@ class PermuteQpgraph:
         """
         if MULTITHREAD_SEARCH:
             # we need to buffer the results to use multi-threading
-            pool = Pool(MAX_CPU_CORES)
+            pool = mp.ProcessingPool(MAX_CPU_CORES)
             results = pool.map(self.run_qpgraph, itertools.izip(new_trees, itertools.repeat(depth)))
         else:
             # test the trees without multi-threading
