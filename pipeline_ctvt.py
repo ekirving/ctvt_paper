@@ -1251,7 +1251,7 @@ class CTVTqpGraphPipeline(luigi.WrapperTask):
                 yield AdmixtureCV(group, dataset)
 
                 for m in range(0, TREEMIX_MAX_M + 1):
-                    yield TreemixPlotM(group, dataset, m)
+                    yield TreemixPlotM(group, dataset, GROUP_BY_POPS, m)
 
                 yield QPGraphPermute(group, dataset)
 
