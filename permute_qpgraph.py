@@ -127,7 +127,7 @@ class PermuteQpgraph:
 
             # we could not place the node via either method :(
             if new_tag not in self.problem_nodes and remaining and not EXHAUSTIVE_SEARCH:
-                print >> sys.stderr, "WARNING: Unable to place node '%s' at this time." % new_tag
+                print "WARNING: Unable to place node '%s' at this time." % new_tag
 
                 self.problem_nodes.append(new_tag)
 
@@ -176,7 +176,7 @@ class PermuteQpgraph:
                 if remaining:
                     self.recurse_tree(new_tree, remaining[0], remaining[1:], depth + 1)
                 else:
-                    print >> sys.stderr, "SUCCESS: Placed all nodes on a graph without outliers!"
+                    print "SUCCESS: Placed all nodes on a graph without outliers!"
 
                     # add this graph to the list of solutions
                     self.solutions.add(graph_name)
@@ -447,7 +447,7 @@ class PermuteQpgraph:
         Build and test all possible trees and graphs
         """
 
-        print >> sys.stderr, 'INFO: Starting list %s' % self.nodes
+        print 'INFO: Starting list %s' % self.nodes
 
         # setup a simple 2-node tree
         root_node = ElemTree.Element(self.root_node)
@@ -471,7 +471,7 @@ def permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup):
     # get all the permutations of possible node orders
     all_nodes_perms = list(itertools.permutations(nodes, len(nodes)))
 
-    print >> sys.stderr, "INFO: There are %s possible starting orders for the given nodes." % len(all_nodes_perms)
+    print "INFO: There are %s possible starting orders for the given nodes." % len(all_nodes_perms)
 
     # keep looping until we find a solution
     while not qp.solutions or EXHAUSTIVE_SEARCH:
@@ -482,7 +482,7 @@ def permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup):
 
         except NodeUnplaceable as error:
             # log the error
-            print >> sys.stderr, error
+            print error
 
         try:
             # try starting with a different node order
@@ -491,12 +491,12 @@ def permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup):
         except IndexError:
             # we've run out of node orders to try
             if not qp.solutions:
-                print >> sys.stderr, "ERROR: Cannot resolve the graph from any permutation of the given nodes."
+                print "ERROR: Cannot resolve the graph from any permutation of the given nodes."
 
             break
 
-    print >> sys.stderr, "FINISHED: Found %s unique solution(s) from a total of %s unique graphs!" % \
-                         (len(qp.solutions), len(qp.tested_graphs))
+    print "FINISHED: Found %s unique solution(s) from a total of %s unique graphs!" % \
+          (len(qp.solutions), len(qp.tested_graphs))
 
     return len(qp.solutions) > 0
 
@@ -518,12 +518,20 @@ if __name__ == "__main__":
     # outgroup = 'Out'
 
     # # test scenarios...
-    # par_file = 'qpgraph/qpgraph-pops.merged_v2_hq2_nomex_ctvt.permute.par'
-    # dot_path = 'permute/graphs/qpgraph-pops.merged_v2_hq2_nomex_ctvt.permute'
-    # pdf_path = 'permute/pdf/qpgraph-pops.merged_v2_hq2_nomex_ctvt.permute'
-    # nodes = ['COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
+    # group = 'qpgraph-pops'
+    # dataset = 'merged_v2_hq2_nomex_ctvt'
+    # nodes = QPGRAPH_POPS
     # outgroup = 'COY'
-    #
-    # permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup)
+
+    group = 'simple-pops'
+    dataset = 'merged_v2_hq2_nomex_ctvt'
+    nodes = SIMPLE_POPS
+    outgroup = 'WAM'
+
+    par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
+    dot_path = 'qpgraph/{0}.{1}.permute'.format(group, dataset)
+    pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
+
+    permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup)
 
     pass

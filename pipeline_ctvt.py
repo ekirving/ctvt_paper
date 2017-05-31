@@ -836,16 +836,16 @@ class QPGraphPermute(PrioritisedTask):
 
         log_file = self.output()[1].path
 
-        # buffer all output to the log file
-        fhandle = open(log_file, 'w')
-        sys.stdout = sys.stderr = fhandle
+        with open(log_file, 'w') as fout:
+            # buffer all output to the log file
+            sys.stdout = fout
 
-        # run qpGraph
-        success = permute_qpgraph(par_file, dot_path, pdf_path, populations, outgroup)
+            # run qpGraph
+            success = permute_qpgraph(par_file, dot_path, pdf_path, populations, outgroup)
 
-        # restore stdout and stderr
-        sys.stdout = sys.__stdout__
-        sys.stderr = sys.__stderr__
+            # restore stdout
+            sys.stdout.flush()
+            sys.stdout = sys.__stdout__
 
         if not success:
             os.remove(par_file)
