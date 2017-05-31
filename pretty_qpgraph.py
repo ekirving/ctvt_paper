@@ -3,20 +3,21 @@
 
 import graphviz
 import re
-import csv
 
-# the name of the graph file
-dot_file = "permute/_final/0f3755a.dot"
-pdf_file = "permute/_final/0f3755a"  # no extension
+# import the custom modules
+from pipeline_utils import *
 
-csv_file = "pop_names.csv"
+# import csv
+# import colors from project
+# with open('pop_names.csv', 'rU') as fin:
+#     colors = dict((line[0], line[3]) for line in csv.reader(fin))
 
-# load the file
-with open(dot_file, 'rU') as fin:
-    file = fin.read()
+# the base name of the dot file
+basename = "permute/_final/0f3755a"
 
-# extract the body contents from the file
-body = re.search("{(.+)}", file, re.DOTALL).group(1).strip().split("\n")
+# extract the body contents from the dot file
+with open(basename + '.dot', 'rU') as fin:
+    body = re.search("{(.+)}", fin.read(), re.DOTALL).group(1).strip().split("\n")
 
 # make a new direct graph
 dot = graphviz.Digraph(body=body)
@@ -43,15 +44,10 @@ for line in dot:
     if match:
         nodes.append(match.group(1))
 
-# import colors from project
-with open(csv_file, 'rU') as fin:
-    colors = dict((line[0], line[3]) for line in csv.reader(fin))
-
 # set leaf node attributes
 for node in nodes:
-    dot.node(node, shape='ellipse',
-                   color=colors[node],
-                   fontcolor=colors[node])
+    colour = COLOURS.get(POPULATIONS.get(node), DEFAULT_COLOUR)
+    dot.node(node, shape='ellipse', color=colour, fontcolor=colour)
 
 # render the graph
-dot.render(pdf_file)
+dot.render(basename)
