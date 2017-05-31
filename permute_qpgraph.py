@@ -24,12 +24,12 @@ MULTITHREADED_SEARCH = True
 # how many outliers should we allow before pruning a branch in graph space
 MAX_OUTLIER_THRESHOLD = 0
 
-# how many remaining nodes should we permit before we start printing PDFs
+# print PDFs for graphs with (N - offset) nodes
 REMAINING_PRINT_OFFSET = 0
 
 # should we try all possible graphs, or should we stop when we find something reasonable
-# EXHAUSTIVE_SEARCH = False
-EXHAUSTIVE_SEARCH = True
+EXHAUSTIVE_SEARCH = False
+# EXHAUSTIVE_SEARCH = True
 
 # TODO improve parsimony...
 # on first pass, only allow non-admix insertion
@@ -40,16 +40,17 @@ EXHAUSTIVE_SEARCH = True
 
 class PermuteQpgraph:
 
-    root_node = 'R'
-
-    def __init__(self, par_file, basename, outgroup, nodes):
+    def __init__(self, par_file, dot_path, pdf_path, nodes, outgroup):
         """
         Initialise the object attributes 
         """
         self.par_file = par_file
-        self.basename = basename
-        self.outgroup = outgroup
+        self.dot_path = dot_path
+        self.pdf_path = pdf_path
         self.nodes = nodes
+        self.outgroup = outgroup
+
+        self.root_node = 'R'
         self.problem_nodes = []
         self.tested_graphs = set()
         self.solutions = set()
@@ -236,10 +237,10 @@ class PermuteQpgraph:
 
         # get unique names for the output files
         graph_name = self.hash_text(newick)
-        grp_file = self.basename + '{name}.graph'.format(name=graph_name)
-        dot_file = self.basename + '{name}.dot'.format(name=graph_name)
-        log_file = self.basename + '{name}.log'.format(name=graph_name)
-        xml_file = self.basename + '{name}.xml'.format(name=graph_name)
+        grp_file = self.dot_path + '-{name}.graph'.format(name=graph_name)
+        dot_file = self.dot_path + '-{name}.dot'.format(name=graph_name)
+        log_file = self.dot_path + '-{name}.log'.format(name=graph_name)
+        xml_file = self.dot_path + '-{name}.xml'.format(name=graph_name)
 
         try:
             # if the log file exists then we've run the analysis already
@@ -274,15 +275,15 @@ class PermuteQpgraph:
         num_outliers = len(outliers)
 
         # only print PDFs for graphs that pass the threshold
-        if num_outliers <= MAX_OUTLIER_THRESHOLD and num_nodes > len(self.nodes) - REMAINING_PRINT_OFFSET:
+        if num_outliers <= MAX_OUTLIER_THRESHOLD and num_nodes > (len(self.nodes) - REMAINING_PRINT_OFFSET):
 
-            # embed some useful info in the PDF name
-            pdf_file = self.basename + 'qpgraph-n{nodes}-o{out}-a{admix}-{name}.pdf'.format(nodes=num_nodes,
-                                                                                            out=num_outliers,
-                                                                                            admix=num_admix,
-                                                                                            name=graph_name)
+            # embed some useful metadata info in the PDF name
+            pdf_file = self.pdf_path + '-n{nodes}-o{out}-a{admix}-{name}.pdf'.format(nodes=num_nodes,
+                                                                                     out=num_outliers,
+                                                                                     admix=num_admix,
+                                                                                     name=graph_name)
 
-            # pretty print the qpgraph dot file
+            # pretty print the qpGraph dot file
             pprint_qpgraph(dot_file, pdf_file)
 
         # output some summary stats
@@ -458,13 +459,13 @@ class PermuteQpgraph:
         return True
 
 
-def permute_qpgraph(par_file, basename, outgroup, nodes):
+def permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup):
     """
     Find the best fitting graph for a given set of nodes, by permuting all possible graphs.
     """
 
     # instantiate the class
-    qp = PermuteQpgraph(par_file, basename, outgroup, nodes)
+    qp = PermuteQpgraph(par_file, dot_path, pdf_path, nodes, outgroup)
 
     # get all the permutations of possible node orders
     all_nodes_perms = list(itertools.permutations(nodes, len(nodes)))
@@ -495,7 +496,7 @@ def permute_qpgraph(par_file, basename, outgroup, nodes):
 
             break
 
-    print >> sys.stderr, "FINISHED: Found %s unique solution(s) from a total of %s tested graphs!" % \
+    print >> sys.stderr, "FINISHED: Found %s unique solution(s) from a total of %s unique graphs!" % \
                          (len(qp.solutions), len(qp.tested_graphs))
 
 
@@ -506,15 +507,20 @@ class NodeUnplaceable(Exception):
     pass
 
 
-# par_file = 'qpgraph/qpgraph-pops.merged_v2_hq2_nomex_ctvt.treemix.m0.par'
-# basename = 'qpgraph/permute/'
-# outgroup = 'OUT'
+par_file = 'qpgraph/qpgraph-pops.merged_v2_hq2_nomex_ctvt.treemix.m0.par'
+dot_path = 'permute/graphs/real'
+pdf_path = 'permute/pdf/real'
+
+nodes = ['WAM', 'DEU', 'DVN', 'DPC', 'DMA']
+outgroup = 'OUT'
+
 # nodes = ['WAM', 'DEU', 'DVN', 'DPC', 'DMA']
+# outgroup = 'OUT'
 
+# par_file = "permute/simulated.par"
+# dot_path = 'permute/graphs/sim'
+# pdf_path = 'permute/pdf/sim'
+# nodes = ['A', 'B', 'C', 'X']
+# outgroup = 'Out'
 
-par_file = "permute/simulated.par"
-basename = 'permute/graphs/'
-outgroup = 'Out'
-nodes = ['A', 'B', 'C', 'X']
-
-permute_qpgraph(par_file, basename, outgroup, nodes)
+permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup)
