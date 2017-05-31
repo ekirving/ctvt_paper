@@ -33,8 +33,8 @@ PROBLEM_NODES = []
 PAR_FILE = 'permute/merged_v2_hq2_nomex_ctvt.par'
 OUTPUT_FOLDER = 'permute/graphs3/'
 ROOT = 'R'
-OUT = 'WAM'
-NODES = ['DEU', 'DVN', 'DPC', 'DMA']
+OUT = 'OUT'
+NODES = ['WAM', 'DEU', 'DVN', 'DPC', 'DMA']
 
 # TODO 1...
 # 1. disable admixing
@@ -277,12 +277,8 @@ def run_qpgraph(args):
                                                                                     name=graph_name)
 
     if num_outliers <= MAX_OUTLIER_THRESHOLD and not cached:
-        # generate the PDF
-        pdf = run_cmd(["dot", "-Tpdf", dot_file], verbose=False)
-
-        # save the pdf file
-        with open(pdf_file, 'w') as fout:
-            fout.write(pdf)
+        # only print PDFs for graphs that pass the threshold
+        pprint_qpgraph(dot_file, pdf_file)
 
     # output some summary stats
     print "{padding}{tree} nodes={nodes}\t admix={admix}\t outliers={out}\t worst={worst}\t {name}".format(
