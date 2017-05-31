@@ -459,9 +459,6 @@ class PermuteQpgraph:
         # recursively add all the other nodes
         self.recurse_tree(root_tree, self.nodes[1], self.nodes[2:])
 
-        # success
-        return True
-
 
 def permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup):
     """
@@ -474,16 +471,14 @@ def permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup):
     # get all the permutations of possible node orders
     all_nodes_perms = list(itertools.permutations(nodes, len(nodes)))
 
-    successful = False
-
     print >> sys.stderr, "INFO: There are %s possible starting orders for the given nodes." % len(all_nodes_perms)
 
     # keep looping until we find a solution
-    while not successful or EXHAUSTIVE_SEARCH:
+    while not qp.solutions or EXHAUSTIVE_SEARCH:
 
         try:
             # perform the analysis
-            successful = qp.find_graph()
+            qp.find_graph()
 
         except NodeUnplaceable as error:
             # log the error
@@ -503,6 +498,8 @@ def permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup):
     print >> sys.stderr, "FINISHED: Found %s unique solution(s) from a total of %s unique graphs!" % \
                          (len(qp.solutions), len(qp.tested_graphs))
 
+    return len(qp.solutions) > 0
+
 
 class NodeUnplaceable(Exception):
     """
@@ -511,20 +508,22 @@ class NodeUnplaceable(Exception):
     pass
 
 
-par_file = 'qpgraph/qpgraph-pops.merged_v2_hq2_nomex_ctvt.treemix.m0.par'
-dot_path = 'permute/graphs/real'
-pdf_path = 'permute/pdf/real'
+if __name__ == "__main__":
 
-nodes = ['WAM', 'DEU', 'DVN', 'DPC', 'DMA']
-outgroup = 'OUT'
+    # # simulated test data...
+    # par_file = "permute/simulated.par"
+    # dot_path = 'permute/graphs/sim'
+    # pdf_path = 'permute/pdf/sim'
+    # nodes = ['A', 'B', 'C', 'X']
+    # outgroup = 'Out'
 
-# nodes = ['WAM', 'DEU', 'DVN', 'DPC', 'DMA']
-# outgroup = 'OUT'
+    # # test scenarios...
+    # par_file = 'qpgraph/qpgraph-pops.merged_v2_hq2_nomex_ctvt.permute.par'
+    # dot_path = 'permute/graphs/qpgraph-pops.merged_v2_hq2_nomex_ctvt.permute'
+    # pdf_path = 'permute/pdf/qpgraph-pops.merged_v2_hq2_nomex_ctvt.permute'
+    # nodes = ['COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
+    # outgroup = 'COY'
+    #
+    # permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup)
 
-# par_file = "permute/simulated.par"
-# dot_path = 'permute/graphs/sim'
-# pdf_path = 'permute/pdf/sim'
-# nodes = ['A', 'B', 'C', 'X']
-# outgroup = 'Out'
-
-permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup)
+    pass

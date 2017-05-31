@@ -835,12 +835,23 @@ class QPGraphPermute(PrioritisedTask):
         dot_path = 'permute/graphs/{0}.{1}.permute'.format(self.group, self.dataset)
         pdf_path = 'permute/pdf/{0}.{1}.permute'.format(self.group, self.dataset)
 
-        # run qpGraph
-        log = permute_qpgraph(par_file, dot_path, pdf_path, populations, outgroup)
+        log_file = self.output()[1].path
 
-        # save the log file
-        with self.output()[1].open('w') as logfile:
-            logfile.write(log)
+        # buffer all output to the log file
+        fhandle = open(log_file, 'w')
+        sys.stdout = sys.stderr = fhandle
+
+        # run qpGraph
+        success = permute_qpgraph(par_file, dot_path, pdf_path, populations, outgroup)
+
+        # restore stdout and stderr
+        sys.stdout = sys.__stdout__
+        sys.stderr = sys.__stderr__
+
+        if not success:
+            os.remove(par_file)
+            raise Exception("Error: The graph cannot be resolved.")
+
 
 
 class QPGraphPlot(PrioritisedTask):
@@ -1236,7 +1247,8 @@ class CTVTCustomPipelineV3(luigi.WrapperTask):
         #     yield QPGraphPlot('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', m)
         #     yield TreemixPlotM('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt', m)
 
-        yield QPGraphPermute('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt')
+        # yield QPGraphPermute('qpgraph-pops', 'merged_v2_hq2_nomex_ctvt')
+        yield QPGraphPermute('simple-pops', 'merged_v2_hq2_nomex_ctvt')
 
 if __name__ == '__main__':
     luigi.run()
