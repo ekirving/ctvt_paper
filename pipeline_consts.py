@@ -69,7 +69,8 @@ GROUPS = {
     # qpGraph analysis
     'merged_v2_hq2_nomex_ctvt':    {'qpgraph-pops':  QPGRAPH_POPS,  'qpgraph-simple':  QPSIMPLE_POPS,
                                     'qpgraph-pops2': QPGRAPH_POPS2, 'qpgraph-simple2': QPSIMPLE_POPS2,
-                                    'qpgraph-pops3': QPGRAPH_POPS3, 'qpgraph-simple3': QPSIMPLE_POPS3},
+                                    'qpgraph-pops3': QPGRAPH_POPS3, 'qpgraph-simple3': QPSIMPLE_POPS3,
+                                    'qpgraph-pops4': QPGRAPH_POPS4, 'qpgraph-simple4': QPSIMPLE_POPS4},
 
 
     'merged_SNParray':           {'all-pops': SNP_ARRAY_POPS},
