@@ -799,13 +799,14 @@ class QPGraphPermute(PrioritisedTask):
     """
     group = luigi.Parameter()
     dataset = luigi.Parameter()
+    exhaustive = luigi.BoolParameter(default=False)
 
     def requires(self):
         return ConvertfBedToEigenstrat(self.group, self.dataset, GROUP_BY_POPS)
 
     def output(self):
         return [luigi.LocalTarget("qpgraph/{0}.{1}.permute.{2}".format(self.group, self.dataset, ext))
-                for ext in ['par', 'log']]
+                for ext in ['par', 'log', 'done']]
 
     def run(self):
 
@@ -844,7 +845,12 @@ class QPGraphPermute(PrioritisedTask):
         log_file = self.output()[1].path
 
         # run qpGraph
-        permute_qpgraph(par_file, log_file, dot_path, pdf_path, populations, outgroup)
+        permute_qpgraph(par_file, log_file, dot_path, pdf_path, populations, outgroup, self.exhaustive)
+
+        # mark the job as complete
+        done_file = self.output()[2].path
+        with open(done_file, 'w') as done:
+            done.write("FINISHED")
 
 
 class QPGraphPlot(PrioritisedTask):
@@ -1246,7 +1252,7 @@ class CTVTqpGraphPipeline(luigi.WrapperTask):
                 for m in range(0, TREEMIX_MAX_M + 1):
                     yield TreemixPlotM(group, dataset, GROUP_BY_POPS, m)
 
-                yield QPGraphPermute(group, dataset)
+                yield QPGraphPermute(group, dataset, exhaustive=True)
 
 if __name__ == '__main__':
     luigi.run()
