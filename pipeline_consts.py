@@ -30,6 +30,10 @@ QPSIMPLE_POPS2 = ['OUT', 'WAM', 'DEU', 'DVN', 'DPC', 'DMA']
 QPGRAPH_POPS3 = ['WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
 QPSIMPLE_POPS3 = ['WAM', 'DEU', 'DVN', 'DPC', 'DMA']
 
+# now add the TAI
+QPGRAPH_POPS4 = ['WAM', 'WEU', 'TAI', 'DEU', 'DVN', 'DPC', 'DMA']
+QPSIMPLE_POPS4 = ['WAM', 'TAI', 'DEU', 'DVN', 'DPC', 'DMA']
+
 # groups of populations for running analyses
 GROUPS = {
 
@@ -97,6 +101,12 @@ OUTGROUP_POP['qpgraph-pops3'] = 'WAM'
 OUTGROUP_POP['qpgraph-simple3'] = 'WAM'
 OUTGROUP_SAMPLE['qpgraph-pops3'] = 'W_Yellow1'
 OUTGROUP_SAMPLE['qpgraph-simple3'] = 'W_Yellow1'
+
+OUTGROUP_POP['qpgraph-pops4'] = 'WAM'
+OUTGROUP_POP['qpgraph-simple4'] = 'WAM'
+OUTGROUP_SAMPLE['qpgraph-pops4'] = 'W_Yellow1'
+OUTGROUP_SAMPLE['qpgraph-simple4'] = 'W_Yellow1'
+
 
 NO_OUTGROUPS = ['all-no-out', 'dog-ctvt']
 

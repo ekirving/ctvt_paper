@@ -1238,7 +1238,8 @@ class CTVTqpGraphPipeline(luigi.WrapperTask):
 
             for group in ['qpgraph-pops',  'qpgraph-simple',
                           'qpgraph-pops2', 'qpgraph-simple2',
-                          'qpgraph-pops3', 'qpgraph-simple3']:
+                          'qpgraph-pops3', 'qpgraph-simple3',
+                          'qpgraph-pops4', 'qpgraph-simple4']:
 
                 yield AdmixtureCV(group, dataset)
 
