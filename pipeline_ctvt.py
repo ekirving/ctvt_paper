@@ -395,7 +395,7 @@ class AdmixtureK(PrioritisedTask):
         os.chdir('./admix')
 
         # admixture is usually run in a big batch, so don't thrash the CPU by using too many cores
-        cores = max(1, MAX_CPU_CORES//10)
+        cores = max(1, MAX_CPU_CORES//5)
 
         log = run_cmd(["admixture", 
                        "-j{0}".format(cores),                  # use multi-threading
