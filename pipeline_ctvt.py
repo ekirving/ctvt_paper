@@ -1237,7 +1237,8 @@ class CTVTqpGraphPipeline(luigi.WrapperTask):
         for dataset in ['merged_v2_hq2_nomex_ctvt']:
 
             for group in ['qpgraph-pops',  'qpgraph-simple',
-                          'qpgraph-pops2', 'qpgraph-simple2']:
+                          'qpgraph-pops2', 'qpgraph-simple2',
+                          'qpgraph-pops3', 'qpgraph-simple3']:
 
                 yield AdmixtureCV(group, dataset)
 
