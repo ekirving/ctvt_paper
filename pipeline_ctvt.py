@@ -394,8 +394,11 @@ class AdmixtureK(PrioritisedTask):
         # admixture only outputs to the current directory
         os.chdir('./admix')
 
+        # admixture is usually run in a big batch, so don't thrash the CPU by using too many cores
+        cores = max(1, MAX_CPU_CORES//10)
+
         log = run_cmd(["admixture", 
-                       "-j{0}".format(MAX_CPU_CORES),          # use multi-threading
+                       "-j{0}".format(cores),                  # use multi-threading
                        "-B{}".format(ADMIXTURE_BOOTSTRAP),     # the number of bootstrap replicates to run
                        "--cv=10",                              # generate cross-validation estimates
                        "../{0}".format(self.input()[0].path),  # using the pruned data file
