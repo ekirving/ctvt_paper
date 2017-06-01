@@ -840,20 +840,8 @@ class QPGraphPermute(PrioritisedTask):
 
         log_file = self.output()[1].path
 
-        with open(log_file, 'w') as fout:
-            # buffer all output to the log file
-            sys.stdout = fout
-
-            # run qpGraph
-            success = permute_qpgraph(par_file, dot_path, pdf_path, populations, outgroup)
-
-            # restore stdout
-            sys.stdout.flush()
-            sys.stdout = sys.__stdout__
-
-        if not success:
-            os.remove(par_file)
-            raise Exception("Error: The graph cannot be resolved.")
+        # run qpGraph
+        permute_qpgraph(par_file, log_file, dot_path, pdf_path, populations, outgroup)
 
 
 class QPGraphPlot(PrioritisedTask):

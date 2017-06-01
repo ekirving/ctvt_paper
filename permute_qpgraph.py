@@ -18,19 +18,6 @@ from pipeline_utils import *
 from cStringIO import StringIO
 from Bio import Phylo
 
-# shoud we use multi-threading to speed up the graph search
-MULTITHREADED_SEARCH = True
-
-# how many outliers should we allow before pruning a branch in graph space
-MAX_OUTLIER_THRESHOLD = 0
-
-# print PDFs for graphs with (N - offset) nodes
-REMAINING_PRINT_OFFSET = 0
-
-# should we try all possible graphs, or should we stop when we find something reasonable
-EXHAUSTIVE_SEARCH = False
-# EXHAUSTIVE_SEARCH = True
-
 # TODO improve parsimony...
 # on first pass, only allow non-admix insertion
 # if can't be added, then send to back of list
@@ -40,13 +27,29 @@ EXHAUSTIVE_SEARCH = False
 
 class PermuteQpgraph:
 
-    def __init__(self, par_file, dot_path, pdf_path, nodes, outgroup):
+    # shoud we use multi-threading to speed up the graph search
+    MULTITHREADED_SEARCH = False
+
+    # how many outliers should we allow before pruning a branch in graph space
+    MAX_OUTLIER_THRESHOLD = 0
+
+    # print PDFs for graphs with (N - offset) nodes
+    REMAINING_PRINT_OFFSET = 0
+
+    def __init__(self, par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive, verbose):
         """
         Initialise the object attributes 
         """
         self.par_file = par_file
         self.dot_path = dot_path
         self.pdf_path = pdf_path
+        self.verbose = verbose
+
+        # should we try all possible graphs, or should we stop when we find something reasonable
+        self.exhaustive_search = exhaustive
+
+        # open the file for writing
+        self.log_file = open(log_file, 'w')
 
         if outgroup in nodes:
             nodes.remove(outgroup)
@@ -58,6 +61,19 @@ class PermuteQpgraph:
         self.problem_nodes = []
         self.tested_graphs = set()
         self.solutions = set()
+
+    def log(self, message):
+        """
+        Handle message logging to file/stdout. 
+        """
+        # send message to the log file
+        print >> self.log_file, message
+        self.log_file.flush()
+
+        if self.verbose:
+            # echo to stdout
+            print message
+            sys.stdout.flush()
 
     def recurse_tree(self, root_tree, new_tag, remaining, depth=0):
         """
@@ -126,8 +142,8 @@ class PermuteQpgraph:
         if not node_placed:
 
             # we could not place the node via either method :(
-            if new_tag not in self.problem_nodes and remaining and not EXHAUSTIVE_SEARCH:
-                print "WARNING: Unable to place node '%s' at this time." % new_tag
+            if new_tag not in self.problem_nodes and remaining and not self.exhaustive_search:
+                self.log("WARNING: Unable to place node '%s' at this time." % new_tag)
 
                 self.problem_nodes.append(new_tag)
 
@@ -144,7 +160,7 @@ class PermuteQpgraph:
         """
         Run qpGraph on a list of trees
         """
-        if MULTITHREADED_SEARCH:
+        if self.MULTITHREADED_SEARCH:
             # we need to buffer the results to use multi-threading
             pool = mp.ProcessingPool(MAX_CPU_CORES)
             results = pool.map(self.run_qpgraph, itertools.izip(new_trees, itertools.repeat(depth)))
@@ -170,13 +186,13 @@ class PermuteQpgraph:
             self.tested_graphs.add(graph_name)
 
             # did our new trees pass the threshold
-            if len(outliers) <= MAX_OUTLIER_THRESHOLD:
+            if len(outliers) <= self.MAX_OUTLIER_THRESHOLD:
 
                 # recursively add any remaining nodes
                 if remaining:
                     self.recurse_tree(new_tree, remaining[0], remaining[1:], depth + 1)
                 else:
-                    print "SUCCESS: Placed all nodes on a graph without outliers!"
+                    self.log("SUCCESS: Placed all nodes on a graph without outliers!")
 
                     # add this graph to the list of solutions
                     self.solutions.add(graph_name)
@@ -279,7 +295,7 @@ class PermuteQpgraph:
         num_outliers = len(outliers)
 
         # only print PDFs for graphs that pass the threshold
-        if num_outliers <= MAX_OUTLIER_THRESHOLD and num_nodes > (len(self.nodes) - REMAINING_PRINT_OFFSET):
+        if num_outliers <= self.MAX_OUTLIER_THRESHOLD and num_nodes > (len(self.nodes) - self.REMAINING_PRINT_OFFSET):
 
             # embed some useful metadata info in the PDF name
             pdf_file = self.pdf_path + '-n{nodes}-o{out}-a{admix}-{name}.pdf'.format(nodes=num_nodes,
@@ -291,9 +307,9 @@ class PermuteQpgraph:
             pprint_qpgraph(dot_file, pdf_file)
 
         # output some summary stats
-        print "{padding}{tree} \tnodes={nodes}\t admix={admix}\t outliers={out}\t worst={worst}\t {name}".format(
+        self.log("{padding}{tree} \tnodes={nodes}\t admix={admix}\t outliers={out}\t worst={worst}\t {name}".format(
             padding="  "*depth, name=graph_name, tree=newick.ljust(80), nodes=num_nodes, admix=num_admix,
-            out=len(outliers), worst=worst_fstat[-1])
+            out=len(outliers), worst=worst_fstat[-1]))
 
         return new_tree, outliers, graph_name
 
@@ -447,7 +463,7 @@ class PermuteQpgraph:
         Build and test all possible trees and graphs
         """
 
-        print 'INFO: Starting list %s' % self.nodes
+        self.log('INFO: Starting list %s' % self.nodes)
 
         # setup a simple 2-node tree
         root_node = ElemTree.Element(self.root_node)
@@ -460,29 +476,30 @@ class PermuteQpgraph:
         self.recurse_tree(root_tree, self.nodes[1], self.nodes[2:])
 
 
-def permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup):
+def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=False, verbose=False):
     """
     Find the best fitting graph for a given set of nodes, by permuting all possible graphs.
     """
 
     # instantiate the class
-    qp = PermuteQpgraph(par_file, dot_path, pdf_path, nodes, outgroup)
+    qp = PermuteQpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive, verbose)
 
     # get all the permutations of possible node orders
     all_nodes_perms = list(itertools.permutations(nodes, len(nodes)))
 
-    print "INFO: There are %s possible starting orders for the given nodes." % len(all_nodes_perms)
+    qp.log("INFO: There are %s possible starting orders for the given nodes." % len(all_nodes_perms))
+    qp.log("INFO: Performing %s search." % ("an exhaustive" if qp.exhaustive_search else "a heuristic"))
 
-    # keep looping until we find a solution
-    while not qp.solutions or EXHAUSTIVE_SEARCH:
+    # keep looping until we find a solution, or until we've exhausted all possible starting orders
+    while not qp.solutions or qp.exhaustive_search:
 
         try:
-            # perform the analysis
+            # find the best fitting graph for this starting order
             qp.find_graph()
 
         except NodeUnplaceable as error:
             # log the error
-            print error
+            qp.log(error)
 
         try:
             # try starting with a different node order
@@ -491,12 +508,14 @@ def permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup):
         except IndexError:
             # we've run out of node orders to try
             if not qp.solutions:
-                print "ERROR: Cannot resolve the graph from any permutation of the given nodes."
+                qp.log("ERROR: Cannot resolve the graph from any permutation of the given nodes.")
 
             break
 
-    print "FINISHED: Found %s unique solution(s) from a total of %s unique graphs!" % \
-          (len(qp.solutions), len(qp.tested_graphs))
+    qp.log("FINISHED: Found %s unique solution(s) from a total of %s unique graphs!" % \
+          (len(qp.solutions), len(qp.tested_graphs)))
+
+    qp.log_file.close()
 
     return len(qp.solutions) > 0
 
@@ -517,21 +536,23 @@ if __name__ == "__main__":
     # nodes = ['A', 'B', 'C', 'X']
     # outgroup = 'Out'
 
-    # # test scenarios...
+    # test scenarios...
+
     # group = 'qpgraph-pops'
     # dataset = 'merged_v2_hq2_nomex_ctvt'
     # nodes = QPGRAPH_POPS
-    # outgroup = 'COY'
+    # outgroup = OUTGROUP_POP[group]
 
     group = 'qpgraph-simple'
     dataset = 'merged_v2_hq2_nomex_ctvt'
     nodes = QPSIMPLE_POPS
-    outgroup = 'WAM'
+    outgroup = OUTGROUP_POP[group]
 
     par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
+    log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
     dot_path = 'qpgraph/{0}.{1}.permute'.format(group, dataset)
     pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
 
-    permute_qpgraph(par_file, dot_path, pdf_path, nodes, outgroup)
+    permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, verbose=True)
 
     pass
