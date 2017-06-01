@@ -22,8 +22,10 @@ SNP_ARRAY_POPS = ['BAS', 'BAS2', 'DNA', 'BEA', 'BOX', 'DAE', 'DEU', 'DGS', 'DLB'
                   'TAI', 'OUT']
 
 QPGRAPH_POPS = ['COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
-
 QPSIMPLE_POPS = ['COY', 'WAM', 'DEU', 'DVN', 'DPC', 'DMA']
+
+QPGRAPH_POPS2 = ['OUT', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
+QPSIMPLE_POPS2 = ['OUT', 'WAM', 'DEU', 'DVN', 'DPC', 'DMA']
 
 # groups of populations for running analyses
 GROUPS = {
@@ -59,7 +61,8 @@ GROUPS = {
 
     # qpGraph analysis
     # 'merged_v2_hq_nomex':     {'qpgraph-pops': QPGRAPH_POPS},
-    'merged_v2_hq2_nomex_ctvt':    {'qpgraph-pops': QPGRAPH_POPS, 'qpgraph-simple': QPSIMPLE_POPS},
+    'merged_v2_hq2_nomex_ctvt':    {'qpgraph-pops': QPGRAPH_POPS,   'qpgraph-simple': QPSIMPLE_POPS,
+                                    'qpgraph-pops2': QPGRAPH_POPS2, 'qpgraph-simple2': QPSIMPLE_POPS2},
     # 'merged_v2_TV_hq_nomex':  {'qpgraph-pops': QPGRAPH_POPS},
     # 'merged_v2_TV_hq2_nomex': {'qpgraph-pops': QPGRAPH_POPS},
 

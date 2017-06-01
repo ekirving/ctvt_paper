@@ -541,17 +541,18 @@ if __name__ == "__main__":
     # group = 'qpgraph-pops'
     # dataset = 'merged_v2_hq2_nomex_ctvt'
     # nodes = QPGRAPH_POPS
-    # outgroup = OUTGROUP_POP[group]
+    # outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
 
     group = 'qpgraph-simple'
     dataset = 'merged_v2_hq2_nomex_ctvt'
     nodes = QPSIMPLE_POPS
-    outgroup = OUTGROUP_POP[group]
+    outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
 
     par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
     log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
     dot_path = 'qpgraph/{0}.{1}.permute'.format(group, dataset)
     pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
+
 
     permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, verbose=True)
 
