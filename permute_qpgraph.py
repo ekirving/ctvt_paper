@@ -28,7 +28,7 @@ from Bio import Phylo
 class PermuteQpgraph:
 
     # shoud we use multi-threading to speed up the graph search
-    MULTITHREADED_SEARCH = False
+    MULTITHREADED_SEARCH = True
 
     # how many outliers should we allow before pruning a branch in graph space
     MAX_OUTLIER_THRESHOLD = 0
