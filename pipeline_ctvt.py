@@ -837,7 +837,7 @@ class QPGraphPermute(PrioritisedTask):
         with open(par_file, 'w') as par:
             par.write("\n".join(config))
 
-        dot_path = 'qpgraph/{0}.{1}.permute'.format(self.group, self.dataset)
+        dot_path = 'qpgraph/{0}.permute'.format(self.dataset)
         pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(self.group, self.dataset)
 
         log_file = self.output()[1].path
