@@ -515,8 +515,6 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
     qp.log("FINISHED: Found %s unique solution(s) from a total of %s unique graphs!" % \
           (len(qp.solutions), len(qp.tested_graphs)))
 
-    qp.log_file.close()
-
     return len(qp.solutions) > 0
 
 
