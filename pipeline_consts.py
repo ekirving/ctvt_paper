@@ -72,6 +72,8 @@ GROUPS = {
                                     'qpgraph-pops3': QPGRAPH_POPS3, 'qpgraph-simple3': QPSIMPLE_POPS3,
                                     'qpgraph-pops4': QPGRAPH_POPS4, 'qpgraph-simple4': QPSIMPLE_POPS4},
 
+    'merged_v2_laurent':    {'qpgraph-pops': QPGRAPH_POPS},
+    'merged_v2_TV_laurent': {'qpgraph-pops': QPGRAPH_POPS},
 
     'merged_SNParray':           {'all-pops': SNP_ARRAY_POPS},
     'merged_SNParray_v1':        {'all-pops': SNP_ARRAY_POPS},

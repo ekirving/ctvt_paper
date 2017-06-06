@@ -1254,5 +1254,24 @@ class CTVTqpGraphPipeline(luigi.WrapperTask):
 
                 yield QPGraphPermute(group, dataset, exhaustive=True)
 
+
+class CTVTqpGraph2Pipeline(luigi.WrapperTask):
+    """
+    Run these specific qpGraph tasks from the CTVT pipeline
+    """
+
+    def requires(self):
+
+        # new analysis group for Laurent
+        for dataset in ['merged_v2_laurent', 'merged_v2_TV_laurent']:
+
+            for group in ['qpgraph-pops']:
+
+                for m in range(0, TREEMIX_MAX_M + 1):
+                    yield TreemixPlotM(group, dataset, GROUP_BY_POPS, m)
+
+                yield QPGraphPermute(group, dataset, exhaustive=True)
+
+
 if __name__ == '__main__':
     luigi.run()
