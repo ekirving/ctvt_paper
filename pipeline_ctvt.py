@@ -810,15 +810,23 @@ class QPGraphPermute(PrioritisedTask):
 
     def run(self):
 
+        # NB admixtools requires a non-standard fam file format
+        fam = run_cmd(["awk '$6=$1' bed/{0}.{1}.geno.fam".format(self.group, self.dataset)], shell=True)
+
+        # save the fam file
+        famfile = "bed/{0}.{1}.qpgraph.fam".format(self.group, self.dataset)
+        with open(famfile, 'w') as fout:
+            fout.write(fam)
+
         # get the populations and the outgroup
         populations = GROUPS[self.dataset][self.group]
         outgroup = OUTGROUP_POP[self.group] if self.group in OUTGROUP_POP else OUTGROUP_POP[self.dataset]
 
         # compose the config settings for qpGraph
         config = [
-            "genotypename:  {}".format(self.input()[1].path),
-            "snpname:       {}".format(self.input()[2].path),
-            "indivname:     {}".format(self.input()[3].path),
+            "genotypename:  bed/{0}.{1}.geno.bed".format(self.group, self.dataset),
+            "snpname:       bed/{0}.{1}.geno.bim".format(self.group, self.dataset),
+            "indivname:     bed/{0}.{1}.qpgraph.fam".format(self.group, self.dataset),
             "outpop:        {}".format(outgroup),
             # TODO review these defaults
             "blgsize:       0.05",
