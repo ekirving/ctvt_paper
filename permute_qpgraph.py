@@ -562,6 +562,6 @@ if __name__ == "__main__":
     pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
 
 
-    permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, verbose=True)
+    permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
 
     pass
