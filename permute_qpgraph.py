@@ -543,9 +543,17 @@ if __name__ == "__main__":
     # nodes = QPGRAPH_POPS
     # outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
 
-    group = 'qpgraph-simple'
-    dataset = 'merged_v2_hq2_nomex_ctvt'
-    nodes = QPSIMPLE_POPS
+    # group = 'qpgraph-simple'
+    # dataset = 'merged_v2_hq2_nomex_ctvt'
+
+    if len(sys.argv) != 3:
+        print "Error: required params"
+        quit()
+
+    group = sys.argv[1]
+    dataset = sys.argv[2]
+
+    nodes = GROUPS[dataset][group]
     outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
 
     par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
