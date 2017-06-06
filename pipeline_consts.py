@@ -21,18 +21,9 @@ SNP_ARRAY_POPS = ['BAS', 'BAS2', 'DNA', 'BEA', 'BOX', 'DAE', 'DEU', 'DGS', 'DLB'
                   'VDVCB', 'VDVHG', 'VDVLS', 'VDVLC', 'DPC', 'CTVT', 'DIN', 'COY', 'WAM', 'WAS', 'WEU', 'WME',
                   'TAI', 'OUT']
 
-QPGRAPH_POPS = ['COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
-QPSIMPLE_POPS = ['COY', 'WAM', 'DEU', 'DVN', 'DPC', 'DMA']
-
-QPGRAPH_POPS2 = ['OUT', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
-QPSIMPLE_POPS2 = ['OUT', 'WAM', 'DEU', 'DVN', 'DPC', 'DMA']
-
-QPGRAPH_POPS3 = ['WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
-QPSIMPLE_POPS3 = ['WAM', 'DEU', 'DVN', 'DPC', 'DMA']
-
-# now add the TAI
-QPGRAPH_POPS4 = ['WAM', 'WEU', 'TAI', 'DEU', 'DVN', 'DPC', 'DMA']
-QPSIMPLE_POPS4 = ['WAM', 'TAI', 'DEU', 'DVN', 'DPC', 'DMA']
+GRAPH_POPS1 = ['COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
+GRAPH_POPS2 = ['OUT', 'COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
+GRAPH_POPS3 = ['OUT', 'COY', 'WAM', 'WEU', 'TAI', 'DEU', 'DVN', 'DPC', 'DMA']
 
 # groups of populations for running analyses
 GROUPS = {
@@ -67,13 +58,13 @@ GROUPS = {
     'merged_v2_TV_hq':  {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
 
     # qpGraph analysis
-    'merged_v2_hq2_nomex_ctvt':    {'qpgraph-pops':  QPGRAPH_POPS,  'qpgraph-simple':  QPSIMPLE_POPS,
-                                    'qpgraph-pops2': QPGRAPH_POPS2, 'qpgraph-simple2': QPSIMPLE_POPS2,
-                                    'qpgraph-pops3': QPGRAPH_POPS3, 'qpgraph-simple3': QPSIMPLE_POPS3,
-                                    'qpgraph-pops4': QPGRAPH_POPS4, 'qpgraph-simple4': QPSIMPLE_POPS4},
+    'merged_v2_laurent':    {'graph-pops1': GRAPH_POPS1,
+                             'graph-pops2': GRAPH_POPS2,
+                             'graph-pops3': GRAPH_POPS3},
 
-    'merged_v2_laurent':    {'qpgraph-pops': QPGRAPH_POPS},
-    'merged_v2_TV_laurent': {'qpgraph-pops': QPGRAPH_POPS},
+    'merged_v2_TV_laurent': {'graph-pops1': GRAPH_POPS1,
+                             'graph-pops2': GRAPH_POPS2,
+                             'graph-pops3': GRAPH_POPS3},
 
     'merged_SNParray':           {'all-pops': SNP_ARRAY_POPS},
     'merged_SNParray_v1':        {'all-pops': SNP_ARRAY_POPS},
@@ -95,21 +86,8 @@ OUTGROUP_POP = {group: 'OUT' for group in GROUPS}
 OUTGROUP_SAMPLE = {group: 'AndeanFox' for group in GROUPS}
 
 # sepcial cases for qpGraph
-OUTGROUP_POP['qpgraph-pops'] = 'COY'
-OUTGROUP_POP['qpgraph-simple'] = 'COY'
+OUTGROUP_POP['qpgraph-pops1'] = 'COY'
 OUTGROUP_SAMPLE['qpgraph-pops'] = 'C_Cal'
-OUTGROUP_SAMPLE['qpgraph-simple'] = 'C_Cal'
-
-OUTGROUP_POP['qpgraph-pops3'] = 'WAM'
-OUTGROUP_POP['qpgraph-simple3'] = 'WAM'
-OUTGROUP_SAMPLE['qpgraph-pops3'] = 'W_Yellow1'
-OUTGROUP_SAMPLE['qpgraph-simple3'] = 'W_Yellow1'
-
-OUTGROUP_POP['qpgraph-pops4'] = 'WAM'
-OUTGROUP_POP['qpgraph-simple4'] = 'WAM'
-OUTGROUP_SAMPLE['qpgraph-pops4'] = 'W_Yellow1'
-OUTGROUP_SAMPLE['qpgraph-simple4'] = 'W_Yellow1'
-
 
 NO_OUTGROUPS = ['all-no-out', 'dog-ctvt']
 

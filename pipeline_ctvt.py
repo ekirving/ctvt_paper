@@ -819,8 +819,7 @@ class QPGraphPermute(PrioritisedTask):
             "genotypename:  {}".format(self.input()[1].path),
             "snpname:       {}".format(self.input()[2].path),
             "indivname:     {}".format(self.input()[3].path),
-            "outpop:        NULL",
-            # TODO review these defaults
+            "outpop:        NULL",  # NB. if the outgroup is inbred then all f2 stats are fucked up
             "blgsize:       0.05",
             "lsqmode:       YES",
             "diag:          .0001",
@@ -1218,19 +1217,6 @@ class CTVTCustomPipelineV2(luigi.WrapperTask):
         for blgsize in [0.5, 1, 2]:
             yield QPF4ratio('all-pops', 'merged_SNParray_v1', a, b, c, x, blgsize)
 
-        # qpGraph
-        for dataset in ['merged_v2_hq_nomex',
-                        'merged_v2_hq2_nomex',
-                        'merged_v2_TV_hq_nomex',
-                        'merged_v2_TV_hq2_nomex']:
-
-            for group in ['qpgraph-pops',
-                          'qpgraph-simple']:
-
-                for m in range(0, 2 + 1):
-                    yield TreemixPlotM(group, dataset, GROUP_BY_POPS, m)
-                    yield QPGraphPlot(group, dataset, m)
-
 
 class CTVTqpGraphPipeline(luigi.WrapperTask):
     """
@@ -1239,32 +1225,13 @@ class CTVTqpGraphPipeline(luigi.WrapperTask):
 
     def requires(self):
 
-        for dataset in ['merged_v2_hq2_nomex_ctvt']:
-
-            for group in ['qpgraph-pops',  'qpgraph-simple',
-                          'qpgraph-pops2', 'qpgraph-simple2',
-                          'qpgraph-pops3', 'qpgraph-simple3',
-                          'qpgraph-pops4', 'qpgraph-simple4']:
-
-                yield AdmixtureCV(group, dataset)
-
-                for m in range(0, TREEMIX_MAX_M + 1):
-                    yield TreemixPlotM(group, dataset, GROUP_BY_POPS, m)
-
-                yield QPGraphPermute(group, dataset, exhaustive=True)
-
-
-class CTVTqpGraph2Pipeline(luigi.WrapperTask):
-    """
-    Run these specific qpGraph tasks from the CTVT pipeline
-    """
-
-    def requires(self):
-
         # new analysis group for Laurent
-        for dataset in ['merged_v2_laurent', 'merged_v2_TV_laurent']:
+        for dataset in ['merged_v2_laurent',
+                        'merged_v2_TV_laurent']:
 
-            for group in ['qpgraph-pops']:
+            for group in ['graph-pops1',
+                          'graph-pops2',
+                          'graph-pops3']:
 
                 for m in range(0, TREEMIX_MAX_M + 1):
                     yield TreemixPlotM(group, dataset, GROUP_BY_POPS, m)
