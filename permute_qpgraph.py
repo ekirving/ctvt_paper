@@ -49,7 +49,7 @@ class PermuteQpgraph:
         self.exhaustive_search = exhaustive
 
         # open the file for writing
-        self.log_file = open(log_file, 'w')
+        self.log_handle = open(log_file, 'w')
 
         if outgroup in nodes:
             nodes.remove(outgroup)
@@ -67,8 +67,8 @@ class PermuteQpgraph:
         Handle message logging to file/stdout. 
         """
         # send message to the log file
-        print >> self.log_file, message
-        self.log_file.flush()
+        print >> self.log_handle, message
+        self.log_handle.flush()
 
         if self.verbose:
             # echo to stdout
