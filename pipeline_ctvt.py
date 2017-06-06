@@ -819,7 +819,7 @@ class QPGraphPermute(PrioritisedTask):
             "genotypename:  {}".format(self.input()[1].path),
             "snpname:       {}".format(self.input()[2].path),
             "indivname:     {}".format(self.input()[3].path),
-            "outpop:        {}".format(outgroup),
+            "outpop:        NULL",
             # TODO review these defaults
             "blgsize:       0.05",
             "lsqmode:       YES",
