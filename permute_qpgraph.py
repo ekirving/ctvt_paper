@@ -49,7 +49,7 @@ class PermuteQpgraph:
         self.exhaustive_search = exhaustive
 
         # open the file for writing
-        self.log_handle = open(log_file, 'w')
+        self.log_handle = open(log_file, 'a')
 
         if outgroup in nodes:
             nodes.remove(outgroup)
@@ -481,6 +481,10 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
     Find the best fitting graph for a given set of nodes, by permuting all possible graphs.
     """
 
+    # clean up the log file
+    if os.path.exists(log_file):
+        os.remove(log_file)
+
     # instantiate the class
     qp = PermuteQpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive, verbose)
 
@@ -551,5 +555,3 @@ if __name__ == "__main__":
 
 
     permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
-
-    pass
