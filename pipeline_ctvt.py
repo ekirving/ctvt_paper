@@ -764,8 +764,8 @@ class QPGraph(PrioritisedTask):
             "snpname:       bed/{0}.{1}.geno.bim".format(self.group, self.dataset),
             "indivname:     bed/{0}.{1}.qpgraph.fam".format(self.group, self.dataset),
             "outpop:        {}".format(outgroup),
-            "blgsize:       1",
             # TODO review these defaults
+            "blgsize:       0.05",
             "lsqmode:       YES",
             "diag:          .0001",
             "hires:         YES",
@@ -820,9 +820,8 @@ class QPGraphPermute(PrioritisedTask):
             "snpname:       {}".format(self.input()[2].path),
             "indivname:     {}".format(self.input()[3].path),
             "outpop:        {}".format(outgroup),
-            # TODO really?
-            "blgsize:       1",
             # TODO review these defaults
+            "blgsize:       0.05",
             "lsqmode:       YES",
             "diag:          .0001",
             "hires:         YES",
