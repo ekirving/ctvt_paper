@@ -86,8 +86,8 @@ OUTGROUP_POP = {group: 'OUT' for group in GROUPS}
 OUTGROUP_SAMPLE = {group: 'AndeanFox' for group in GROUPS}
 
 # sepcial cases for qpGraph
-OUTGROUP_POP['qpgraph-pops1'] = 'COY'
-OUTGROUP_SAMPLE['qpgraph-pops'] = 'C_Cal'
+OUTGROUP_POP['graph-pops1'] = 'COY'
+OUTGROUP_SAMPLE['graph-pops1'] = 'C_Cal'
 
 NO_OUTGROUPS = ['all-no-out', 'dog-ctvt']
 
