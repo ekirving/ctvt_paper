@@ -26,10 +26,10 @@ from itertools import izip
 from cStringIO import StringIO
 from Bio import Phylo
 
-# with warnings.catch_warnings():
+with warnings.catch_warnings():
     # dirty hack to suppress warnings from graph_tool
-    # warnings.filterwarnings("ignore", category=RuntimeWarning)
-from graph_tool.all import *
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+    from graph_tool.all import *
 
 # TODO improve parsimony...
 # on first pass, only allow non-admix insertion
@@ -578,8 +578,8 @@ def find_clusters(graph_names, pdf_file, csv_file):
     for i in range(1, size):
         for j in range(i):
             # calculate the distance scores between graph pairs (scores are not symmetric; i.e. A->B != B->A)
-            d1 = similarity(graphs[i], graphs[j], distance=True)
-            d2 = similarity(graphs[j], graphs[i], distance=True)
+            d1 = 1 - similarity(graphs[i], graphs[j])
+            d2 = 1 - similarity(graphs[j], graphs[i])
 
             # enforce symmetry by taking the max distance
             dist_matrix[i, j] = dist_matrix[j, i] = max(d1, d2)
@@ -589,16 +589,16 @@ def find_clusters(graph_names, pdf_file, csv_file):
     linkage = linkage(dist_matrix, method='ward')
 
     # print a dendrogram of the clusters
-    pprint_dendrogram(
-        linkage,
-        truncate_mode='lastp',
-        p=10,
-        leaf_rotation=90.,
-        leaf_font_size=12.,
-        show_contracted=True,
-        pdf=pdf_file,
-        # max_d=20,  # plot a horizontal cut-off line
-    )
+    # pprint_dendrogram(
+    #     linkage,
+    #     truncate_mode='lastp',
+    #     p=10,
+    #     leaf_rotation=90.,
+    #     leaf_font_size=12.,
+    #     show_contracted=True,
+    #     pdf=pdf_file,
+    #     # max_d=20,  # plot a horizontal cut-off line
+    # )
 
     # automatically assign graphs to clusters
     # https://joernhees.de/blog/2015/08/26/scipy-hierarchical-clustering-and-dendrogram-tutorial/#Inconsistency-Method
@@ -646,7 +646,7 @@ if __name__ == "__main__":
     # TODO fix me
     import glob
     files = glob.glob('pdf/graph-pops2.merged_v2_TV_laurent.qpg-permute-*')
-    graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files[:2]]
+    graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files]
 
     dot_path = 'qpgraph/merged_v2_TV_laurent.permute'
 
