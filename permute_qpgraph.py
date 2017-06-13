@@ -26,10 +26,10 @@ from itertools import izip
 from cStringIO import StringIO
 from Bio import Phylo
 
-with warnings.catch_warnings():
+# with warnings.catch_warnings():
     # dirty hack to suppress warnings from graph_tool
-    warnings.filterwarnings("ignore", category=RuntimeWarning)
-    from graph_tool.all import *
+    # warnings.filterwarnings("ignore", category=RuntimeWarning)
+from graph_tool.all import *
 
 # TODO improve parsimony...
 # on first pass, only allow non-admix insertion
