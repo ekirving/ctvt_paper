@@ -8,6 +8,13 @@
 import xml.etree.ElementTree as ElemTree
 import re
 import sys
+import warnings
+import csv
+
+import numpy as np
+
+# import the clustering libraries
+from scipy.cluster.hierarchy import linkage, fcluster
 
 # use the Pathos library for improved multi-processing
 import pathos.multiprocessing as mp
@@ -15,10 +22,14 @@ import pathos.multiprocessing as mp
 # import the custom modules
 from pipeline_utils import *
 
+from itertools import izip
 from cStringIO import StringIO
 from Bio import Phylo
 
-from graph_tool.all import *
+with warnings.catch_warnings():
+    # dirty hack to suppress warnings from graph_tool
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+    from graph_tool.all import *
 
 # TODO improve parsimony...
 # on first pass, only allow non-admix insertion
@@ -518,8 +529,8 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
 
             break
 
-    qp.log("FINISHED: Found %s unique solution(s) from a total of %s unique graphs!" % \
-          (len(qp.solutions), len(qp.tested_graphs)))
+    qp.log("FINISHED: Found %s unique solution(s) from a total of %s unique graphs!" %
+           (len(qp.solutions), len(qp.tested_graphs)))
 
     return len(qp.solutions) > 0
 
@@ -531,9 +542,82 @@ class NodeUnplaceable(Exception):
     pass
 
 
+def parse_dot_file(path):
+    """
+    The graph-tool library doesn't like the header attributes used by qpGraph, so we need to filter them out
+    """
+    with open(path, 'r') as fin:
+        rows = fin.readlines()
+
+    # exclude lines 2-4, which contain the problematic metadata
+    text = "".join(rows[:1] + rows[5:])
+
+    return StringIO(text)
+
+
+def find_clusters(graph_names, pdf_file, csv_file):
+
+    from scipy.cluster.hierarchy import linkage
+
+    graphs = []
+
+    # instantiate all the graph objects
+    for graph_name in graph_names:
+        # TOOD self.dot_path
+        dot_file = dot_path + '-{name}.dot'.format(name=graph_name)
+        graph = load_graph(parse_dot_file(dot_file), fmt='dot')
+        graphs.append(graph)
+
+    # how many graphs are we comparing
+    size = len(graph_names)
+
+    # initialise a distance matrix
+    dist_matrix = np.zeros([size, size])
+
+    # populate the distance matrix
+    for i in range(1, size):
+        for j in range(i):
+            # calculate the distance scores between graph pairs (scores are not symmetric; i.e. A->B != B->A)
+            d1 = similarity(graphs[i], graphs[j], distance=True)
+            d2 = similarity(graphs[j], graphs[i], distance=True)
+
+            # enforce symmetry by taking the max distance
+            dist_matrix[i, j] = dist_matrix[j, i] = max(d1, d2)
+
+    # calculate the hierarchical clusters, using Ward's minimum variance method
+    # see https://en.wikipedia.org/wiki/Ward%27s_method
+    linkage = linkage(dist_matrix, method='ward')
+
+    # print a dendrogram of the clusters
+    pprint_dendrogram(
+        linkage,
+        truncate_mode='lastp',
+        p=10,
+        leaf_rotation=90.,
+        leaf_font_size=12.,
+        show_contracted=True,
+        pdf=pdf_file,
+        # max_d=20,  # plot a horizontal cut-off line
+    )
+
+    # automatically assign graphs to clusters
+    # https://joernhees.de/blog/2015/08/26/scipy-hierarchical-clustering-and-dendrogram-tutorial/#Inconsistency-Method
+    clusters = fcluster(linkage, 8, criterion='inconsistent', depth=10)
+
+    print "Found %s clusters" % len(set(clusters))
+
+    with open(csv_file, 'wb') as fout:
+        csv_writer = csv.writer(fout)
+        csv_writer.writerow(['Graph', 'Cluster'])
+        for graph, cluster in izip(graph_names, clusters):
+            csv_writer.writerow([graph, cluster])
+
+    return clusters
+
+
 if __name__ == "__main__":
 
-    # # simulated test data...
+    # simulated test data...
     par_file = 'permute/simulated.par'
     log_file = 'permute/simulated.log'
     dot_path = 'permute/graphs/sim'
@@ -559,5 +643,27 @@ if __name__ == "__main__":
 
     # permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
 
-    g2 = load_graph("permute/graphs/sim-204a55b.dot", fmt='dot')
-    print g2
+    # TODO fix me
+    import glob
+    files = glob.glob('pdf/graph-pops2.merged_v2_TV_laurent.qpg-permute-*')
+    graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files[:2]]
+
+    # graph_names = ['03f8f20', '04415fe', '074f42f', '0abe334', '0bd6ab7', '0cc8dc9', '0eb6d63', '1169e75', '15ff806',
+    #                '16a4713', '19ed6e8', '1b58e0b', '1e3e40e', '1e5f242', '1edf0bb', '1fa4501', '204a55b', '20edf7c',
+    #                '2280052', '252a051', '256b3f9', '29925e2', '2a879fc', '2e5374a', '2e6f645', '30f25d3', '31790c8',
+    #                '31c40c7', '3209cf8', '322bc1b', '3274050', '35b7f88', '3860a94', '3ba1bdf', '3e309e8', '3e6cd23',
+    #                '401685b', '405ff67', '410ecac', '43ec82c', '449a55f', '46c0f99', '4add777', '4c093f0', '4c8ccfa',
+    #                '5055248', '51eb595', '52443ef', '5342b7f', '5364738', '537fb37', '53ceace', '56a7d9a', '5ba7166',
+    #                '5c3c62a', '5df249f', '649e55c', '64ebc31', '68029e4', '6946338', '6b7545a', '6bd8707', '6d75411',
+    #                '6d95fca', '725683f', '725a0f0', '72b9c75', '769a660', '76da55b', '779ab27', '77de3f5', '78df87f',
+    #                '7d3fbad', '7e6156c', '7f0646c', '801c201', '8144745', '82ea5f2', '83a8650', '863a17b', '86470cc',
+    #                '87369c9', '8a40fb1', '8b0ebca', '9773ea2', '98617f0', '995962b', '9ae068c', '9eada70', 'a19cbf2',
+    #                'a3013ca', 'a3177ad', 'a58b8cd', 'a63dfbf', 'a78ade8', 'a85f651', 'aa24aee', 'abe0beb', 'ac481d3',
+    #                'ae3d738', 'af2cc15', 'b2b46e0', 'b2d5e17', 'b443fe6', 'b564cc5', 'b5dfeb9', 'b767d73', 'b82be21',
+    #                'b85acd2', 'b86960d', 'b988ce4', 'ba29db9', 'bcbb494', 'c0f9e78', 'c35b8da', 'c3c7908', 'c82d89f',
+    #                'c836ff0', 'c8f0147', 'ca128bd', 'ca82eef', 'cea743e', 'd1edd48', 'd35ace2', 'd937116', 'd97a1b5',
+    #                'da42c84', 'dae410e', 'db585ea', 'dbb73f9', 'dbf0daa', 'dd3e2a1', 'ddd2b7d', 'de54ee0', 'e35cad4',
+    #                'e5c3cc6', 'eb9a011', 'ec3e11f', 'ef3d704', 'ef9c447', 'f019c0f', 'f0468a5', 'f57d5b5', 'f98e287',
+    #                'fdbe395', 'ffbcae6']
+
+    find_clusters(graph_names, pdf_file='clusters.pdf', csv_file='clusters.csv')
