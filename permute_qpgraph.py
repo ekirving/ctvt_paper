@@ -18,6 +18,8 @@ from pipeline_utils import *
 from cStringIO import StringIO
 from Bio import Phylo
 
+from graph_tool.all import *
+
 # TODO improve parsimony...
 # on first pass, only allow non-admix insertion
 # if can't be added, then send to back of list
@@ -532,26 +534,30 @@ class NodeUnplaceable(Exception):
 if __name__ == "__main__":
 
     # # simulated test data...
-    # par_file = "permute/simulated.par"
-    # dot_path = 'permute/graphs/sim'
-    # pdf_path = 'permute/pdf/sim'
-    # nodes = ['A', 'B', 'C', 'X']
-    # outgroup = 'Out'
+    par_file = 'permute/simulated.par'
+    log_file = 'permute/simulated.log'
+    dot_path = 'permute/graphs/sim'
+    pdf_path = 'permute/pdf/sim'
+    nodes = ['A', 'B', 'C', 'X']
+    outgroup = 'Out'
 
-    if len(sys.argv) != 3:
-        print "Error: required params"
-        quit()
+    # if len(sys.argv) != 3:
+    #     print "Error: required params"
+    #     quit()
+    #
+    # group = sys.argv[1]
+    # dataset = sys.argv[2]
+    #
+    # nodes = GROUPS[dataset][group]
+    # outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
+    #
+    # par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
+    # log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
+    # dot_path = 'qpgraph/{0}.{1}.permute'.format(group, dataset)
+    # pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
 
-    group = sys.argv[1]
-    dataset = sys.argv[2]
 
-    nodes = GROUPS[dataset][group]
-    outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
+    # permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
 
-    par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
-    log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
-    dot_path = 'qpgraph/{0}.{1}.permute'.format(group, dataset)
-    pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
-
-
-    permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
+    g2 = load_graph("permute/graphs/sim-204a55b.dot", fmt='dot')
+    print g2
