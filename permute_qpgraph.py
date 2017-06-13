@@ -618,12 +618,12 @@ def find_clusters(graph_names, pdf_file, csv_file):
 if __name__ == "__main__":
 
     # simulated test data...
-    par_file = 'permute/simulated.par'
-    log_file = 'permute/simulated.log'
-    dot_path = 'permute/graphs/sim'
-    pdf_path = 'permute/pdf/sim'
-    nodes = ['A', 'B', 'C', 'X']
-    outgroup = 'Out'
+    # par_file = 'permute/simulated.par'
+    # log_file = 'permute/simulated.log'
+    # dot_path = 'permute/graphs/sim'
+    # pdf_path = 'permute/pdf/sim'
+    # nodes = ['A', 'B', 'C', 'X']
+    # outgroup = 'Out'
 
     # if len(sys.argv) != 3:
     #     print "Error: required params"
@@ -637,7 +637,7 @@ if __name__ == "__main__":
     #
     # par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
     # log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
-    # dot_path = 'qpgraph/{0}.{1}.permute'.format(group, dataset)
+    # dot_path = 'qpgraph/{0}.permute'.format(dataset)
     # pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
 
 
@@ -647,6 +647,8 @@ if __name__ == "__main__":
     import glob
     files = glob.glob('pdf/graph-pops2.merged_v2_TV_laurent.qpg-permute-*')
     graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files[:2]]
+
+    dot_path = 'qpgraph/merged_v2_TV_laurent.permute'
 
     # graph_names = ['03f8f20', '04415fe', '074f42f', '0abe334', '0bd6ab7', '0cc8dc9', '0eb6d63', '1169e75', '15ff806',
     #                '16a4713', '19ed6e8', '1b58e0b', '1e3e40e', '1e5f242', '1edf0bb', '1fa4501', '204a55b', '20edf7c',
