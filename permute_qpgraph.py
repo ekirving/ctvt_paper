@@ -555,54 +555,96 @@ def parse_dot_file(path):
     return StringIO(text)
 
 
-def find_clusters(graph_names, pdf_file, csv_file):
+def build_matrix(graph_names, mtx_file):
+
+    try:
+        # load the distance matrix from file
+        dist_matrix = np.load(mtx_file)
+
+        print "Loaded matrix"
+
+    except IOError:
+
+        # file doesn't exist, so build it
+        graphs = []
+
+        # instantiate all the graph objects
+        for graph_name in graph_names:
+            # TODO self.dot_path
+            dot_file = dot_path + '-{name}.dot'.format(name=graph_name)
+            graph = load_graph(parse_dot_file(dot_file), fmt='dot')
+            graphs.append(graph)
+
+        # how many graphs are we comparing
+        size = len(graph_names)
+
+        # initialise a distance matrix
+        dist_matrix = np.zeros([size, size])
+
+        # get all the i,j pairs
+        idxs = [(i, j) for i in range(1, size) for j in range(i)]
+
+        print "Calculating distances for %s graph pairs" % len(idxs)
+
+        def distance(args):
+
+            # extract the tuple of arguments
+            i, j = args
+
+            # calculate the distance scores between graph pairs (scores are not symmetric; i.e. A->B != B->A)
+            d1 = similarity(graphs[i], graphs[j], distance=True)
+            d2 = similarity(graphs[j], graphs[i], distance=True)
+
+            # enforce symmetry by taking the max distance
+            dist = max(d1, d2)
+
+            return (i, j, dist)
+
+        MULTITHREADED_SEARCH = True
+
+        if MULTITHREADED_SEARCH:
+            # we need to buffer the results to use multi-threading
+            pool = mp.ProcessingPool(MAX_CPU_CORES)
+            results = pool.map(distance, idxs)
+        else:
+            # compute distances without multi-threading
+            results = []
+            for i, j in idxs:
+                result = distance((i, j))
+                results.append(result)
+
+        # populate the distance matrix
+        for i, j, dist in results:
+            dist_matrix[i, j] = dist_matrix[j, i] = dist
+
+        # save the matrix
+        np.save(mtx_file, dist_matrix)
+
+        print "Built matrix"
+
+    return dist_matrix
+
+
+def find_clusters(graph_names, pdf_file, csv_file, mtx_file):
 
     from scipy.cluster.hierarchy import linkage
 
-    graphs = []
+    print "Clustering %s graphs" % len(set(graph_names))
 
-    # instantiate all the graph objects
-    for graph_name in graph_names:
-        # TOOD self.dot_path
-        dot_file = dot_path + '-{name}.dot'.format(name=graph_name)
-        graph = load_graph(parse_dot_file(dot_file), fmt='dot')
-        graphs.append(graph)
-
-    # how many graphs are we comparing
-    size = len(graph_names)
-
-    # initialise a distance matrix
-    dist_matrix = np.zeros([size, size])
-
-    # populate the distance matrix
-    for i in range(1, size):
-        for j in range(i):
-            # calculate the distance scores between graph pairs (scores are not symmetric; i.e. A->B != B->A)
-            d1 = 1 - similarity(graphs[i], graphs[j])
-            d2 = 1 - similarity(graphs[j], graphs[i])
-
-            # enforce symmetry by taking the max distance
-            dist_matrix[i, j] = dist_matrix[j, i] = max(d1, d2)
+    dist_matrix = build_matrix(graph_names, mtx_file)
 
     # calculate the hierarchical clusters, using Ward's minimum variance method
     # see https://en.wikipedia.org/wiki/Ward%27s_method
     linkage = linkage(dist_matrix, method='ward')
 
     # print a dendrogram of the clusters
-    # pprint_dendrogram(
-    #     linkage,
-    #     truncate_mode='lastp',
-    #     p=10,
-    #     leaf_rotation=90.,
-    #     leaf_font_size=12.,
-    #     show_contracted=True,
-    #     pdf=pdf_file,
-    #     # max_d=20,  # plot a horizontal cut-off line
-    # )
+    pprint_dendrogram(linkage, truncate_mode='lastp', p=10, leaf_rotation=90., leaf_font_size=12., show_contracted=True,
+                      pdf=pdf_file, # max_d=20,  # plot a horizontal cut-off line
+    )
 
     # automatically assign graphs to clusters
     # https://joernhees.de/blog/2015/08/26/scipy-hierarchical-clustering-and-dendrogram-tutorial/#Inconsistency-Method
-    clusters = fcluster(linkage, 8, criterion='inconsistent', depth=10)
+    clusters = fcluster(linkage, 10, criterion='inconsistent', depth=10)
 
     print "Found %s clusters" % len(set(clusters))
 
@@ -648,6 +690,8 @@ if __name__ == "__main__":
     files = glob.glob('pdf/graph-pops2.merged_v2_TV_laurent.qpg-permute-*')
     graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files]
 
+    # print "cp " + ' '.join(["qpgraph/merged_v2_TV_laurent.permute-%s.dot" % name for name in graph_names]) + " tmp/"
+
     dot_path = 'qpgraph/merged_v2_TV_laurent.permute'
 
     # graph_names = ['03f8f20', '04415fe', '074f42f', '0abe334', '0bd6ab7', '0cc8dc9', '0eb6d63', '1169e75', '15ff806',
@@ -668,4 +712,4 @@ if __name__ == "__main__":
     #                'e5c3cc6', 'eb9a011', 'ec3e11f', 'ef3d704', 'ef9c447', 'f019c0f', 'f0468a5', 'f57d5b5', 'f98e287',
     #                'fdbe395', 'ffbcae6']
 
-    find_clusters(graph_names, pdf_file='clusters.pdf', csv_file='clusters.csv')
+    find_clusters(graph_names, pdf_file='clusters.pdf', csv_file='clusters.csv', mtx_file='clusters.npy')
