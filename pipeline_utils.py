@@ -159,7 +159,7 @@ def pprint_dendrogram(*args, **kwargs):
 
     if not kwargs.get('no_plot', False):
         plt.title('Hierarchical Clustering Dendrogram (truncated)')
-        plt.xlabel('sample index or (cluster size)')
+        # plt.xlabel('sample index or (cluster size)')
         plt.ylabel('distance')
         for i, d, c in zip(ddata['icoord'], ddata['dcoord'], ddata['color_list']):
             x = 0.5 * sum(i[1:3])
