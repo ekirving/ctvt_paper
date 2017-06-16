@@ -526,6 +526,9 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
     # get all the permutations of possible node orders
     all_nodes_perms = list(itertools.permutations(nodes, len(nodes)))
 
+    # randomise the list of starting orders
+    random.shuffle(all_nodes_perms)
+
     pq.log("INFO: There are %s possible starting orders for the given nodes." % len(all_nodes_perms))
     pq.log("INFO: Performing %s search." % ("an exhaustive" if pq.exhaustive_search else "a heuristic"))
 
