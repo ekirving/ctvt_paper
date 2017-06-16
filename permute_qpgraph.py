@@ -695,7 +695,7 @@ def cluster_qpgraph(graph_names, log_file, dot_path, pdf_file, csv_file, mtx_fil
     pprint_dendrogram(Z, truncate_mode='lastp', p=10, leaf_rotation=90.,
                       leaf_font_size=12., show_contracted=True, pdf=pdf_file)
 
-    cq.log("INFO: Printed hierarchical clustering dendrogram")
+    cq.log("INFO: Printed hierarchical clustering dendrogram %s" % pdf_file)
 
     # automatically assign graphs to clusters
     # https://joernhees.de/blog/2015/08/26/scipy-hierarchical-clustering-and-dendrogram-tutorial/#Inconsistency-Method
@@ -734,7 +734,7 @@ if __name__ == "__main__":
     #
     # par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
     # log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
-    # dot_path = 'qpgraph/{0}.permute'.format(dataset)
+    # dot_path = 'qpgraph/dot/{0}.permute'.format(dataset)
     # pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
 
     # permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
