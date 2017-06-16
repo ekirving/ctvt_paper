@@ -1226,12 +1226,9 @@ class CTVTqpGraphPipeline(luigi.WrapperTask):
     def requires(self):
 
         # new analysis group for Laurent
-        for dataset in ['merged_v2_laurent',
-                        'merged_v2_TV_laurent']:
+        for dataset in ['merged_v2_TV_laurent']:
 
-            for group in ['graph-pops1',
-                          'graph-pops2',
-                          'graph-pops3']:
+            for group in ['graph-pops2']:
 
                 for m in range(0, TREEMIX_MAX_M + 1):
                     yield TreemixPlotM(group, dataset, GROUP_BY_POPS, m)
