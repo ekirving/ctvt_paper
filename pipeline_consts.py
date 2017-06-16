@@ -211,4 +211,4 @@ ADMIXTURE_BOOTSTRAP = 0  # TODO put this back to 100
 PLINK_TAXA = '--dog'
 
 # no single worker should use more than 50% of the available cores
-MAX_CPU_CORES = int(multiprocessing.cpu_count() * 0.5)
+MAX_CPU_CORES = int(multiprocessing.cpu_count() * 0.8)
