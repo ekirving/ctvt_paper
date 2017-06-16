@@ -457,8 +457,22 @@ class PermuteQpgraph:
         # export the tree back to a string
         fout = StringIO()
         Phylo.write(tree, fout, 'newick')
+        newick = fout.getvalue()
 
-        return fout.getvalue().replace(':0.00000', '').strip()
+        # remove the branch lenghs
+        newick = newick.replace(':0.00000', '').strip()
+
+        # get the order of admix nodes in the tree
+        order = list(OrderedDict.fromkeys(re.findall('a\d+', newick)))
+
+        # normalise the node numbering
+        for i, old in enumerate(order):
+            newick = newick.replace(old, 'n%s' % (i+1))
+
+        # replace n0 with a0 (to preseve the existing chache)
+        newick = re.sub(r'n([0-9]+)', r'a\1', newick)
+
+        return newick
 
     def export_newick_tree(self, parent_node):
         """
