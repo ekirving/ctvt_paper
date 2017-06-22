@@ -63,8 +63,7 @@ pdf(file=pdf_file, width = plotsize, height = plotsize)
 
 # plot the tree
 plot(tr, type=treetype, cex=0.6, tip.color=cols, label.offset=0.001)
-
-# add the legend
-legend("bottomleft", legend = key[[1]], fill = key[[2]], cex=0.6)
+legend(x=0,y=35,legend = key[[1]], fill = key[[2]], cex=0.6)
+add.scale.bar(cex = 0.6)
 
 dev.off()
