@@ -48,14 +48,23 @@ plotsize = max(c(numnodes/20, 7))
 info <- read.table('pop_names.csv', sep = ",", quote = '"', header=TRUE, comment.char="")
 
 # join the metadata, so we can get the node colours
-meta <- merge(m, info[c(1,4)], by = 'Code')
+meta <- merge(m, info[c(1,3,4)], by = 'Code')
 rownames(meta) <- meta[,'Sample']
+
+# get the population names and colours for the legend
+key<-unique(meta[c('Type.Name','Colour')])
+# key<-key[with(key, order(Type.Name)), ]
+key[] <- lapply(key, as.character)
 
 # fix the type issue with the colour codes
 cols <- sapply(meta[tr$tip.label, 'Colour'], as.character)
 
-# plot the tree
 pdf(file=pdf_file, width = plotsize, height = plotsize)
+
+# plot the tree
 plot(tr, type=treetype, cex=0.6, tip.color=cols, label.offset=0.001)
-# plot(tr, type=treetype, cex=0.8, tip.color=collist)
+
+# add the legend
+legend("bottomleft", legend = key[[1]], fill = key[[2]], cex=0.6)
+
 dev.off()
