@@ -48,12 +48,12 @@ plotsize = max(c(numnodes/20, 7))
 info <- read.table('pop_names.csv', sep = ",", quote = '"', header=TRUE, comment.char="")
 
 # join the metadata, so we can get the node colours
-meta <- merge(m, info[c(1,3,4)], by = 'Code')
+meta <- merge(m, info[c('Code','Type.Name','Colour','Order')], by = 'Code')
 rownames(meta) <- meta[,'Sample']
 
 # get the population names and colours for the legend
-key<-unique(meta[c('Type.Name','Colour')])
-# key<-key[with(key, order(Type.Name)), ]
+key<-unique(meta[c('Type.Name','Colour','Order')])
+key<-key[with(key, order(Order)), ]
 key[] <- lapply(key, as.character)
 
 # fix the type issue with the colour codes
