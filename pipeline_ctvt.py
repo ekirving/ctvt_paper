@@ -1170,10 +1170,14 @@ class CTVTCustomPipeline(luigi.WrapperTask):
 
         for dataset in ['merged_v3', 'merged_v3_TV']:
 
-            for group in ['all-pops']:
+            # NJ Trees
+            yield NeighborJoiningTree('all-pops', dataset)
 
-                yield SmartPCAPlot(group, dataset)
-                yield NeighborJoiningTree(group, dataset)
+            # PCA plots
+            yield SmartPCAPlot('all-pops', dataset)
+            yield SmartPCAPlot('dog-ctvt', dataset)
+            yield SmartPCAPlot('dog-ctvt', dataset, ['DPC','CTVT'])
+
 
 
 if __name__ == '__main__':
