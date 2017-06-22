@@ -37,8 +37,15 @@ names(t1)[1] <- "Code"
 names(t2)[1] <- "Code"
 
 # join the population types
-t1meta <- merge(t1, info[c(1,3,4)], by = 'Code')
-t2meta <- merge(t2, info[c(1,3,4)], by = 'Code')
+t1meta <- merge(t1, info[c('Code','Type.Name','Colour','Shape')], by = 'Code')
+t2meta <- merge(t2, info[c('Code','Type.Name','Colour','Shape')], by = 'Code')
+
+# replace solid shapes with hollow ones for the projected populations
+# see http://www.cookbook-r.com/Graphs/Shapes_and_line_types/
+t2meta$Shape[t2meta$Shape==15]<-0
+t2meta$Shape[t2meta$Shape==16]<-1
+t2meta$Shape[t2meta$Shape==17]<-2
+t2meta$Shape[t2meta$Shape==18]<-5
 
 # join the two data frames
 meta <- rbind(t1meta, t2meta)
@@ -46,28 +53,20 @@ meta <- rbind(t1meta, t2meta)
 # preserve the order of the factors
 meta[,'Type.Name'] <- factor(meta[,'Type.Name'], levels = unique(meta[,'Type.Name']))
 
-# setup the different symbol types
-# see http://www.cookbook-r.com/Graphs/Shapes_and_line_types/ for shape codes
-solid=c(15, 17, 15, 20, 18, 17, 15, 16, 20, 18, 15) # solid shapes
-hollow=c(21, 22, 23, 24, 25) # hollow shapes (projected)
-
-# make sure there are enough of each shape
-shapes<-c(rep_len(solid, length.out=length(unique(t1meta$Type.Name))),
-          rep_len(hollow, length.out=length(unique(t1meta$Type.Name))))
-
-# setup the colours
-colours <- unique(as.character(meta$Colour))
+# setup the legend data
+legend <- unique(meta[c('Type.Name','Colour','Shape')])
+legend$Colour <- sapply(legend$Colour, as.character)
 
 alpha=c(1, 1, 1, 0.1, 1, 1, 1, 1, 1, 1, 1, 1)
 pdf(file=pdf_file, width = 10, height = 7)
 
 gg <- ggplot(meta, aes(meta[[comp1+2]], meta[[comp2+2]])) +
     aes(shape=factor(Type.Name)) +
-    scale_shape_manual(values=shapes) +
+    scale_shape_manual(values=legend$Shape) +
+    scale_colour_manual(values=legend$Colour) +
     geom_point(aes(colour = factor(Type.Name)), size=4, alpha=1) +
     xlab(paste("PC", comp1, " (", pve[comp1], "%)", sep='')) +
     ylab(paste("PC", comp2, " (", pve[comp2], "%)", sep='')) +
-    scale_colour_manual(values=colours) +
     theme_bw() +
     # coord_fixed() +
     theme(legend.title=element_blank(), legend.key = element_blank()) +
