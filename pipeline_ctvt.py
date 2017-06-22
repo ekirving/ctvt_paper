@@ -252,8 +252,8 @@ class SmartPCA(PrioritisedTask):
     dataset = luigi.Parameter()
     projectpops = luigi.ListParameter(default=ANCIENT_POPS)
 
-    # limit total resource usage
-    resources = {'cpu-cores': MAX_CPU_CORES}
+    # TODO limit total resource usage
+    # resources = {'cpu-cores': MAX_CPU_CORES}
 
     def requires(self):
         return PlinkFilterPops(self.group, self.dataset)
@@ -384,8 +384,8 @@ class AdmixtureK(PrioritisedTask):
     dataset = luigi.Parameter()
     k = luigi.IntParameter()
 
-    # limit total resource usage
-    resources = {'cpu-cores': MAX_CPU_CORES}
+    # TODO limit total resource usage
+    # resources = {'cpu-cores': MAX_CPU_CORES}
 
     def requires(self):
         return PlinkPruneBed(self.group, self.dataset)
@@ -804,8 +804,8 @@ class QPGraphPermute(PrioritisedTask):
     dataset = luigi.Parameter()
     exhaustive = luigi.BoolParameter(default=False)
 
-    # limit total resource usage
-    resources = {'cpu-cores': MAX_CPU_CORES}
+    # TODO limit total resource usage
+    # resources = {'cpu-cores': MAX_CPU_CORES}
 
     def requires(self):
         return ConvertfBedToEigenstrat(self.group, self.dataset, GROUP_BY_POPS)
