@@ -4,6 +4,9 @@
 import multiprocessing, copy
 from collections import OrderedDict
 
+from luigi import configuration
+from psutil import virtual_memory
+
 # populations
 ANCIENT_POPS = ['DPC']
 
@@ -210,5 +213,10 @@ ADMIXTURE_BOOTSTRAP = 0  # TODO put this back to 100
 # the species flag for plink telling it how many chromosomes to expect
 PLINK_TAXA = '--dog'
 
-# no single worker should use more than 50% of the available cores
-MAX_CPU_CORES = int(multiprocessing.cpu_count() * 0.8)
+# no single worker should use more than 30% of the available cores
+MAX_CPU_CORES = int(multiprocessing.cpu_count() * 0.3)
+
+# dynamically set the resource constraints
+config = configuration.get_config()
+config.set('resources', 'cpu-cores', str(multiprocessing.cpu_count()))
+config.set('resources', 'ram-gb', str(int(virtual_memory().total * 1e-9)))
