@@ -37,8 +37,8 @@ names(t1)[1] <- "Code"
 names(t2)[1] <- "Code"
 
 # join the population types
-t1meta <- merge(t1, info[c('Code','Type.Name','Colour','Shape')], by = 'Code')
-t2meta <- merge(t2, info[c('Code','Type.Name','Colour','Shape')], by = 'Code')
+t1meta <- merge(t1, info[c('Code','Type.Name','Colour','Shape','Order')], by = 'Code')
+t2meta <- merge(t2, info[c('Code','Type.Name','Colour','Shape','Order')], by = 'Code')
 
 # replace solid shapes with hollow ones for the projected populations
 # see http://www.cookbook-r.com/Graphs/Shapes_and_line_types/
@@ -50,11 +50,15 @@ t2meta$Shape[t2meta$Shape==18]<-5
 # join the two data frames
 meta <- rbind(t1meta, t2meta)
 
-# preserve the order of the factors
+# sort the matrix
+meta <- meta[with(meta, order(Order)), ]
+
+# set the order of the factors (as this determines the legend ordering)
 meta[,'Type.Name'] <- factor(meta[,'Type.Name'], levels = unique(meta[,'Type.Name']))
+# meta[,'Type.Name'] <- factor(meta[,'Type.Name'], levels = legend$Type.Name)
 
 # setup the legend data
-legend <- unique(meta[c('Type.Name','Colour','Shape')])
+legend <- unique(meta[c('Type.Name','Colour','Shape', 'Order')])
 legend$Colour <- sapply(legend$Colour, as.character)
 
 alpha=c(1, 1, 1, 0.1, 1, 1, 1, 1, 1, 1, 1, 1)
