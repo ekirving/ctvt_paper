@@ -1161,5 +1161,20 @@ class CTVTqpGraphPipeline(luigi.WrapperTask):
                 yield QPGraphPermute(group, dataset, exhaustive=True)
 
 
+class CTVTCustomPipeline(luigi.WrapperTask):
+    """
+    Run the specific elements of the CTVT pipeline
+    """
+
+    def requires(self):
+
+        for dataset in ['merged_v3', 'merged_v3_TV']:
+
+            for group in ['all-pops']:
+
+                yield SmartPCAPlot(group, dataset)
+                yield NeighborJoiningTree(group, dataset)
+
+
 if __name__ == '__main__':
     luigi.run()

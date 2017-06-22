@@ -69,6 +69,10 @@ GROUPS = {
                              'graph-pops2': GRAPH_POPS2,
                              'graph-pops3': GRAPH_POPS3},
 
+    'merged_v3':        {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v3_TV':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+
+
     'merged_SNParray':           {'all-pops': SNP_ARRAY_POPS},
     'merged_SNParray_v1':        {'all-pops': SNP_ARRAY_POPS},
     'merged_SNParray_v1_noCTVT': {'all-pops': SNP_ARRAY_POPS},
