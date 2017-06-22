@@ -11,15 +11,28 @@ pdf_file=args[5]
 
 # TODO remove when done testing
 # setwd("/Users/Evan/Dropbox/Code/ctvt")
-# data_file <- "njtree/test-pops.merged_map.geno.data"
-# treetype <- "phylogram" #"fan"
+# data_file <- "njtree/all-pops.merged_v1.geno.data"
+# treetype <- "phylogram" # "phylogram" / "fan"
 # outgroup <- "AndeanFox"
-# tree_file <- "njtree/test-pops.merged_map.geno.tree"
-# pdf_file <- "pdf/test-pops.merged_map.njtree.pdf"
+# tree_file <- "njtree/all-pops.merged_v1.geno.tree"
+# pdf_file <- "pdf/all-pops.merged_v1.geno.njtree.pdf"
 
+# load the distance matrix
 m<-as.matrix(read.table(data_file, head=T, check.names=FALSE))
-tr=bionj(m[,-c(1:2)])
-tr<-root(tr, outgroup = outgroup, resolve.root = TRUE)
+
+# build the NJ tree
+tr <- bionj(m[,-c(1:2)])
+
+# root the tree
+tr <- root(tr, outgroup = outgroup, resolve.root = TRUE)
+
+# resolve.root adds a zero-length branch below the MRCA of the ingroup, so lets
+# find the outgroup branch and place the root in the middle of the branch
+last <- length(tr$edge.length)
+len <- tr$edge.length[last]
+
+tr$edge.length[1] <- len/2     # the edge to the MRCA is always first
+tr$edge.length[last] <- len/2  # the edge to the outgroup is always last
 
 # sort the tree
 tr <- ladderize(tr)
@@ -43,6 +56,6 @@ cols <- sapply(meta[tr$tip.label, 'Colour'], as.character)
 
 # plot the tree
 pdf(file=pdf_file, width = plotsize, height = plotsize)
-plot(tr, type=treetype, cex=0.6, tip.color=cols)
+plot(tr, type=treetype, cex=0.6, tip.color=cols, label.offset=0.001)
 # plot(tr, type=treetype, cex=0.8, tip.color=collist)
 dev.off()
