@@ -1169,7 +1169,8 @@ class CTVTCustomPipeline(luigi.WrapperTask):
 
     def requires(self):
 
-        for dataset in ['merged_v3', 'merged_v3_TV']:
+        for dataset in ['merged_v3',
+                        'merged_v3_TV']:
 
             # NJ Trees
             yield NeighborJoiningTree('all-pops', dataset)
@@ -1179,6 +1180,8 @@ class CTVTCustomPipeline(luigi.WrapperTask):
             yield SmartPCAPlot('dog-ctvt', dataset)
             yield SmartPCAPlot('dog-ctvt', dataset, ['DPC','CTVT'])
 
+            for m in range(0, TREEMIX_MAX_M + 1):
+                yield TreemixPlotM('graph-pops2', dataset, GROUP_BY_POPS, m)
 
 if __name__ == '__main__':
     luigi.run()

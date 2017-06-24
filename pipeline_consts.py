@@ -69,8 +69,8 @@ GROUPS = {
                              'graph-pops2': GRAPH_POPS2,
                              'graph-pops3': GRAPH_POPS3},
 
-    'merged_v3':        {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v3_TV':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v3':        {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS, 'graph-pops1': GRAPH_POPS1, 'graph-pops2': GRAPH_POPS2},
+    'merged_v3_TV':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS, 'graph-pops1': GRAPH_POPS1, 'graph-pops2': GRAPH_POPS2},
 
 
     'merged_SNParray':           {'all-pops': SNP_ARRAY_POPS},
