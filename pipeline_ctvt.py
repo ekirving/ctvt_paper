@@ -317,13 +317,14 @@ class SmartPCAPlot(PrioritisedTask):
     group = luigi.Parameter()
     dataset = luigi.Parameter()
     projectpops = luigi.ListParameter(default=ANCIENT_POPS)
+    components = luigi.ListParameter(default=PCA_COMPONENTS)
 
     def requires(self):
         return SmartPCA(self.group, self.dataset, self.projectpops)
 
     def output(self):
         prj = "-".join(self.projectpops)
-        for pc1, pc2 in [(1, 2), (3, 4), (5, 6)]:
+        for pc1, pc2 in self.components:
             yield luigi.LocalTarget("pdf/{0}.{1}.prj-{2}.PCA.{3}.{4}.pdf".format(self.group, self.dataset, prj, pc1, pc2))
 
     def run(self):
@@ -1177,7 +1178,6 @@ class CTVTCustomPipeline(luigi.WrapperTask):
             yield SmartPCAPlot('all-pops', dataset)
             yield SmartPCAPlot('dog-ctvt', dataset)
             yield SmartPCAPlot('dog-ctvt', dataset, ['DPC','CTVT'])
-
 
 
 if __name__ == '__main__':

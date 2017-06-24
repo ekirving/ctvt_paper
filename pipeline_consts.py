@@ -214,6 +214,9 @@ ADMIXTURE_MAX_K = 5
 # the number of bootstrap replicates to run
 ADMIXTURE_BOOTSTRAP = 0  # TODO put this back to 100
 
+# which PCA coponents should we print
+PCA_COMPONENTS = [(1, 2), (3, 4), (5, 6)]
+
 # the species flag for plink telling it how many chromosomes to expect
 PLINK_TAXA = '--dog'
 
