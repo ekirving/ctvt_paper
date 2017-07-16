@@ -180,7 +180,7 @@ class PlinkFilterGenoByPops(PrioritisedTask):
 
 class PlinkHighGeno(PrioritisedTask):
     """
-    Filter all sites without a gentyping rate of 95%
+    Filter all sites without a genotyping rate of 95%
     """
     group = luigi.Parameter()
     dataset = luigi.Parameter()
@@ -1165,26 +1165,26 @@ class CTVTFiguresPipeline(luigi.WrapperTask):
 
     def requires(self):
 
-        # Figure_NJTREE / all-pops.merged_v2.njtree.pdf
+        # Figure_NJTREE     / all-pops.merged_v2.njtree.pdf
         yield NeighborJoiningTree('all-pops', 'merged_v2')
 
-        # Figure_NJVIET / nj-pops.merged_v2_njviet.njtree.pdf
+        # Figure_NJVIET     / nj-pops.merged_v2_njviet.njtree.pdf
         yield NeighborJoiningTree('nj-pops', 'merged_v2_njviet')
 
-        # Figure_PCA1   / all-pops.merged_v2.prj-DPC.PCA.1.2.pdf
+        # Figure_PCA1       / all-pops.merged_v2.prj-DPC.PCA.1.2.pdf
         yield SmartPCAPlot('all-pops', 'merged_v2', ['DPC'], [1,2])
 
-        # Figure_PCA2   / dog-ctvt.merged_v2.prj-DPC.PCA.1.2.pdf
+        # Figure_PCA2       / dog-ctvt.merged_v2.prj-DPC.PCA.1.2.pdf
         yield SmartPCAPlot('dog-ctvt', 'merged_v2', ['DPC'], [1, 2])
 
-        # Figure_PCA3   / dog-ctvt.merged_v2.prj-DPC-CTVT.PCA.1.2.pdf
+        # Figure_PCA3       / dog-ctvt.merged_v2.prj-DPC-CTVT.PCA.1.2.pdf
         yield SmartPCAPlot('dog-ctvt', 'merged_v2', ['DPC', 'CTVT'], [1, 2])
 
-        # Figure_TREEMIX
-        # Figure_TREEMIX1
-        # Figure_TREEMIX2
+        # Figure_TREEMIX    / graph-pops2.merged_v2_TV_laurent.treemix.geno.grp-pops.m0.pdf
+        # Figure_TREEMIX1   / graph-pops2.merged_v2_TV_laurent.treemix.geno.grp-pops.m1.pdf
+        # Figure_TREEMIX2   / graph-pops2.merged_v2_TV_laurent.treemix.geno.grp-pops.m2.pdf
         for m in range(0, 3):
-            yield TreemixPlotM('graph-pops2', 'merged_v2_laurent', GROUP_BY_POPS, m)
+            yield TreemixPlotM('graph-pops2', 'merged_v2_TV_laurent', GROUP_BY_POPS, m)
 
 if __name__ == '__main__':
     luigi.run()
