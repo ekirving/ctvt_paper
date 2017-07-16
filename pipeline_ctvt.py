@@ -1172,13 +1172,13 @@ class CTVTFiguresPipeline(luigi.WrapperTask):
         yield NeighborJoiningTree('nj-pops', 'merged_v2_njviet')
 
         # Figure_PCA1       / all-pops.merged_v2.prj-DPC.PCA.1.2.pdf
-        yield SmartPCAPlot('all-pops', 'merged_v2', ['DPC'], [1,2])
+        yield SmartPCAPlot('all-pops', 'merged_v2', ['DPC'], [(1, 2)])
 
         # Figure_PCA2       / dog-ctvt.merged_v2.prj-DPC.PCA.1.2.pdf
-        yield SmartPCAPlot('dog-ctvt', 'merged_v2', ['DPC'], [1, 2])
+        yield SmartPCAPlot('dog-ctvt', 'merged_v2', ['DPC'], [(1, 2)])
 
         # Figure_PCA3       / dog-ctvt.merged_v2.prj-DPC-CTVT.PCA.1.2.pdf
-        yield SmartPCAPlot('dog-ctvt', 'merged_v2', ['DPC', 'CTVT'], [1, 2])
+        yield SmartPCAPlot('dog-ctvt', 'merged_v2', ['DPC', 'CTVT'], [(1, 2)])
 
         # Figure_TREEMIX    / graph-pops2.merged_v2_TV_laurent.treemix.geno.grp-pops.m0.pdf
         # Figure_TREEMIX1   / graph-pops2.merged_v2_TV_laurent.treemix.geno.grp-pops.m1.pdf
