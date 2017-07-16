@@ -620,8 +620,8 @@ class ClusterQpgraph():
         i, j = args
 
         # calculate the distance scores between graph pairs (scores are not symmetric; i.e. A->B != B->A)
-        d1 = similarity(self.graphs[i], self.graphs[j], distance=True)
-        d2 = similarity(self.graphs[j], self.graphs[i], distance=True)
+        d1 = 1 - similarity(self.graphs[i], self.graphs[j])
+        d2 = 1 - similarity(self.graphs[j], self.graphs[i])
 
         # enforce symmetry in the matrix by taking the max distance
         dist = max(d1, d2)
