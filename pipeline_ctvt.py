@@ -733,7 +733,7 @@ class TreemixToQPGraph(PrioritisedTask):
             fout.write(graph)
 
 
-class QPGraph(PrioritisedTask):
+class QPGraphTreemix(PrioritisedTask):
     """
     Run qpGraph
     """
@@ -795,6 +795,29 @@ class QPGraph(PrioritisedTask):
             logfile.write(log)
 
 
+class QPGraphTreemixPlot(PrioritisedTask):
+    """
+    Plot the output from qpGraph
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+    m = luigi.IntParameter(default=0)
+
+    def requires(self):
+        return QPGraphTreemix(self.group, self.dataset, self.m)
+
+    def output(self):
+        return luigi.LocalTarget("pdf/{0}.{1}.qpgraph.m{2}.pdf".format(self.group, self.dataset, self.m))
+
+    def run(self):
+
+        dot_file = self.input()[1].path
+        pdf_file = self.output().path
+
+        # pretty print the qpgraph dot file
+        pprint_qpgraph(dot_file, pdf_file)
+
+
 class QPGraphPermute(PrioritisedTask):
     """
     Permute all possible graphs to find a qpGraph model which fits the data
@@ -853,29 +876,6 @@ class QPGraphPermute(PrioritisedTask):
         fitted_file = self.output()[2].path
         with open(fitted_file, 'w') as done:
             par.write("\n".join(solutions))
-
-
-class QPGraphPlot(PrioritisedTask):
-    """
-    Plot the output from qpGraph
-    """
-    group = luigi.Parameter()
-    dataset = luigi.Parameter()
-    m = luigi.IntParameter(default=0)
-
-    def requires(self):
-        return QPGraph(self.group, self.dataset, self.m)
-
-    def output(self):
-        return luigi.LocalTarget("pdf/{0}.{1}.qpgraph.m{2}.pdf".format(self.group, self.dataset, self.m))
-
-    def run(self):
-
-        dot_file = self.input()[1].path
-        pdf_file = self.output().path
-
-        # pretty print the qpgraph dot file
-        pprint_qpgraph(dot_file, pdf_file)
 
 
 class ConvertfBedToEigenstrat(PrioritisedTask):
@@ -1137,7 +1137,7 @@ class CTVTPipeline(luigi.WrapperTask):
 
                         yield TreemixPlotM(group, dataset, GROUP_BY_POPS, m)
                         yield TreemixPlotM(group, dataset, GROUP_BY_SMPL, m)
-                        yield QPGraphPlot(group, dataset, m)
+                        yield QPGraphTreemixPlot(group, dataset, m)
 
 
 class CTVTqpGraphPipeline(luigi.WrapperTask):
