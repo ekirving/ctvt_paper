@@ -14,7 +14,7 @@ ALL_POPS = ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA'
             'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT', 'DIN', 'COY', 'TAI', 'WAM', 'WAS', 'WEU', 'WME', 'OUT']
 
 NJ_POPS = ['BAS', 'COY', 'CTVT', 'DAE', 'DAL', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DIN', 'DLB', 'DMA', 'DME', 'DNA',
-            'DPC', 'DPU', 'DQA', 'DSL', 'DVN', 'OUT', 'TAI', 'WAM', 'WAS', 'WEU', 'WME'],
+           'DPC', 'DPU', 'DQA', 'DSL', 'DVN', 'OUT', 'TAI', 'WAM', 'WAS', 'WEU', 'WME']
 
 ALL_DOGS = ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID', 'DQA',
             'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT', 'DIN']
