@@ -907,10 +907,6 @@ class QPGraphCluster(PrioritisedTask):
         # get the output file
         log_file, csv_file, mtx_file, pdf_file = [file.path for file in self.output()]
 
-        # find all the PDFs, and extract the graph names
-        files = glob.glob('pdf/{0}.{1}.qpg-permute-*'.format(self.group, self.dataset))
-        graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files]
-
         fitted_file = self.input()[2].path
         with open(fitted_file, 'r') as fin:
             graph_names = fin.read().splitlines()

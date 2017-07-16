@@ -756,8 +756,9 @@ if __name__ == "__main__":
 
     # permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
 
+    dot_path = 'qpgraph/dot/{0}.permute'.format(dataset)
+
     log_file = 'qpgraph/{0}.{1}.cluster.log'.format(group, dataset)
-    dot_path = 'qpgraph/{0}.permute'.format(dataset)
     csv_file = 'qpgraph/{0}.{1}.cluster.csv'.format(group, dataset)
     mtx_file = 'qpgraph/{0}.{1}.cluster.npy'.format(group, dataset)
     pdf_file = 'pdf/{0}.{1}.qpg-cluster.pdf'.format(group, dataset)
