@@ -1162,26 +1162,33 @@ class CTVTqpGraphPipeline(luigi.WrapperTask):
                 yield QPGraphPermute(group, dataset, exhaustive=True)
 
 
-class CTVTCustomPipeline(luigi.WrapperTask):
+class CTVTFiguresPipeline(luigi.WrapperTask):
     """
     Run the specific elements of the CTVT pipeline
     """
 
     def requires(self):
 
-        for dataset in ['merged_v3',
-                        'merged_v3_TV']:
+        # Figure_NJTREE / all-pops.merged_v2.njtree.pdf
+        yield NeighborJoiningTree('all-pops', 'merged_v2')
 
-            # NJ Trees
-            yield NeighborJoiningTree('all-pops', dataset)
+        # Figure_NJVIET / nj-pops.merged_v2_njviet.njtree.pdf
+        yield NeighborJoiningTree('nj-pops', 'merged_v2_njviet')
 
-            # PCA plots
-            yield SmartPCAPlot('all-pops', dataset)
-            yield SmartPCAPlot('dog-ctvt', dataset)
-            yield SmartPCAPlot('dog-ctvt', dataset, ['DPC','CTVT'])
+        # Figure_PCA1   / all-pops.merged_v2.prj-DPC.PCA.1.2.pdf
+        yield SmartPCAPlot('all-pops', 'merged_v2', ['DPC'], [1,2])
 
-            for m in range(0, TREEMIX_MAX_M + 1):
-                yield TreemixPlotM('graph-pops2', dataset, GROUP_BY_POPS, m)
+        # Figure_PCA2   / dog-ctvt.merged_v2.prj-DPC.PCA.1.2.pdf
+        yield SmartPCAPlot('dog-ctvt', 'merged_v2', ['DPC'], [1, 2])
+
+        # Figure_PCA3   / dog-ctvt.merged_v2.prj-DPC-CTVT.PCA.1.2.pdf
+        yield SmartPCAPlot('dog-ctvt', 'merged_v2', ['DPC', 'CTVT'], [1, 2])
+
+        # Figure_TREEMIX
+        # Figure_TREEMIX1
+        # Figure_TREEMIX2
+        for m in range(0, 3):
+            yield TreemixPlotM('graph-pops2', 'merged_v2_laurent', GROUP_BY_POPS, m)
 
 if __name__ == '__main__':
     luigi.run()

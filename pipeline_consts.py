@@ -13,6 +13,9 @@ ANCIENT_POPS = ['DPC']
 ALL_POPS = ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID', 'DQA',
             'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT', 'DIN', 'COY', 'TAI', 'WAM', 'WAS', 'WEU', 'WME', 'OUT']
 
+NJ_POPS = ['BAS', 'COY', 'CTVT', 'DAE', 'DAL', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DIN', 'DLB', 'DMA', 'DME', 'DNA',
+            'DPC', 'DPU', 'DQA', 'DSL', 'DVN', 'OUT', 'TAI', 'WAM', 'WAS', 'WEU', 'WME'],
+
 ALL_DOGS = ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID', 'DQA',
             'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT', 'DIN']
 
@@ -69,8 +72,10 @@ GROUPS = {
                              'graph-pops2': GRAPH_POPS2,
                              'graph-pops3': GRAPH_POPS3},
 
-    'merged_v3':        {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS, 'graph-pops1': GRAPH_POPS1, 'graph-pops2': GRAPH_POPS2},
-    'merged_v3_TV':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS, 'graph-pops1': GRAPH_POPS1, 'graph-pops2': GRAPH_POPS2},
+    'merged_v2_njviet': {'nj-pops' : NJ_POPS},
+
+    # 'merged_v3':        {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS, 'graph-pops1': GRAPH_POPS1, 'graph-pops2': GRAPH_POPS2},
+    # 'merged_v3_TV':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS, 'graph-pops1': GRAPH_POPS1, 'graph-pops2': GRAPH_POPS2},
 
 
     'merged_SNParray':           {'all-pops': SNP_ARRAY_POPS},
