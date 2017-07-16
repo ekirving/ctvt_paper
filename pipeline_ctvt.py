@@ -810,7 +810,7 @@ class QPGraphPermute(PrioritisedTask):
 
     def output(self):
         return [luigi.LocalTarget("qpgraph/{0}.{1}.permute.{2}".format(self.group, self.dataset, ext))
-                for ext in ['par', 'log', 'done']]
+                for ext in ['par', 'log', 'fitted']]
 
     def run(self):
 
@@ -847,12 +847,12 @@ class QPGraphPermute(PrioritisedTask):
         log_file = self.output()[1].path
 
         # run qpGraph
-        permute_qpgraph(par_file, log_file, dot_path, pdf_path, populations, outgroup, self.exhaustive)
+        solutions = permute_qpgraph(par_file, log_file, dot_path, pdf_path, populations, outgroup, self.exhaustive)
 
         # mark the job as complete
-        done_file = self.output()[2].path
-        with open(done_file, 'w') as done:
-            done.write("FINISHED")
+        fitted_file = self.output()[2].path
+        with open(fitted_file, 'w') as done:
+            par.write("\n".join(solutions))
 
 
 class QPGraphPlot(PrioritisedTask):
@@ -1147,15 +1147,8 @@ class CTVTqpGraphPipeline(luigi.WrapperTask):
 
     def requires(self):
 
-        # new analysis group for Laurent
-        for dataset in ['merged_v2_TV_laurent']:
-
-            for group in ['graph-pops2']:
-
-                for m in range(0, TREEMIX_MAX_M + 1):
-                    yield TreemixPlotM(group, dataset, GROUP_BY_POPS, m)
-
-                yield QPGraphPermute(group, dataset, exhaustive=True)
+        # new analysis group for Laurent mirroring the treemix group
+        yield QPGraphPermute('graph-pops2', 'merged_v2_TV_laurent', exhaustive=True)
 
 
 class CTVTFiguresPipeline(luigi.WrapperTask):

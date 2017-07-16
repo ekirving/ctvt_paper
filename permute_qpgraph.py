@@ -557,7 +557,7 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
     pq.log("FINISHED: Found %s unique solution(s) from a total of %s unique graphs!" %
            (len(pq.solutions), len(pq.tested_graphs)))
 
-    return len(pq.solutions) > 0
+    return pq.solutions
 
 
 class ClusterQpgraph():
