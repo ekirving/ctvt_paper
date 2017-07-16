@@ -892,23 +892,23 @@ class QPGraphCluster(PrioritisedTask):
         return QPGraphPermute(self.group, self.dataset, self.exhaustive)
 
     def output(self):
-        log_file = 'qpgraph/{0}.{1}.cluster.log'.format(group, dataset)
-        csv_file = 'qpgraph/{0}.{1}.cluster.csv'.format(group, dataset)
-        mtx_file = 'qpgraph/{0}.{1}.cluster.npy'.format(group, dataset)
-        pdf_file = 'pdf/{0}.{1}.qpg-cluster.pdf'.format(group, dataset)
+        log_file = 'qpgraph/{0}.{1}.cluster.log'.format(self.group, self.dataset)
+        csv_file = 'qpgraph/{0}.{1}.cluster.csv'.format(self.group, self.dataset)
+        mtx_file = 'qpgraph/{0}.{1}.cluster.npy'.format(self.group, self.dataset)
+        pdf_file = 'pdf/{0}.{1}.qpg-cluster.pdf'.format(self.group, self.dataset)
 
         return [luigi.LocalTarget(path) for path in [log_file, csv_file, mtx_file, pdf_file]]
 
     def run(self):
 
         # the prefix to apply to the dot files
-        dot_path = 'qpgraph/dot/{0}.permute'.format(dataset)
+        dot_path = 'qpgraph/dot/{0}.permute'.format(self.dataset)
 
         # get the output file
         log_file, csv_file, mtx_file, pdf_file = [file.path for file in self.output()]
 
         # find all the PDFs, and extract the graph names
-        files = glob.glob('pdf/{0}.{1}.qpg-permute-*'.format(group, dataset))
+        files = glob.glob('pdf/{0}.{1}.qpg-permute-*'.format(self.group, self.dataset))
         graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files]
 
         fitted_file = self.input()[2].path
