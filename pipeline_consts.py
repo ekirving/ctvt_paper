@@ -227,8 +227,3 @@ PLINK_TAXA = '--dog'
 
 # no single worker should use more than 30% of the available cores
 MAX_CPU_CORES = int(multiprocessing.cpu_count() * 0.3)
-
-# dynamically set the resource constraints
-config = configuration.get_config()
-config.set('resources', 'cpu-cores', str(multiprocessing.cpu_count()))
-config.set('resources', 'ram-gb', str(int(virtual_memory().total * 1e-9)))
