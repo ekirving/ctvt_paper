@@ -872,10 +872,50 @@ class QPGraphPermute(PrioritisedTask):
         # run qpGraph
         solutions = permute_qpgraph(par_file, log_file, dot_path, pdf_path, populations, outgroup, self.exhaustive)
 
-        # mark the job as complete
+        # record the hash codes for all the fitting graphs
         fitted_file = self.output()[2].path
-        with open(fitted_file, 'w') as done:
-            par.write("\n".join(solutions))
+        with open(fitted_file, 'w') as fout:
+            fout.write("\n".join(solutions))
+
+
+class QPGraphCluster(PrioritisedTask):
+    """
+    Perform hierarchical clustering on a set of fitted admixture graphs.
+    """
+    group = luigi.Parameter()
+    dataset = luigi.Parameter()
+    exhaustive = luigi.BoolParameter(default=False)
+
+    resources = {'cpu-cores': MAX_CPU_CORES}
+
+    def requires(self):
+        return QPGraphPermute(self.group, self.dataset, self.exhaustive)
+
+    def output(self):
+        log_file = 'qpgraph/{0}.{1}.cluster.log'.format(group, dataset)
+        csv_file = 'qpgraph/{0}.{1}.cluster.csv'.format(group, dataset)
+        mtx_file = 'qpgraph/{0}.{1}.cluster.npy'.format(group, dataset)
+        pdf_file = 'pdf/{0}.{1}.qpg-cluster.pdf'.format(group, dataset)
+
+        return [luigi.LocalTarget(path) for path in [log_file, csv_file, mtx_file, pdf_file]]
+
+    def run(self):
+
+        # the prefix to apply to the dot files
+        dot_path = 'qpgraph/dot/{0}.permute'.format(dataset)
+
+        # get the output file
+        log_file, csv_file, mtx_file, pdf_file = [file.path for file in self.output()]
+
+        # find all the PDFs, and extract the graph names
+        files = glob.glob('pdf/{0}.{1}.qpg-permute-*'.format(group, dataset))
+        graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files]
+
+        fitted_file = self.input()[2].path
+        with open(fitted_file, 'r') as fin:
+            graph_names = fin.read().splitlines()
+
+        cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file)
 
 
 class ConvertfBedToEigenstrat(PrioritisedTask):
@@ -1148,7 +1188,7 @@ class CTVTqpGraphPipeline(luigi.WrapperTask):
     def requires(self):
 
         # new analysis group for Laurent mirroring the treemix group
-        yield QPGraphPermute('graph-pops2', 'merged_v2_TV_laurent', exhaustive=True)
+        yield QPGraphCluster('graph-pops2', 'merged_v2_TV_laurent', exhaustive=True)
 
 
 class CTVTFiguresPipeline(luigi.WrapperTask):

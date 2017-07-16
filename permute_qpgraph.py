@@ -687,7 +687,7 @@ class ClusterQpgraph():
         return dist_matrix
 
 
-def cluster_qpgraph(graph_names, log_file, dot_path, pdf_file, csv_file, mtx_file, verbose=False):
+def cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file, verbose=False):
     """
     Compare all fitting graphs and compute the number of clusters.
     """
@@ -766,4 +766,4 @@ if __name__ == "__main__":
     files = glob.glob('pdf/{0}.{1}.qpg-permute-*'.format(group, dataset))
     graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files]
 
-    cluster_qpgraph(graph_names, log_file, dot_path, pdf_file, csv_file, mtx_file, verbose=True)
+    cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file, verbose=True)
