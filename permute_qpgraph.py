@@ -626,6 +626,10 @@ class ClusterQpgraph():
         # enforce symmetry in the matrix by taking the max distance
         dist = max(d1, d2)
 
+        # FIXME output something 1% of the time
+        if random.randint(1, 100) == 100:
+            self.log(".")
+
         return i, j, dist
 
     def build_matrix(self):
@@ -704,6 +708,8 @@ def cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_fil
     # get the distance matrix
     dist_matrix = cq.get_matrix()
 
+    cq.log("INFO: Calculating the hierarchical clusters (linkage matrix)")
+
     # calculate the hierarchical clusters, using Ward's minimum variance method
     # https://en.wikipedia.org/wiki/Ward%27s_method
     Z = linkage(dist_matrix, method='ward')
@@ -716,9 +722,9 @@ def cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_fil
 
     # automatically assign graphs to clusters
     # https://joernhees.de/blog/2015/08/26/scipy-hierarchical-clustering-and-dendrogram-tutorial/#Inconsistency-Method
-    clusters = fcluster(Z, 10, criterion='inconsistent', depth=10)
+    clusters = fcluster(Z, t=10, criterion='inconsistent', depth=10)
 
-    cq.log("INFO: Found %s clusters using inconsistency criterion" % len(set(clusters)))
+    cq.log("INFO: Found %s clusters using inconsistency criterion (t=%s)" % (len(set(clusters)), 10))
 
     with open(csv_file, 'wb') as fout:
         csv_writer = csv.writer(fout)
