@@ -620,15 +620,15 @@ class ClusterQpgraph():
         i, j = args
 
         # calculate the distance scores between graph pairs (scores are not symmetric; i.e. A->B != B->A)
-        d1 = 1 - similarity(self.graphs[i], self.graphs[j])
-        d2 = 1 - similarity(self.graphs[j], self.graphs[i])
+        d1 = similarity(self.graphs[i], self.graphs[j], distance=True)
+        d2 = similarity(self.graphs[j], self.graphs[i], distance=True)
 
         # enforce symmetry in the matrix by taking the max distance
         dist = max(d1, d2)
 
-        # FIXME output something 1% of the time
+        # this might take a while, so lets show that something is actually happening
         if random.randint(1, 100) == 100:
-            self.log(".")
+            self.log(".",)
 
         return i, j, dist
 
