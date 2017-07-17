@@ -8,9 +8,11 @@
 import xml.etree.ElementTree as ElemTree
 import re
 import sys
-import warnings
 import csv
 import glob
+
+import matplotlib
+matplotlib.use('Agg')
 
 import numpy as np
 
