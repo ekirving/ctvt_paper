@@ -27,10 +27,8 @@ from itertools import izip
 from cStringIO import StringIO
 from Bio import Phylo
 
-with warnings.catch_warnings():
-    # suppress any optional dependency warnings from graph_tool
-    warnings.filterwarnings("ignore", category=RuntimeWarning)
-    from graph_tool.all import *
+from graph_tool import *
+from graph_tool.topology import *
 
 # TODO improve parsimony...
 # on first pass, only allow non-admix insertion
