@@ -624,10 +624,6 @@ class ClusterQpgraph():
         # enforce symmetry in the matrix by taking the max distance
         dist = max(d1, d2)
 
-        # this might take a while, so lets show that something is actually happening
-        if random.randint(1, 100) == 100:
-            self.log(".",)
-
         return i, j, dist
 
     def build_matrix(self):
