@@ -34,28 +34,6 @@ GRAPH_POPS3 = ['OUT', 'COY', 'WAM', 'WEU', 'TAI', 'DEU', 'DVN', 'DPC', 'DMA']
 # groups of populations for running analyses
 GROUPS = {
 
-    'merged_map': {
-
-        # all the populations (except the Taimyr)
-        'all-pops': ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID',
-                     'DQA', 'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT', 'DIN', 'COY', 'WAM', 'WAS', 'WEU', 'WME', 'OUT'],
-
-        # all the populations, without the outgroup
-        'all-no-out': ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID',
-                       'DQA', 'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT', 'DIN', 'COY', 'WAM', 'WAS', 'WEU', 'WME'],
-
-        # dogs + CTVT (no outgroup)
-        'dog-ctvt': ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID',
-                     'DQA', 'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT'],
-    },
-
-    'merged_v1':        {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v1.random': {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v1_hq':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v1_hq2':    {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v1_TV':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v1_TV_hq':  {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-
     'merged_v2':        {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
     'merged_v2.random': {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
     'merged_v2_hq':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
@@ -63,31 +41,23 @@ GROUPS = {
     'merged_v2_TV':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
     'merged_v2_TV_hq':  {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
 
-    # qpGraph analysis
-    'merged_v2_laurent':    {'graph-pops1': GRAPH_POPS1,
-                             'graph-pops2': GRAPH_POPS2,
-                             'graph-pops3': GRAPH_POPS3},
+    # qpGraph / treemix data
+    'merged_v2_laurent':    {'graph-pops2': GRAPH_POPS2},
+    'merged_v2_TV_laurent': {'graph-pops2': GRAPH_POPS2},
 
-    'merged_v2_TV_laurent': {'graph-pops1': GRAPH_POPS1,
-                             'graph-pops2': GRAPH_POPS2,
-                             'graph-pops3': GRAPH_POPS3},
-
-    'merged_v2_njviet':     {'nj-pops': NJ_POPS},
+    # NJ tree data
+    'merged_v2_njviet':     {'nj-pops':     NJ_POPS},
 
     'merged_SNParray':           {'all-pops': SNP_ARRAY_POPS},
     'merged_SNParray_v1':        {'all-pops': SNP_ARRAY_POPS},
     'merged_SNParray_v1_noCTVT': {'all-pops': SNP_ARRAY_POPS},
 
+    # new datasets
+    'merged_v3':          {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v3_hq':       {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v3_TV_hq':    {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_SNParray_v4': {'all-pops': SNP_ARRAY_POPS},
 }
-
-# add the 'all-pops' group to the new analysis dataset
-GROUPS['merged_map_hq']  = {'all-pops': list(GROUPS['merged_map']['all-pops'])}
-GROUPS['merged_map_hq2'] = {'all-pops': list(GROUPS['merged_map']['all-pops'])}
-
-# added the Taimyr (Ancient Wolf)
-GROUPS['merged_map_Taimyr'] = copy.deepcopy(GROUPS['merged_map'])
-for pop in GROUPS['merged_map_Taimyr'] :
-    GROUPS['merged_map_Taimyr'][pop].append('Taimyr')
 
 # the population and sample to use for rooting the NJ tree
 OUTGROUP_POP = {group: 'OUT' for group in GROUPS}
@@ -96,8 +66,6 @@ OUTGROUP_SAMPLE = {group: 'AndeanFox' for group in GROUPS}
 # sepcial cases for qpGraph
 OUTGROUP_POP['graph-pops1'] = 'COY'
 OUTGROUP_SAMPLE['graph-pops1'] = 'C_Cal'
-
-NO_OUTGROUPS = ['all-no-out', 'dog-ctvt']
 
 POPULATIONS = OrderedDict([
     ('BAS', 'African Dogs'),

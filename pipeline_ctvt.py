@@ -1066,7 +1066,7 @@ class QP3Pop(PrioritisedTask):
             "snpname:      {}".format(self.input()[2].path),
             "indivname:    {}".format(self.input()[3].path),
             "popfilename:  {}".format(self.output()[2].path),
-            # "inbreed:      YES"  # Use if target pop is inbred OR abd crucially if target is psudo-diploid
+            "inbreed:      YES"  # Use if target pop is inbred OR abd crucially if target is psudo-diploid
         ]
 
         # the params need to be defined in a .par file
@@ -1106,8 +1106,8 @@ class QPF4ratio(PrioritisedTask):
         c = '-'.join([re.sub('[^A-Z]', '', meta) for meta in self.meta_c])
         x = '-'.join([re.sub('[^A-Z]', '', meta) for meta in self.meta_x])
 
-        return [luigi.LocalTarget("qpf4ratio/{0}.{1}.a-{2}.b-{3}.c-{4}.x-{5}.blgsize-{6}.{7}".format(self.group, self.dataset, a, b, c, x, self.blgsize, ext))
-                    for ext in ['par', 'log', 'poplist']]
+        return [luigi.LocalTarget("qpf4ratio/{0}.{1}.a-{2}.b-{3}.c-{4}.x-{5}.blgsize-{6}.{7}".format(
+            self.group, self.dataset, a, b, c, x, self.blgsize, ext)) for ext in ['par', 'log', 'poplist']]
 
     def run(self):
 
@@ -1151,31 +1151,6 @@ class QPF4ratio(PrioritisedTask):
             logfile.write(log)
 
 
-class CTVTPipeline(luigi.WrapperTask):
-    """
-    Run the main CTVT pipeline
-    """
-
-    def requires(self):
-
-        for dataset in GROUPS:
-
-            for group in GROUPS[dataset]:
-
-                yield SmartPCAPlot(group, dataset)
-
-                for blgsize in [0.5, 1, 2]:
-                    yield QPDstat(group, dataset, blgsize)
-
-                if group not in NO_OUTGROUPS:
-
-                    for m in range(0, TREEMIX_MAX_M + 1):
-
-                        yield TreemixPlotM(group, dataset, GROUP_BY_POPS, m)
-                        yield TreemixPlotM(group, dataset, GROUP_BY_SMPL, m)
-                        yield QPGraphTreemixPlot(group, dataset, m)
-
-
 class CTVTqpGraphPipeline(luigi.WrapperTask):
     """
     Run these specific qpGraph tasks from the CTVT pipeline
@@ -1214,6 +1189,42 @@ class CTVTFiguresPipeline(luigi.WrapperTask):
         # Figure_TREEMIX2   / graph-pops2.merged_v2_TV_laurent.treemix.geno.grp-pops.m2.pdf
         for m in range(0, 3):
             yield TreemixPlotM('graph-pops2', 'merged_v2_TV_laurent', GROUP_BY_POPS, m)
+
+
+class CTVTv4Pipeline(luigi.WrapperTask):
+    """
+    Run these specific qpGraph tasks from the CTVT pipeline
+    """
+
+    def requires(self):
+
+        # SmartPCA
+        for dataset in ['merged_v3', 'merged_v3_TV']:
+            yield SmartPCAPlot('all-pops', dataset)
+            yield SmartPCAPlot('dog-ctvt', dataset)
+            yield SmartPCAPlot('dog-ctvt', dataset, ['DPC', 'CTVT'])
+
+        yield SmartPCAPlot('all-pops', 'merged_SNParray_v4')
+
+        # QPDstat
+        for dataset in ['merged_v3', 'merged_v3_TV', 'merged_SNParray_v4']:
+            for blgsize in [1, 2]:
+                yield QPDstat('all-pops', dataset, blgsize)
+
+        # QPF4ratio
+        a = ['CTVT']
+        b = ['Pre-Colombian Dogs']
+        c = ['European Dogs', 'East Asian Dogs']
+        x = ['American Dogs']
+
+        for dataset in ['merged_v3_hq', 'merged_v3_TV_hq', 'merged_SNParray_v4']:
+            for blgsize in [1, 2]:
+                yield QPF4ratio('all-pops', dataset, blgsize)
+
+        # QP3Pop
+        for dataset in ['merged_v3_hq', 'merged_v3_TV_hq']:
+            yield QP3Pop('all-pops', dataset)
+
 
 if __name__ == '__main__':
     luigi.run()
