@@ -1219,7 +1219,7 @@ class CTVTStatsPipeline(luigi.WrapperTask):
 
         for dataset in ['merged_v3_hq', 'merged_v3_TV_hq', 'merged_SNParray_v4']:
             for blgsize in [1, 2]:
-                yield QPF4ratio('all-pops', dataset, blgsize)
+                yield QPF4ratio('all-pops', dataset, a, b, c, x, blgsize)
 
         # QP3Pop
         for dataset in ['merged_v3_hq', 'merged_v3_TV_hq']:
