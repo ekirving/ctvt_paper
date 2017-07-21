@@ -19,13 +19,20 @@ NJ_POPS = ['BAS', 'COY', 'CTVT', 'DAE', 'DAL', 'DEU', 'DGL', 'DGS', 'DHU', 'DID'
 ALL_DOGS = ['BAS', 'DNA', 'DAE', 'DEU', 'DGS', 'DLB', 'DAL', 'DGL', 'DHU', 'DMA', 'DSL', 'DME', 'DPU', 'DID', 'DQA',
             'DCH', 'DTI', 'DTM', 'DVN', 'DPC', 'CTVT', 'DIN']
 
-SNP_ARRAY_POPS = ['BAS', 'BAS2', 'DNA', 'BEA', 'BOX', 'DAE', 'DEU', 'DGS', 'DLB', 'AM', 'DAL', 'DGL', 'DHU', 'DMA',
-                  'DSL', 'EUR', 'FS', 'GSD', 'SAM', 'SH', 'AED', 'APBT', 'AST', 'CD', 'CLD', 'CBR', 'CHI', 'DME',
-                  'DPU', 'NEW', 'NSDTR', 'PIO', 'VDB', 'VDB2', 'VDC', 'VDCR', 'VDDR', 'VDH', 'VDP', 'VDPA', 'VDPC',
-                  'VDPI', 'VDPL', 'VDPP', 'VDPR', 'VDUA', 'XOL', 'DID', 'DQA', 'VDIC', 'VDID', 'VDIH', 'VDIM',
-                  'VDIO', 'CSP', 'CC', 'DCH', 'DTI', 'DTM', 'DVN', 'NGSD', 'VDIB', 'VDIJ', 'VDPNGEH', 'VDPNGPM',
-                  'VDVCB', 'VDVHG', 'VDVLS', 'VDVLC', 'DPC', 'CTVT', 'DIN', 'COY', 'WAM', 'WAS', 'WEU', 'WME',
-                  'TAI', 'OUT']
+SNP_ARRAY_v1 = ['AED', 'AM', 'APBT', 'AST', 'BAS', 'BAS2', 'BEA', 'BOX', 'CBR', 'CC', 'CD', 'CHI', 'CLD', 'COY', 'CSP',
+                'CTVT', 'DAE', 'DAL', 'DCH', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DIN', 'DLB', 'DMA', 'DME', 'DNA',
+                'DPC', 'DPU', 'DQA', 'DSL', 'DTI', 'DTM', 'DVN', 'EUR', 'FS', 'GSD', 'NEW', 'NGSD', 'NSDTR', 'OUT',
+                'PIO', 'SAM', 'SH', 'TAI', 'VDB', 'VDB2', 'VDC', 'VDCR', 'VDDR', 'VDH', 'VDIB', 'VDIC', 'VDID', 'VDIH',
+                'VDIJ', 'VDIM', 'VDIO', 'VDP', 'VDPA', 'VDPC', 'VDPI', 'VDPL', 'VDPNGEH', 'VDPNGPM', 'VDPP', 'VDPR',
+                'VDUA', 'VDVCB', 'VDVHG', 'VDVLC', 'VDVLS', 'WAM', 'WAS', 'WEU', 'WME', 'XOL']
+
+# added "COO" since v1
+SNP_ARRAY_v5 = ['AED', 'AM', 'APBT', 'AST', 'BAS', 'BAS2', 'BEA', 'BOX', 'CBR', 'CC', 'CD', 'CHI', 'CLD', 'COO', 'COY',
+                'CSP', 'CTVT', 'DAE', 'DAL', 'DCH', 'DEU', 'DGL', 'DGS', 'DHU', 'DID', 'DIN', 'DLB', 'DMA', 'DME',
+                'DNA', 'DPC', 'DPU', 'DQA', 'DSL', 'DTI', 'DTM', 'DVN', 'EUR', 'FS', 'GSD', 'NEW', 'NGSD', 'NSDTR',
+                'OUT', 'PIO', 'SAM', 'SH', 'TAI', 'VDB', 'VDB2', 'VDC', 'VDCR', 'VDDR', 'VDH', 'VDIB', 'VDIC', 'VDID',
+                'VDIH', 'VDIJ', 'VDIM', 'VDIO', 'VDP', 'VDPA', 'VDPC', 'VDPI', 'VDPL', 'VDPNGEH', 'VDPNGPM', 'VDPP',
+                'VDPR', 'VDUA', 'VDVCB', 'VDVHG', 'VDVLC', 'VDVLS', 'WAM', 'WAS', 'WEU', 'WME', 'XOL']
 
 GRAPH_POPS1 = ['COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
 GRAPH_POPS2 = ['OUT', 'COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
@@ -48,15 +55,15 @@ GROUPS = {
     # NJ tree data
     'merged_v2_njviet':     {'nj-pops':     NJ_POPS},
 
-    'merged_SNParray':           {'all-pops': SNP_ARRAY_POPS},
-    'merged_SNParray_v1':        {'all-pops': SNP_ARRAY_POPS},
-    'merged_SNParray_v1_noCTVT': {'all-pops': SNP_ARRAY_POPS},
+    'merged_SNParray':           {'all-pops': SNP_ARRAY_v1},
+    'merged_SNParray_v1':        {'all-pops': SNP_ARRAY_v1},
+    'merged_SNParray_v1_noCTVT': {'all-pops': SNP_ARRAY_v1},
 
     # new datasets
     'merged_v3':          {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
     'merged_v3_hq':       {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
     'merged_v3_TV_hq':    {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_SNParray_v4': {'all-pops': SNP_ARRAY_POPS},
+    'merged_SNParray_v5': {'all-pops': SNP_ARRAY_v5},
 }
 
 # the population and sample to use for rooting the NJ tree
@@ -95,6 +102,7 @@ POPULATIONS = OrderedDict([
     ('CLD', 'American Dogs'),
     ('CBR', 'American Dogs'),
     ('CHI', 'American Dogs'),
+    ('COO', 'American Dogs'),
     ('DME', 'American Dogs'),
     ('DPU', 'American Dogs'),
     ('NEW', 'American Dogs'),

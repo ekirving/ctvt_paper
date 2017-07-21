@@ -1204,20 +1204,20 @@ class CTVTStatsPipeline(luigi.WrapperTask):
             yield SmartPCAPlot('dog-ctvt', dataset)
             yield SmartPCAPlot('dog-ctvt', dataset, ['DPC', 'CTVT'])
 
-        yield SmartPCAPlot('all-pops', 'merged_SNParray_v4')
+        yield SmartPCAPlot('all-pops', 'merged_SNParray_v5')
 
         # QPDstat
-        for dataset in ['merged_v3', 'merged_v3_TV', 'merged_SNParray_v4']:
+        for dataset in ['merged_v3', 'merged_v3_TV', 'merged_SNParray_v5']:
             for blgsize in [1, 2]:
                 yield QPDstat('all-pops', dataset, blgsize)
 
         # QPF4ratio
         a = ['CTVT']
-        b = ['Pre-Colombian Dogs']
+        b = ['Pre-contact Dogs']
         c = ['European Dogs', 'East Asian Dogs']
         x = ['American Dogs']
 
-        for dataset in ['merged_v3_hq', 'merged_v3_TV_hq', 'merged_SNParray_v4']:
+        for dataset in ['merged_v3_hq', 'merged_v3_TV_hq', 'merged_SNParray_v5']:
             for blgsize in [1, 2]:
                 yield QPF4ratio('all-pops', dataset, a, b, c, x, blgsize)
 
