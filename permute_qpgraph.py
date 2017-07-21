@@ -11,8 +11,9 @@ import sys
 import csv
 import glob
 
-import matplotlib
-matplotlib.use('Agg')
+# TODO this throws a warning...
+# import matplotlib
+# matplotlib.use('Agg')
 
 import numpy as np
 
