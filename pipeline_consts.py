@@ -62,6 +62,7 @@ GROUPS = {
     # new datasets
     'merged_v3':          {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
     'merged_v3_hq':       {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    'merged_v3_TV':       {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
     'merged_v3_TV_hq':    {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
     'merged_SNParray_v5': {'all-pops': SNP_ARRAY_v5},
 }
