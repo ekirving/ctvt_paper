@@ -1191,7 +1191,7 @@ class CTVTFiguresPipeline(luigi.WrapperTask):
             yield TreemixPlotM('graph-pops2', 'merged_v2_TV_laurent', GROUP_BY_POPS, m)
 
 
-class CTVTv4Pipeline(luigi.WrapperTask):
+class CTVTStatsPipeline(luigi.WrapperTask):
     """
     Run these specific qpGraph tasks from the CTVT pipeline
     """
