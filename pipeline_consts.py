@@ -49,8 +49,8 @@ GROUPS = {
     'merged_v2_TV_hq':  {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
 
     # qpGraph / treemix data
-    'merged_v2_laurent':    {'graph-pops2': GRAPH_POPS2},
-    'merged_v2_TV_laurent': {'graph-pops2': GRAPH_POPS2},
+    'merged_v2_laurent':    {'graph-pops1': GRAPH_POPS1, 'graph-pops2': GRAPH_POPS2},
+    'merged_v2_TV_laurent': {'graph-pops1': GRAPH_POPS1, 'graph-pops2': GRAPH_POPS2},
 
     # NJ tree data
     'merged_v2_njviet':     {'nj-pops':     NJ_POPS},
