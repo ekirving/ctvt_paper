@@ -273,6 +273,7 @@ class SmartPCA(PrioritisedTask):
         with open(poplist, 'w') as fout:
             fout.write("\n".join(pops))
 
+        # TODO replace with dependency on convertf
         # N.B. smartpca requires an invalid verison of the .fam file, where the phenotype column has been replaced with
         # the population name. If you don't do this then none of the populations in poplistname will be found. Also, if
         # you happen to be using qtmode:YES (because otherwise a value of -9 throws errors!) then it will fail to find

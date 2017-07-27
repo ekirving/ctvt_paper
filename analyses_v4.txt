@@ -1,0 +1,72 @@
+- Admixture
+	- NO (we'll use your version)
+
+- NeighborJoiningTree
+	- NO (we'll use your version)
+
+- SmartPCA
+	- all pops (proj. DPC)
+		- merged_v3
+		- merged_v3_TV
+		- merged_SNParray_v4
+
+	- all dogs (proj. DPC)
+		- merged_v3
+		- merged_v3_TV
+		
+	- all dogs (proj. DPC, CTVT)
+		- merged_v3
+		- merged_v3_TV
+		
+- Treemix
+	- NO (we'll keep the old stuff)
+
+- QPGraph
+	- NO (we'll keep the existing version)
+	
+- QPDstat
+	- all samples in all possible 3-way tests with the outgroup
+
+	- for these datasets
+		- merged_v3
+		- merged_v3_TV
+		- merged_SNParray_v4
+
+	- blgsizes 1 and 2
+
+- QPF4ratio
+
+	- all 4-pop tests for every population in these meta-populations
+		f4(A,O; X,C) / f4(A,O; B,C)
+		
+        a = ['CTVT']
+        b = ['Pre-Colombian Dogs']
+        c = ['European Dogs', 'East Asian Dogs']
+        x = ['American Dogs']
+
+	- should this use all DPC or just AL3194 & AL3223 ?
+
+	- for these datasets
+		- merged_SNParray_v4
+	
+	- blgsizes 1 and 2
+	
+- QP3Pop
+	- all populations
+		- but only the 2x "high coverage" DPC - AL3194 & AL3223
+	
+	- all 3-ways tests with
+		- (outgroup, testpop, DPC)
+	
+	- for these datasets
+		- merged_v3
+		- merged_v3_TV
+
+
+
+
+
+
+
+
+
