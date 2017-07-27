@@ -759,7 +759,7 @@ if __name__ == "__main__":
     # ---------------------
     # -- PERMUTE_QPGRAPH --
     # ---------------------
-    nodes = GROUPS[dataset][group][0:4]
+    nodes = GROUPS[dataset][group][0:5]
     outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
     par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
     log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
@@ -782,4 +782,4 @@ if __name__ == "__main__":
     # cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file, verbose=True)
 
     walltime = time.time() - start
-    print "INFO: Execution took: %" % datetime.timedelta(seconds=walltime)
+    print "INFO: Execution took: %s" % datetime.timedelta(seconds=walltime)
