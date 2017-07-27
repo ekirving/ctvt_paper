@@ -749,25 +749,29 @@ if __name__ == "__main__":
     group = sys.argv[1]
     dataset = sys.argv[2]
 
-    # nodes = GROUPS[dataset][group]
-    # outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
-    #
-    # par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
-    # log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
-    # dot_path = 'qpgraph/dot/{0}.permute'.format(dataset)
-    # pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
-
-    # permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
-
     dot_path = 'qpgraph/dot/{0}.permute'.format(dataset)
 
-    log_file = 'qpgraph/{0}.{1}.cluster.log'.format(group, dataset)
-    csv_file = 'qpgraph/{0}.{1}.cluster.csv'.format(group, dataset)
-    mtx_file = 'qpgraph/{0}.{1}.cluster.npy'.format(group, dataset)
-    pdf_file = 'pdf/{0}.{1}.qpg-cluster.pdf'.format(group, dataset)
+    # ---------------------
+    # -- PERMUTE_QPGRAPH --
+    # ---------------------
+    nodes = GROUPS[dataset][group]
+    outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
+    par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
+    log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
+    pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
 
-    # find all the PDFs, and extract the graph names
-    files = glob.glob('pdf/{0}.{1}.qpg-permute-*'.format(group, dataset))
-    graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files]
+    permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
 
-    cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file, verbose=True)
+    # ---------------------
+    # -- CLUSTER_QPGRAPH --
+    # ---------------------
+    # log_file = 'qpgraph/{0}.{1}.cluster.log'.format(group, dataset)
+    # csv_file = 'qpgraph/{0}.{1}.cluster.csv'.format(group, dataset)
+    # mtx_file = 'qpgraph/{0}.{1}.cluster.npy'.format(group, dataset)
+    # pdf_file = 'pdf/{0}.{1}.qpg-cluster.pdf'.format(group, dataset)
+    #
+    # # find all the PDFs, and extract the graph names
+    # files = glob.glob('pdf/{0}.{1}.qpg-permute-*'.format(group, dataset))
+    # graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files]
+    #
+    # cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file, verbose=True)
