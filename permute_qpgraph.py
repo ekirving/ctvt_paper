@@ -734,6 +734,9 @@ def cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_fil
 
 if __name__ == "__main__":
 
+    import time
+    import datetime
+
     # simulated test data...
     # par_file = 'permute/simulated.par'
     # log_file = 'permute/simulated.log'
@@ -745,6 +748,8 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         print "Error: required params"
         quit()
+
+    start = time.time()
 
     group = sys.argv[1]
     dataset = sys.argv[2]
@@ -775,3 +780,6 @@ if __name__ == "__main__":
     # graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files]
     #
     # cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file, verbose=True)
+
+    walltime = time.time() - start
+    print "INFO: Execution took: %" % datetime.timedelta(seconds=walltime)
