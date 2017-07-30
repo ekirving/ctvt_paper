@@ -537,7 +537,7 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
     for graph_name in graph_names:
 
         try:
-            xml_path = 'qpgraph/dot/merged_v2_TV_laurent.permute-{name}.xml'.format(name=graph_name)
+            xml_path = 'qpgraph/dot/merged_v2_TV_laurent.permute-{name}.xml'.format(name=graph_name.strip())
             pq.find_graph(xml_path)
 
         except NodeUnplaceable as error:
