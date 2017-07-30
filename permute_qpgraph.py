@@ -521,10 +521,8 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
     pq = PermuteQpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive, verbose)
 
     # read in all the fitted graphs
-    # with open('qpgraph/graph-pops2.merged_v2_TV_laurent.permute.fitted', 'r') as fin:
-    #     graph_names = fin.readlines()
-
-    graph_names = ['1ac85ea', '1b4e916', '87e0558', '422111f', 'a22dfe5']
+    with open('qpgraph/graph-pops2.merged_v2_TV_laurent.permute.fitted', 'r') as fin:
+        graph_names = fin.readlines()
 
     pq.log("INFO: There are %s starting XML tees." % len(graph_names))
     pq.log("INFO: Performing %s search." % ("an exhaustive" if pq.exhaustive_search else "a heuristic"))

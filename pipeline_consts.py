@@ -204,4 +204,4 @@ PCA_COMPONENTS = [(1, 2), (3, 4), (5, 6)]
 PLINK_TAXA = '--dog'
 
 # no single worker should use more than 30% of the available cores
-MAX_CPU_CORES = int(multiprocessing.cpu_count() * 0.3)
+MAX_CPU_CORES = int(multiprocessing.cpu_count() - 5)
