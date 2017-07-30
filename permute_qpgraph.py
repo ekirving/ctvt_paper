@@ -487,22 +487,18 @@ class PermuteQpgraph:
             tag_name = '' if re.match('n[0-9]+|R', parent_node.tag) else parent_node.tag
             return '(' + ','.join(node for tag, node in children) + ')%s' % tag_name
 
-    def find_graph(self):
+    def find_graph(self, xml_path):
         """
         Build and test all possible trees and graphs
         """
 
-        self.log('INFO: Starting list %s' % self.nodes)
+        self.log('INFO: Starting XML tree %s' % xml_path)
 
-        # setup a simple 2-node tree
-        root_node = ElemTree.Element(self.root_node)
-        root_tree = ElemTree.ElementTree(root_node)
-
-        ElemTree.SubElement(root_node, self.outgroup)
-        ElemTree.SubElement(root_node, self.nodes[0])
+        # load an xml tree from file
+        root_tree = ElemTree.parse(xml_path)
 
         # recursively add all the other nodes
-        self.recurse_tree(root_tree, self.nodes[1], self.nodes[2:])
+        self.recurse_tree(root_tree, ['CTVT'], [])
 
 
 class NodeUnplaceable(Exception):
@@ -533,12 +529,16 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
     pq.log("INFO: There are %s possible starting orders for the given nodes." % len(all_nodes_perms))
     pq.log("INFO: Performing %s search." % ("an exhaustive" if pq.exhaustive_search else "a heuristic"))
 
+    # read in all the fitted graphs
+    with open('qpgraph/graph-pops2.merged_v2_TV_laurent.permute.fitted', 'r') as fin:
+        graph_names = fin.readlines()
+
     # keep looping until we find a solution, or until we've exhausted all possible starting orders
-    while not pq.solutions or pq.exhaustive_search:
+    for graph_name in graph_names:
 
         try:
-            # find the best fitting graph for this starting order
-            pq.find_graph()
+            xml_path = 'qpgraph/dot/merged_v2_TV_laurent.permute-{name}.xml'.format(name=graph_name)
+            pq.find_graph(xml_path)
 
         except NodeUnplaceable as error:
             # log the error
@@ -739,31 +739,31 @@ if __name__ == "__main__":
 
     start = time()
 
-    # simulated test data...
-    nodes = ['A', 'X', 'B', 'C']
-    outgroup = 'Out'
-    par_file = 'permute/simulated.par'
-    log_file = 'permute/simulated.log'
-    dot_path = 'permute/graphs/sim'
-    pdf_path = 'permute/pdf/sim'
+    # # simulated test data...
+    # nodes = ['A', 'X', 'B', 'C']
+    # outgroup = 'Out'
+    # par_file = 'permute/simulated.par'
+    # log_file = 'permute/simulated.log'
+    # dot_path = 'permute/graphs/sim'
+    # pdf_path = 'permute/pdf/sim'
 
-    # if len(sys.argv) != 3:
-    #     print "Error: required params"
-    #     quit()
-    #
-    # group = sys.argv[1]
-    # dataset = sys.argv[2]
-    #
-    # dot_path = 'qpgraph/dot/{0}.permute'.format(dataset)
-    #
-    # # ---------------------
-    # # -- PERMUTE_QPGRAPH --
-    # # ---------------------
-    # nodes = GROUPS[dataset][group]
-    # outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
-    # par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
-    # log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
-    # pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
+    if len(sys.argv) != 3:
+        print "Error: required params"
+        quit()
+
+    group = sys.argv[1]
+    dataset = sys.argv[2]
+
+    dot_path = 'qpgraph/dot/{0}.permute'.format(dataset)
+
+    # ---------------------
+    # -- PERMUTE_QPGRAPH --
+    # ---------------------
+    nodes = GROUPS[dataset][group]
+    outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
+    par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
+    log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
+    pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
 
     permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
 

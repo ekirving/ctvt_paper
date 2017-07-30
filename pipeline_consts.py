@@ -36,7 +36,7 @@ SNP_ARRAY_v5 = ['AED', 'AM', 'APBT', 'AST', 'BAS', 'BAS2', 'BEA', 'BOX', 'CBR', 
 
 GRAPH_POPS1 = ['COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
 GRAPH_POPS2 = ['OUT', 'COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
-GRAPH_POPS3 = ['OUT', 'COY', 'WAM', 'WEU', 'TAI', 'DEU', 'DVN', 'DPC', 'DMA']
+GRAPH_POPS3 = ['OUT', 'COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA', 'CTVT']
 
 GRAPH_TEST1 = ['OUT', 'COY', 'WAM', 'WEU', 'DEU', 'DVN']
 
@@ -52,7 +52,7 @@ GROUPS = {
 
     # qpGraph / treemix data
     'merged_v2_laurent':    {'graph-pops2': GRAPH_POPS2},
-    'merged_v2_TV_laurent': {'graph-pops2': GRAPH_POPS2, 'graph-test1': GRAPH_TEST1},
+    'merged_v2_TV_laurent': {'graph-pops2': GRAPH_POPS2, 'graph-pops3': GRAPH_POPS3, 'graph-test1': GRAPH_TEST1},
 
     # NJ tree data
     'merged_v2_njviet':     {'nj-pops':     NJ_POPS},
