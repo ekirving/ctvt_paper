@@ -95,6 +95,9 @@ class PermuteQpgraph:
         Permute all possible new trees, by adding the new node to all branches.
     
         If no resulting tree passes the outlier threshold then try adding the node to all possible pairs of branches.
+
+        If that still doesn't work, then try inserting the node as a child of an existing branch, but also as an admix
+        parent of an existing node. For example, (A,(B,X)) + C -> ((A,(B,(X)a1)),(C)a1)
         """
         new_trees = []
 
@@ -115,7 +118,7 @@ class PermuteQpgraph:
         # process the results
         node_placed = self.check_results(results, remaining, depth)
 
-        # test all the admixture possibilities
+        # test all the admixture child possibilities
         if not node_placed:
 
             admix_trees = []
@@ -154,22 +157,39 @@ class PermuteQpgraph:
             # process the results
             node_placed = self.check_results(results, remaining, depth)
 
+        new_trees = []
+
+        # test all the admixture parent possibilities
         if not node_placed:
 
-            # we could not place the node via either method :(
-            if new_tag not in self.problem_nodes and remaining and not self.exhaustive_search:
-                self.log("WARNING: Unable to place node '%s' at this time." % new_tag)
+            # all_trees = new_trees + admix_trees
 
-                self.problem_nodes.append(new_tag)
+            for new_tree in new_trees:
+                # none of the normal insertions worked, so lets try them all again but this time lets allow an existing
+                # node to be removed and reinserted as the admixed child of the new node and its current parent
 
-                # add the problem node to end of the list, as we may be able to add it later on
-                remaining.append(new_tag)
+                # add the new node to every branch in the tree
+                for target_node in target_nodes:
+                    print '.',
+                    pass
 
-                # try and add the other nodes
-                self.recurse_tree(root_tree, remaining[0], remaining[1:], depth)
+        if not node_placed:
+            self.log("WARNING: Unable to place node '%s'." % new_tag)
 
-            else:
-                raise NodeUnplaceable("ERROR: Cannot place node '%s' in the graph." % new_tag)
+            # # we could not place the node via either method :(
+            # if new_tag not in self.problem_nodes and remaining and not self.exhaustive_search:
+            #     self.log("WARNING: Unable to place node '%s' at this time." % new_tag)
+            #
+            #     self.problem_nodes.append(new_tag)
+            #
+            #     # add the problem node to end of the list, as we may be able to add it later on
+            #     remaining.append(new_tag)
+            #
+            #     # try and add the other nodes
+            #     self.recurse_tree(root_tree, remaining[0], remaining[1:], depth)
+            #
+            # else:
+            #     raise NodeUnplaceable("ERROR: Cannot place node '%s' in the graph." % new_tag)
 
     def test_trees(self, new_trees, depth):
         """
@@ -524,36 +544,19 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
     # instantiate the class
     pq = PermuteQpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive, verbose)
 
-    # get all the permutations of possible node orders
-    all_nodes_perms = list(itertools.permutations(nodes, len(nodes)))
-
-    # randomise the list of starting orders
-    random.shuffle(all_nodes_perms)
-
-    pq.log("INFO: There are %s possible starting orders for the given nodes." % len(all_nodes_perms))
     pq.log("INFO: Performing %s search." % ("an exhaustive" if pq.exhaustive_search else "a heuristic"))
 
-    # keep looping until we find a solution, or until we've exhausted all possible starting orders
-    while not pq.solutions or pq.exhaustive_search:
+    try:
+        # find the best fitting graph
+        pq.find_graph()
 
-        try:
-            # find the best fitting graph for this starting order
-            pq.find_graph()
+    except NodeUnplaceable as error:
+        # log the error
+        pq.log(error)
 
-        except NodeUnplaceable as error:
-            # log the error
-            pq.log(error)
-
-        try:
-            # try starting with a different node order
-            pq.nodes = list(all_nodes_perms.pop())
-
-        except IndexError:
-            # we've run out of node orders to try
-            if not pq.solutions:
-                pq.log("ERROR: Cannot resolve the graph from any permutation of the given nodes.")
-
-            break
+        # we didn't find a solution
+        if not pq.solutions:
+            pq.log("ERROR: Cannot resolve the graph all the given nodes.")
 
     pq.log("FINISHED: Found %s unique solution(s) from a total of %s unique graphs!" %
            (len(pq.solutions), len(pq.tested_graphs)))
@@ -620,6 +623,7 @@ class ClusterQpgraph():
         # extract the tuple of arguments
         i, j = args
 
+        # TODO check how node names effect this!
         # calculate the distance scores between graph pairs (scores are not symmetric; i.e. A->B != B->A)
         d1 = similarity(self.graphs[i], self.graphs[j], distance=True)
         d2 = similarity(self.graphs[j], self.graphs[i], distance=True)
