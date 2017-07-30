@@ -520,18 +520,12 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
     # instantiate the class
     pq = PermuteQpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive, verbose)
 
-    # get all the permutations of possible node orders
-    all_nodes_perms = list(itertools.permutations(nodes, len(nodes)))
-
-    # randomise the list of starting orders
-    random.shuffle(all_nodes_perms)
-
-    pq.log("INFO: There are %s possible starting orders for the given nodes." % len(all_nodes_perms))
-    pq.log("INFO: Performing %s search." % ("an exhaustive" if pq.exhaustive_search else "a heuristic"))
-
     # read in all the fitted graphs
     with open('qpgraph/graph-pops2.merged_v2_TV_laurent.permute.fitted', 'r') as fin:
         graph_names = fin.readlines()
+
+    pq.log("INFO: There are %s starting XML tees." % len(graph_names))
+    pq.log("INFO: Performing %s search." % ("an exhaustive" if pq.exhaustive_search else "a heuristic"))
 
     # keep looping until we find a solution, or until we've exhausted all possible starting orders
     for graph_name in graph_names:
@@ -543,17 +537,6 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
         except NodeUnplaceable as error:
             # log the error
             pq.log(error)
-
-        try:
-            # try starting with a different node order
-            pq.nodes = list(all_nodes_perms.pop())
-
-        except IndexError:
-            # we've run out of node orders to try
-            if not pq.solutions:
-                pq.log("ERROR: Cannot resolve the graph from any permutation of the given nodes.")
-
-            break
 
     pq.log("FINISHED: Found %s unique solution(s) from a total of %s unique graphs!" %
            (len(pq.solutions), len(pq.tested_graphs)))
