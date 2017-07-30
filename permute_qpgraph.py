@@ -759,7 +759,7 @@ if __name__ == "__main__":
     # ---------------------
     # -- PERMUTE_QPGRAPH --
     # ---------------------
-    nodes = GROUPS[dataset][group][0:6]
+    nodes = GROUPS[dataset][group]
     outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
     par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
     log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)

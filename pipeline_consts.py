@@ -38,6 +38,8 @@ GRAPH_POPS1 = ['COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
 GRAPH_POPS2 = ['OUT', 'COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
 GRAPH_POPS3 = ['OUT', 'COY', 'WAM', 'WEU', 'TAI', 'DEU', 'DVN', 'DPC', 'DMA']
 
+GRAPH_TEST1 = ['OUT', 'COY', 'WAM', 'WEU', 'DEU', 'DVN']
+
 # groups of populations for running analyses
 GROUPS = {
 
@@ -49,8 +51,8 @@ GROUPS = {
     'merged_v2_TV_hq':  {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
 
     # qpGraph / treemix data
-    'merged_v2_laurent':    {'graph-pops1': GRAPH_POPS1, 'graph-pops2': GRAPH_POPS2},
-    'merged_v2_TV_laurent': {'graph-pops1': GRAPH_POPS1, 'graph-pops2': GRAPH_POPS2},
+    'merged_v2_laurent':    {'graph-pops2': GRAPH_POPS2},
+    'merged_v2_TV_laurent': {'graph-pops2': GRAPH_POPS2, 'graph-test1': GRAPH_TEST1},
 
     # NJ tree data
     'merged_v2_njviet':     {'nj-pops':     NJ_POPS},
