@@ -738,36 +738,36 @@ def cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_fil
 
 if __name__ == "__main__":
 
-    import time
-    import datetime
+    from time import time
+    from datetime import timedelta
+
+    start = time()
 
     # simulated test data...
-    # par_file = 'permute/simulated.par'
-    # log_file = 'permute/simulated.log'
-    # dot_path = 'permute/graphs/sim'
-    # pdf_path = 'permute/pdf/sim'
-    # nodes = ['A', 'B', 'C', 'X']
-    # outgroup = 'Out'
+    nodes = ['A', 'X', 'B', 'C']
+    outgroup = 'Out'
+    par_file = 'permute/simulated.par'
+    log_file = 'permute/simulated.log'
+    dot_path = 'permute/graphs/sim'
+    pdf_path = 'permute/pdf/sim'
 
-    if len(sys.argv) != 3:
-        print "Error: required params"
-        quit()
-
-    start = time.time()
-
-    group = sys.argv[1]
-    dataset = sys.argv[2]
-
-    dot_path = 'qpgraph/dot/{0}.permute'.format(dataset)
-
-    # ---------------------
-    # -- PERMUTE_QPGRAPH --
-    # ---------------------
-    nodes = GROUPS[dataset][group]
-    outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
-    par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
-    log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
-    pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
+    # if len(sys.argv) != 3:
+    #     print "Error: required params"
+    #     quit()
+    #
+    # group = sys.argv[1]
+    # dataset = sys.argv[2]
+    #
+    # dot_path = 'qpgraph/dot/{0}.permute'.format(dataset)
+    #
+    # # ---------------------
+    # # -- PERMUTE_QPGRAPH --
+    # # ---------------------
+    # nodes = GROUPS[dataset][group]
+    # outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
+    # par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
+    # log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
+    # pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
 
     permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
 
@@ -785,5 +785,4 @@ if __name__ == "__main__":
     #
     # cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file, verbose=True)
 
-    walltime = time.time() - start
-    print "INFO: Execution took: %s" % datetime.timedelta(seconds=walltime)
+    print "INFO: Execution took: %s" % timedelta(seconds=time()-start)
