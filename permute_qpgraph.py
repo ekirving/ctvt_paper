@@ -166,10 +166,6 @@ class PermuteQpgraph:
             # node to be removed and reinserted as the admixed child of its current parent and the new node
             for outlier_tree in new_trees:
 
-                # get the new node and its parent
-                new_node = outlier_tree.find('.//' + new_tag)
-                parent_node = outlier_tree.find('.//' + new_tag + '/..')
-
                 # try all possible new admixed children
                 for target_node in target_nodes:
 
@@ -180,7 +176,7 @@ class PermuteQpgraph:
                         target_xpath += '[@side="%s"]' % target_node.get('side')
 
                     # skip targets which are ancestral to the new node
-                    if outlier_tree.find(target_xpath + '//' + new_node.tag) is not None:
+                    if outlier_tree.find(target_xpath + '//' + new_tag) is not None:
                         continue
 
                     # clone the current tree
@@ -190,17 +186,24 @@ class PermuteQpgraph:
                     target_node = new_tree.find(target_xpath)
                     target_parent = new_tree.find(target_xpath + '/..')
 
+                    # get the parent of the new new in this tree
+                    parent_node = new_tree.find('.//' + new_tag + '/..')
+
+                    # skip targets which have the same parent as the new node
+                    if target_parent == parent_node:
+                        continue
+
                     # make a new intermediate node
                     admix_label = self.new_label(new_tree, admix=True)
-
-                    # remove the target from the tree
-                    target_parent.remove(target_node)
 
                     # add two admix nodes as the children of both targets
                     admix_nodes = [
                         self.insert_node(new_tree, parent_node, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'l'}),
                         self.insert_node(new_tree, target_parent, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'r'})
                     ]
+
+                    # remove the target from the tree
+                    target_parent.remove(target_node)
 
                     # choose the actual parent based on the sort order of the tag name (needed for unique tree hashing)
                     admix_node = admix_nodes[0] if parent_node.tag < target_parent.tag else admix_nodes[1]
@@ -210,6 +213,8 @@ class PermuteQpgraph:
 
                     # add the new tree to the list of trees to test
                     admix_parent_trees.append(new_tree)
+
+            print "INFO: Built %s admix child trees to test" % len(admix_parent_trees)
 
             # test all the admixture parent trees
             results = self.test_trees(admix_parent_trees, depth)
