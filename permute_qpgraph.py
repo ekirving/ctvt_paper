@@ -121,7 +121,7 @@ class PermuteQpgraph:
         # test all the admixture child possibilities
         if not node_placed:
 
-            admix_trees = []
+            admix_child_trees = []
 
             # permute all the two parent admixture possibilities
             pairs = list(itertools.combinations(target_nodes, 2))
@@ -149,32 +149,78 @@ class PermuteQpgraph:
                 # add the new node as the child of the preferred admix node
                 self.insert_node(new_tree, admix_node, new_tag, append=True)
 
-                admix_trees.append(new_tree)
+                admix_child_trees.append(new_tree)
 
             # test all the admixture trees
-            results = self.test_trees(admix_trees, depth)
+            results = self.test_trees(admix_child_trees, depth)
 
             # process the results
             node_placed = self.check_results(results, remaining, depth)
 
-        new_trees = []
-
         # test all the admixture parent possibilities
         if not node_placed:
 
-            # all_trees = new_trees + admix_trees
+            admix_parent_trees = []
 
-            for new_tree in new_trees:
-                # none of the normal insertions worked, so lets try them all again but this time lets allow an existing
-                # node to be removed and reinserted as the admixed child of the new node and its current parent
+            # none of the normal insertions worked, so lets try them all again but this time lets allow an existing
+            # node to be removed and reinserted as the admixed child of its current parent and the new node
+            for outlier_tree in new_trees:
 
-                # add the new node to every branch in the tree
+                # get the new node and its parent
+                new_node = outlier_tree.find('.//' + new_tag)
+                parent_node = outlier_tree.find('.//' + new_tag + '/..')
+
+                # try all possible new admixed children
                 for target_node in target_nodes:
-                    print '.',
-                    pass
+
+                    # construct an xpath query to find the target in the current tree
+                    target_xpath = './/' + target_node.tag
+
+                    if target_node.get('side'):
+                        target_xpath += '[@side="%s"]' % target_node.get('side')
+
+                    # skip targets which are ancestral to the new node
+                    if outlier_tree.find(target_xpath + '//' + new_node.tag) is not None:
+                        continue
+
+                    # clone the current tree
+                    new_tree = copy.deepcopy(outlier_tree)
+
+                    # get the target and it's parent in this copy of the tree
+                    target_node = new_tree.find(target_xpath)
+                    target_parent = new_tree.find(target_xpath + '/..')
+
+                    # make a new intermediate node
+                    admix_label = self.new_label(new_tree, admix=True)
+
+                    # remove the target from the tree
+                    target_parent.remove(target_node)
+
+                    # add two admix nodes as the children of both targets
+                    admix_nodes = [
+                        self.insert_node(new_tree, parent_node, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'l'}),
+                        self.insert_node(new_tree, target_parent, admix_label, attrs={'internal': '1', 'admix': '1', 'side': 'r'})
+                    ]
+
+                    # choose the actual parent based on the sort order of the tag name (needed for unique tree hashing)
+                    admix_node = admix_nodes[0] if parent_node.tag < target_parent.tag else admix_nodes[1]
+
+                    # re add the target node
+                    admix_node.append(target_node)
+
+                    # add the new tree to the list of trees to test
+                    admix_parent_trees.append(new_tree)
+
+            # test all the admixture parent trees
+            results = self.test_trees(admix_parent_trees, depth)
+
+            # process the results
+            node_placed = self.check_results(results, remaining, depth)
 
         if not node_placed:
+
             self.log("WARNING: Unable to place node '%s'." % new_tag)
+            raise NodeUnplaceable("ERROR: Cannot place node '%s' in the graph." % new_tag)
 
             # # we could not place the node via either method :(
             # if new_tag not in self.problem_nodes and remaining and not self.exhaustive_search:
