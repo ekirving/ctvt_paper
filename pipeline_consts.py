@@ -54,6 +54,9 @@ GROUPS = {
     'merged_v2_laurent':    {'graph-pops2': GRAPH_POPS2},
     'merged_v2_TV_laurent': {'graph-pops2': GRAPH_POPS2, 'graph-test1': GRAPH_TEST1},
 
+    # new analysis group
+    'merged_v3_TV_laurent': {'graph-pops2': GRAPH_POPS2, 'graph-pops3': GRAPH_POPS3, 'graph-test1': GRAPH_TEST1},
+
     # NJ tree data
     'merged_v2_njviet':     {'nj-pops':     NJ_POPS},
 
