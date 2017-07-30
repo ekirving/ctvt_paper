@@ -151,6 +151,8 @@ class PermuteQpgraph:
 
                 admix_child_trees.append(new_tree)
 
+            print "INFO: Built %s admix child trees to test" % len(admix_child_trees)
+
             # test all the admixture trees
             results = self.test_trees(admix_child_trees, depth)
 
@@ -214,7 +216,7 @@ class PermuteQpgraph:
                     # add the new tree to the list of trees to test
                     admix_parent_trees.append(new_tree)
 
-            print "INFO: Built %s admix child trees to test" % len(admix_parent_trees)
+            print "INFO: Built %s admix parent trees to test" % len(admix_parent_trees)
 
             # test all the admixture parent trees
             results = self.test_trees(admix_parent_trees, depth)
@@ -225,22 +227,7 @@ class PermuteQpgraph:
         if not node_placed:
 
             self.log("WARNING: Unable to place node '%s'." % new_tag)
-            raise NodeUnplaceable("ERROR: Cannot place node '%s' in the graph." % new_tag)
-
-            # # we could not place the node via either method :(
-            # if new_tag not in self.problem_nodes and remaining and not self.exhaustive_search:
-            #     self.log("WARNING: Unable to place node '%s' at this time." % new_tag)
-            #
-            #     self.problem_nodes.append(new_tag)
-            #
-            #     # add the problem node to end of the list, as we may be able to add it later on
-            #     remaining.append(new_tag)
-            #
-            #     # try and add the other nodes
-            #     self.recurse_tree(root_tree, remaining[0], remaining[1:], depth)
-            #
-            # else:
-            #     raise NodeUnplaceable("ERROR: Cannot place node '%s' in the graph." % new_tag)
+            # raise NodeUnplaceable("ERROR: Cannot place node '%s' in the graph." % new_tag)
 
     def test_trees(self, new_trees, depth):
         """
