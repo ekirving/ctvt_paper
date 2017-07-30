@@ -498,7 +498,7 @@ class PermuteQpgraph:
         root_tree = ElemTree.parse(xml_path)
 
         # recursively add all the other nodes
-        self.recurse_tree(root_tree, ['CTVT'], [])
+        self.recurse_tree(root_tree, ['CTVT'], [], 7)
 
 
 class NodeUnplaceable(Exception):
