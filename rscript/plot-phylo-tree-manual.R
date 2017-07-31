@@ -21,11 +21,11 @@ pdf_file  <- '/Users/Evan/Downloads/trees/pdf/merged_map_tv_standard.nex.con.pdf
 # tree_file <- '/Users/Evan/Downloads/trees/merged_map_tv_standard1.nex.con.tre'
 # pdf_file  <- '/Users/Evan/Downloads/trees/pdf/merged_map_tv_standard1.nex.con.pdf'
 
-# tree_file <- '/Users/Evan/Downloads/trees/merged_pruned_bootstrap_VIET.tree'
-# pdf_file  <- '/Users/Evan/Downloads/trees/pdf/merged_pruned_bootstrap_VIET.pdf'
+# tree_file <- '/Users/Evan/Downloads/trees/merged_pruned_bootstrap_v3.tree'
+# pdf_file  <- '/Users/Evan/Downloads/trees/pdf/merged_pruned_bootstrap_v3.pdf'
 
-# tree_file <- '/Users/Evan/Downloads/trees/merged_pruned_bootstrap.tree'
-# pdf_file  <- '/Users/Evan/Downloads/trees/pdf/merged_pruned_bootstrap.pdf'
+# tree_file <- '/Users/Evan/Downloads/trees/merged_pruned_bootstrap_VIET_v3.tree'
+# pdf_file  <- '/Users/Evan/Downloads/trees/pdf/merged_pruned_bootstrap_VIET_v3.pdf'
 
 # load the distance matrix
 m<-as.matrix(read.table(data_file, head=T, check.names=FALSE))
@@ -38,9 +38,10 @@ tr <- read.nexus(tree_file)
 tr <- root(tr, outgroup = outgroup, resolve.root = TRUE, edgelabel = TRUE)
 
 # fix the node labels
-if (!is.null(tr$node.label)) {
-    tr$node.label <- strtrim(tr$node.label, 4)
-    tr$node.label[1] <- ''
+tr$node.label <- as.numeric(tr$node.label)
+if (max(tr$node.label[!is.na(tr$node.label)]) <= 1) {
+    # trim long decimals
+    tr$node.label[!is.na(tr$node.label)] <- format(tr$node.label[!is.na(tr$node.label)], digits=2, nsmall=2)
 }
 
 # resolve.root adds a zero-length branch below the MRCA of the ingroup, so lets
@@ -56,7 +57,7 @@ tr <- ladderize(tr)
 
 # calcualte the plot size
 numnodes <- length(m[,1])
-plotsize = max(c(numnodes/20, 7))
+plotsize = numnodes/7
 
 # get the metadata matrix for all the samples
 info <- read.table('pop_names.csv', sep = ",", quote = '"', header=TRUE, comment.char="")
@@ -76,11 +77,9 @@ cols <- sapply(meta[tr$tip.label, 'Colour'], as.character)
 pdf(file=pdf_file, width = plotsize, height = plotsize)
 
 # plot the tree
-if (is.null(tr$node.label)) {
-    plot(tr, type=treetype, cex=0.6, tip.color=cols, label.offset=0.001, show.node.label=F)
-} else {
-    plot(tr, type=treetype, cex=0.6, tip.color=cols, label.offset=0.001, show.node.label=T)
-}
+plot(tr, edge.width=1.3,type=treetype, show.node.label=F, show.tip.label=F)
+nodelabels(tr$node.label, cex=0.6, col='#737373', bg='white', frame="none",adj=-.1)
+tiplabels(tr$tip.label, cex=0.7, col=cols, bg='white', frame="none",adj=-.1)
 legend(x=0,y=25,legend = key[[1]], fill = key[[2]], cex=0.6)
 add.scale.bar(cex = 0.6)
 
