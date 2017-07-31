@@ -1189,7 +1189,7 @@ class CTVTFiguresPipeline(luigi.WrapperTask):
         # Figure_TREEMIX    / graph-pops3.merged_v3_TV_laurent.treemix.geno.grp-pops.m0.pdf
         # Figure_TREEMIX1   / graph-pops3.merged_v3_TV_laurent.treemix.geno.grp-pops.m1.pdf
         # Figure_TREEMIX2   / graph-pops3.merged_v3_TV_laurent.treemix.geno.grp-pops.m2.pdf
-        for m in range(0, 3):
+        for m in range(0, 5):
             # yield TreemixPlotM('graph-pops2', 'merged_v2_TV_laurent', GROUP_BY_POPS, m)
             yield TreemixPlotM('graph-pops3', 'merged_v3_TV_laurent', GROUP_BY_POPS, m)
 
