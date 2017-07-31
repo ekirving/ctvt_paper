@@ -739,46 +739,61 @@ if __name__ == "__main__":
 
     start = time()
 
-    # simulated test data...
-    nodes = ['A', 'X', 'B', 'C']
-    outgroup = 'Out'
-    par_file = 'permute/simulated.par'
-    log_file = 'permute/simulated.log'
-    dot_path = 'permute/graphs/sim'
-    pdf_path = 'permute/pdf/sim'
+    if not(len(sys.argv) == 4 or (len(sys.argv) == 1 and sys.argv[1] == 'simulated')):
+        print "Error: required params"
+        quit()
 
-    # if len(sys.argv) != 3:
-    #     print "Error: required params"
-    #     quit()
-    #
-    # group = sys.argv[1]
-    # dataset = sys.argv[2]
-    #
-    # dot_path = 'qpgraph/dot/{0}.permute'.format(dataset)
-    #
-    # # ---------------------
-    # # -- PERMUTE_QPGRAPH --
-    # # ---------------------
-    # nodes = GROUPS[dataset][group]
-    # outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
-    # par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
-    # log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
-    # pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
+    func = sys.argv[1]
+    group = sys.argv[2]
+    dataset = sys.argv[3]
 
-    permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
+    if func == 'simulated':
 
-    # ---------------------
-    # -- CLUSTER_QPGRAPH --
-    # ---------------------
-    # log_file = 'qpgraph/{0}.{1}.cluster.log'.format(group, dataset)
-    # csv_file = 'qpgraph/{0}.{1}.cluster.csv'.format(group, dataset)
-    # mtx_file = 'qpgraph/{0}.{1}.cluster.npy'.format(group, dataset)
-    # pdf_file = 'pdf/{0}.{1}.qpg-cluster.pdf'.format(group, dataset)
-    #
-    # # find all the PDFs, and extract the graph names
-    # files = glob.glob('pdf/{0}.{1}.qpg-permute-*'.format(group, dataset))
-    # graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files]
-    #
-    # cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file, verbose=True)
+        # -------------------------
+        # -- SIMULATED TEST DATA --
+        # -------------------------
+        nodes = ['A', 'X', 'B', 'C']
+        outgroup = 'Out'
+        par_file = 'permute/simulated.par'
+        log_file = 'permute/simulated.log'
+        dot_path = 'permute/graphs/sim'
+        pdf_path = 'permute/pdf/sim'
 
-    print "INFO: Execution took: %s" % timedelta(seconds=time()-start)
+        permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
+
+        print "INFO: Permute execution took: %s" % timedelta(seconds=time() - start)
+
+    elif func == 'permute':
+
+        # ---------------------
+        # -- PERMUTE_QPGRAPH --
+        # ---------------------
+        nodes = GROUPS[dataset][group]
+        outgroup = OUTGROUP_POP[group] if group in OUTGROUP_POP else OUTGROUP_POP[dataset]
+        dot_path = 'qpgraph/dot/{0}.permute'.format(dataset)
+        par_file = 'qpgraph/{0}.{1}.permute.par'.format(group, dataset)
+        log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
+        pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
+
+        permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
+
+        print "INFO: Permute execution took: %s" % timedelta(seconds=time() - start)
+
+    elif func == 'cluster':
+
+        # ---------------------
+        # -- CLUSTER_QPGRAPH --
+        # ---------------------
+        dot_path = 'qpgraph/dot/{0}.permute'.format(dataset)
+        log_file = 'qpgraph/{0}.{1}.cluster.log'.format(group, dataset)
+        csv_file = 'qpgraph/{0}.{1}.cluster.csv'.format(group, dataset)
+        mtx_file = 'qpgraph/{0}.{1}.cluster.npy'.format(group, dataset)
+        pdf_file = 'pdf/{0}.{1}.qpg-cluster.pdf'.format(group, dataset)
+
+        # find all the PDFs, and extract the graph names
+        files = glob.glob('pdf/{0}.{1}.qpg-permute-*'.format(group, dataset))
+        graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files]
+
+        cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file, verbose=True)
+
+        print "INFO: Cluster execution took: %s" % timedelta(seconds=time()-start)
