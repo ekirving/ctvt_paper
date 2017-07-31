@@ -43,33 +43,36 @@ GRAPH_TEST1 = ['OUT', 'COY', 'WAM', 'WEU', 'DEU', 'DVN']
 # groups of populations for running analyses
 GROUPS = {
 
-    'merged_v2':        {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v2.random': {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v2_hq':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v2_hq2':    {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v2_TV':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v2_TV_hq':  {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    # ---------------------------
+    # -- whole genome datasets --
+    # ---------------------------
+    # 'merged_v2':        {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    # 'merged_v2.random': {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    # 'merged_v2_hq':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    # 'merged_v2_hq2':    {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    # 'merged_v2_TV':     {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    # 'merged_v2_TV_hq':  {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
+    # 'merged_v2_njviet': {'nj-pops':  NJ_POPS},
+    'merged_v3':        {'all-pops': ALL_POPS, 'dog-ctvt': ALL_DOGS},
+    'merged_v3_hq':     {'all-pops': ALL_POPS, 'dog-ctvt': ALL_DOGS},
+    'merged_v3_TV':     {'all-pops': ALL_POPS, 'dog-ctvt': ALL_DOGS},
+    'merged_v3_TV_hq':  {'all-pops': ALL_POPS, 'dog-ctvt': ALL_DOGS},
+    'merged_v3_njviet': {'nj-pops':  NJ_POPS},
 
-    # qpGraph / treemix data
-    'merged_v2_laurent':    {'graph-pops2': GRAPH_POPS2},
-    'merged_v2_TV_laurent': {'graph-pops2': GRAPH_POPS2, 'graph-test1': GRAPH_TEST1},
-
-    # new analysis group
+    # ----------------------------
+    # -- qpGraph / treemix data --
+    # ----------------------------
+    # 'merged_v2_laurent':    {'graph-pops2': GRAPH_POPS2},
+    # 'merged_v2_TV_laurent': {'graph-pops2': GRAPH_POPS2, 'graph-test1': GRAPH_TEST1},
     'merged_v3_TV_laurent': {'graph-pops2': GRAPH_POPS2, 'graph-pops3': GRAPH_POPS3, 'graph-test1': GRAPH_TEST1},
 
-    # NJ tree data
-    'merged_v2_njviet':     {'nj-pops':     NJ_POPS},
-
-    'merged_SNParray':           {'all-pops': SNP_ARRAY_v1},
-    'merged_SNParray_v1':        {'all-pops': SNP_ARRAY_v1},
-    'merged_SNParray_v1_noCTVT': {'all-pops': SNP_ARRAY_v1},
-
-    # new datasets
-    'merged_v3':          {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v3_hq':       {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v3_TV':       {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_v3_TV_hq':    {'all-pops': ALL_POPS, 'dog-ctvt' : ALL_DOGS},
-    'merged_SNParray_v5': {'all-pops': SNP_ARRAY_v5},
+    # -------------------
+    # -- SNParray data --
+    # -------------------
+    # 'merged_SNParray':           {'all-pops': SNP_ARRAY_v1},
+    # 'merged_SNParray_v1':        {'all-pops': SNP_ARRAY_v1},
+    # 'merged_SNParray_v1_noCTVT': {'all-pops': SNP_ARRAY_v1},
+    'merged_SNParray_v5':        {'all-pops': SNP_ARRAY_v5},
 }
 
 # the population and sample to use for rooting the NJ tree
