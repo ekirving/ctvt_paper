@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-suppressWarnings(library("ape"))
+library("ape")
 
 # get the command line arguments
 # args <- commandArgs(trailingOnly = TRUE)
@@ -35,11 +35,12 @@ m<-as.matrix(read.table(data_file, head=T, check.names=FALSE))
 tr <- read.nexus(tree_file)
 
 # root the tree
-tr <- root(tr, outgroup = outgroup, resolve.root = TRUE)
-tr$node.label
+tr <- root(tr, outgroup = outgroup, resolve.root = TRUE, edgelabel = TRUE)
+
 # fix the node labels
 if (!is.null(tr$node.label)) {
-    tr$node.label <- as.numeric(tr$node.label)
+    tr$node.label <- strtrim(tr$node.label, 4)
+    tr$node.label[1] <- ''
 }
 
 # resolve.root adds a zero-length branch below the MRCA of the ingroup, so lets
