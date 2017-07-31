@@ -34,9 +34,8 @@ SNP_ARRAY_v5 = ['AED', 'AM', 'APBT', 'AST', 'BAS', 'BAS2', 'BEA', 'BOX', 'CBR', 
                 'VDIH', 'VDIJ', 'VDIM', 'VDIO', 'VDP', 'VDPA', 'VDPC', 'VDPI', 'VDPL', 'VDPNGEH', 'VDPNGPM', 'VDPP',
                 'VDPR', 'VDUA', 'VDVCB', 'VDVHG', 'VDVLC', 'VDVLS', 'WAM', 'WAS', 'WEU', 'WME', 'XOL']
 
-GRAPH_POPS1 = ['COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
 GRAPH_POPS2 = ['OUT', 'COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA']
-GRAPH_POPS3 = ['OUT', 'COY', 'WAM', 'WEU', 'TAI', 'DEU', 'DVN', 'DPC', 'DMA']
+GRAPH_POPS3 = ['OUT', 'COY', 'WAM', 'WEU', 'DEU', 'DVN', 'DPC', 'DMA', 'CTVT']
 
 GRAPH_TEST1 = ['OUT', 'COY', 'WAM', 'WEU', 'DEU', 'DVN']
 
