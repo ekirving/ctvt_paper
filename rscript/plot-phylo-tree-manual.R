@@ -2,32 +2,23 @@
 library("ape")
 
 # get the command line arguments
-# args <- commandArgs(trailingOnly = TRUE)
-# data_file=args[1]
-# treetype=args[2]
-# outgroup=args[3]
-# tree_file=args[4]
-# pdf_file=args[5]
+args <- commandArgs(trailingOnly = TRUE)
+data_file=args[1]
+treetype=args[2]
+outgroup=args[3]
+tree_file=args[4]
+pdf_file=args[5]
 
 # TODO remove when done testing
-setwd("/Users/Evan/Dropbox/Code/ctvt")
-data_file <- "njtree/all-pops.merged_v2.geno.data"
-treetype <- "phylogram" # "phylogram" / "fan"
-outgroup <- "AndeanFox"
-
-tree_file <- '/Users/Evan/Downloads/trees/merged_map_tv_standard.nex.con.tre'
-pdf_file  <- '/Users/Evan/Downloads/trees/pdf/merged_map_tv_standard.nex.con.pdf'
-
-# tree_file <- '/Users/Evan/Downloads/trees/merged_map_tv_standard1.nex.con.tre'
-# pdf_file  <- '/Users/Evan/Downloads/trees/pdf/merged_map_tv_standard1.nex.con.pdf'
-
-# tree_file <- '/Users/Evan/Downloads/trees/merged_pruned_bootstrap_v3.tree'
-# pdf_file  <- '/Users/Evan/Downloads/trees/pdf/merged_pruned_bootstrap_v3.pdf'
-
-# tree_file <- '/Users/Evan/Downloads/trees/merged_pruned_bootstrap_VIET_v3.tree'
-# pdf_file  <- '/Users/Evan/Downloads/trees/pdf/merged_pruned_bootstrap_VIET_v3.pdf'
+# setwd("/Users/Evan/Dropbox/Code/ctvt")
+# data_file <- "njtree/all-pops.merged_v2.geno.data"
+# treetype <- "phylogram" # "phylogram" / "fan"
+# outgroup <- "AndeanFox"
+# tree_file <- 'trees/merged_map_tv_standard.nex.con.tre'
+# pdf_file  <- 'trees/pdf/merged_map_tv_standard.nex.con.pdf'
 
 # load the distance matrix
+# FIXME ugly hack to get the mapping of sample names to population codes
 m<-as.matrix(read.table(data_file, head=T, check.names=FALSE))
 
 # load the NJ tree from file
@@ -38,7 +29,7 @@ tr <- read.nexus(tree_file)
 tr <- root(tr, outgroup = outgroup, resolve.root = TRUE, edgelabel = TRUE)
 
 # fix the node labels
-tr$node.label <- as.numeric(tr$node.label)
+tr$node.label <- suppressWarnings(as.numeric(tr$node.label))
 if (max(tr$node.label[!is.na(tr$node.label)]) <= 1) {
     # trim long decimals
     tr$node.label[!is.na(tr$node.label)] <- format(tr$node.label[!is.na(tr$node.label)], digits=2, nsmall=2)
@@ -56,7 +47,7 @@ tr$edge.length[last] <- len/2  # the edge to the outgroup is always last
 tr <- ladderize(tr)
 
 # calcualte the plot size
-numnodes <- length(m[,1])
+numnodes <- length(tr$tip.label)
 plotsize = numnodes/7
 
 # get the metadata matrix for all the samples
