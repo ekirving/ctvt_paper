@@ -252,7 +252,7 @@ class SmartPCA(PrioritisedTask):
     dataset = luigi.Parameter()
     projectpops = luigi.ListParameter(default=ANCIENT_POPS)
 
-    resources = {'cpu-cores': MAX_CPU_CORES}
+    resources = {'cpu-cores': CPU_CORES_MED}
 
     def requires(self):
         return PlinkFilterPops(self.group, self.dataset)
@@ -292,7 +292,7 @@ class SmartPCA(PrioritisedTask):
             "indivname:      {0}".format(famfile),                # invalid .fam
             "evecoutname:    {0}".format(self.output()[0].path),  # .pca.evec
             "evaloutname:    {0}".format(self.output()[1].path),  # .eval
-            "numthreads:     {0}".format(MAX_CPU_CORES),          # number of threads to use
+            "numthreads:     {0}".format(CPU_CORES_MED),          # number of threads to use
             "poplistname:    {0}".format(poplist),                # the list of pops to calculate the eigenvectors from
             "lsqproject:     YES",                                # use least squares projection, best for missing data
             "numoutlieriter: 0",                                  # don't exclude outliers
@@ -385,7 +385,7 @@ class AdmixtureK(PrioritisedTask):
     dataset = luigi.Parameter()
     k = luigi.IntParameter()
 
-    resources = {'cpu-cores': MAX_CPU_CORES}
+    resources = {'cpu-cores': CPU_CORES_MED}
 
     def requires(self):
         return PlinkPruneBed(self.group, self.dataset)
@@ -400,12 +400,14 @@ class AdmixtureK(PrioritisedTask):
         # admixture only outputs to the current directory
         os.chdir('./admix')
 
+        bed_file = "../{0}".format(self.input()[0].path)
+
         log = run_cmd(["admixture", 
-                       "-j{0}".format(MAX_CPU_CORES),          # use multi-threading
-                       "-B{}".format(ADMIXTURE_BOOTSTRAP),     # the number of bootstrap replicates to run
-                       "--cv=10",                              # generate cross-validation estimates
-                       "../{0}".format(self.input()[0].path),  # using the pruned data file
-                       self.k],                                # for K ancestral populations
+                       "-j{0}".format(CPU_CORES_MED),       # use multi-threading
+                       "-B{}".format(ADMIXTURE_BOOTSTRAP),  # the number of bootstrap replicates to run
+                       "--cv=10",                           # generate cross-validation estimates
+                       bed_file,                            # using the pruned data file
+                       self.k],                             # for K ancestral populations
                       pwd='../')
 
         # restore previous working directory
@@ -827,7 +829,7 @@ class QPGraphPermute(PrioritisedTask):
     dataset = luigi.Parameter()
     exhaustive = luigi.BoolParameter(default=False)
 
-    resources = {'cpu-cores': MAX_CPU_CORES}
+    resources = {'cpu-cores': CPU_CORES_MAX}
 
     def requires(self):
         return ConvertfBedToEigenstrat(self.group, self.dataset, GROUP_BY_POPS)
@@ -871,7 +873,8 @@ class QPGraphPermute(PrioritisedTask):
         log_file = self.output()[1].path
 
         # run qpGraph
-        solutions = permute_qpgraph(par_file, log_file, dot_path, pdf_path, populations, outgroup, self.exhaustive)
+        solutions = permute_qpgraph(par_file, log_file, dot_path, pdf_path, populations, outgroup, self.exhaustive,
+                                    nthreads=CPU_CORES_MAX)
 
         # record the hash codes for all the fitting graphs
         fitted_file = self.output()[2].path
@@ -887,7 +890,7 @@ class QPGraphCluster(PrioritisedTask):
     dataset = luigi.Parameter()
     exhaustive = luigi.BoolParameter(default=False)
 
-    resources = {'cpu-cores': MAX_CPU_CORES}
+    resources = {'cpu-cores': CPU_CORES_HIGH}
 
     def requires(self):
         return QPGraphPermute(self.group, self.dataset, self.exhaustive)
@@ -912,7 +915,7 @@ class QPGraphCluster(PrioritisedTask):
         with open(fitted_file, 'r') as fin:
             graph_names = fin.read().splitlines()
 
-        cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file)
+        cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file, nthreads=CPU_CORES_HIGH)
 
 
 class ConvertfBedToEigenstrat(PrioritisedTask):

@@ -42,16 +42,13 @@ from graph_tool.topology import *
 
 class PermuteQpgraph:
 
-    # should we use multi-threading to speed up the graph search
-    MULTITHREADED_SEARCH = True
-
     # how many outliers should we allow before pruning a branch in graph space
     MAX_OUTLIER_THRESHOLD = 0
 
     # print PDFs for graphs with (N - offset) nodes
     REMAINING_PRINT_OFFSET = 0
 
-    def __init__(self, par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive, verbose):
+    def __init__(self, par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive, verbose, nthreads):
         """
         Initialise the object attributes 
         """
@@ -59,6 +56,7 @@ class PermuteQpgraph:
         self.dot_path = dot_path
         self.pdf_path = pdf_path
         self.verbose = verbose
+        self.nthreads = nthreads
 
         # should we try all possible graphs, or should we stop when we find something reasonable
         self.exhaustive_search = exhaustive
@@ -175,9 +173,9 @@ class PermuteQpgraph:
         """
         Run qpGraph on a list of trees
         """
-        if self.MULTITHREADED_SEARCH:
+        if self.nthreads > 1:
             # we need to buffer the results to use multi-threading
-            pool = mp.ProcessingPool(MAX_CPU_CORES)
+            pool = mp.ProcessingPool(self.nthreads)
             results = pool.map(self.run_qpgraph, itertools.izip(new_trees, itertools.repeat(depth)))
         else:
             # test the trees without multi-threading
@@ -512,7 +510,7 @@ class NodeUnplaceable(Exception):
     pass
 
 
-def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=False, verbose=False):
+def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=False, verbose=False, nthreads=1):
     """
     Find the best fitting graph for a given set of nodes, by permuting all possible graphs.
     """
@@ -522,7 +520,7 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
         os.remove(log_file)
 
     # instantiate the class
-    pq = PermuteQpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive, verbose)
+    pq = PermuteQpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive, verbose, nthreads)
 
     # get all the permutations of possible node orders
     all_nodes_perms = list(itertools.permutations(nodes, len(nodes)))
@@ -563,10 +561,7 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
 
 class ClusterQpgraph():
 
-    # should we use multi-threading to speed up the graph search
-    MULTITHREADED_SEARCH = True
-
-    def __init__(self, graph_names, log_file, dot_path, csv_file, mtx_file, verbose):
+    def __init__(self, graph_names, log_file, dot_path, csv_file, mtx_file, verbose, nthreads):
         """
         Initialise the object attributes
         """
@@ -576,6 +571,7 @@ class ClusterQpgraph():
         self.csv_file = csv_file
         self.mtx_file = mtx_file
         self.verbose = verbose
+        self.nthreads = nthreads
 
         self.graphs = []
 
@@ -651,9 +647,9 @@ class ClusterQpgraph():
 
         self.log("INFO: Calculating distance matrix for %s graph pairs" % len(idxs))
 
-        if self.MULTITHREADED_SEARCH:
+        if self.nthreads > 1:
             # we need to buffer the results to use multi-threading
-            pool = mp.ProcessingPool(MAX_CPU_CORES)
+            pool = mp.ProcessingPool(self.nthreads)
             results = pool.map(self.calculate_distance, idxs)
         else:
             # compute distances without multi-threading
@@ -688,7 +684,7 @@ class ClusterQpgraph():
         return dist_matrix
 
 
-def cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file, verbose=False):
+def cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file, verbose=False, nthreads=1):
     """
     Compare all fitting graphs and compute the number of clusters.
     """
@@ -698,7 +694,7 @@ def cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_fil
         os.remove(log_file)
 
     # instantiate the class
-    cq = ClusterQpgraph(graph_names, log_file, dot_path, csv_file, mtx_file, verbose)
+    cq = ClusterQpgraph(graph_names, log_file, dot_path, csv_file, mtx_file, verbose, nthreads)
 
     cq.log("INFO: There are %s graphs to compare" % len(set(graph_names)))
 
@@ -759,7 +755,7 @@ if __name__ == "__main__":
         dot_path = 'permute/graphs/sim'
         pdf_path = 'permute/pdf/sim'
 
-        permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
+        permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True, nthreads=CPU_CORES_MAX)
 
         print "INFO: Permute execution took: %s" % timedelta(seconds=time() - start)
 
@@ -775,7 +771,7 @@ if __name__ == "__main__":
         log_file = 'qpgraph/{0}.{1}.permute.log'.format(group, dataset)
         pdf_path = 'pdf/{0}.{1}.qpg-permute'.format(group, dataset)
 
-        permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True)
+        permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True, nthreads=CPU_CORES_MAX)
 
         print "INFO: Permute execution took: %s" % timedelta(seconds=time() - start)
 
@@ -794,6 +790,6 @@ if __name__ == "__main__":
         files = glob.glob('pdf/{0}.{1}.qpg-permute-*'.format(group, dataset))
         graph_names = [re.search(r'a[0-9]-(.+).pdf', file).group(1) for file in files]
 
-        cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file, verbose=True)
+        cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_file, verbose=True, nthreads=CPU_CORES_MAX)
 
         print "INFO: Cluster execution took: %s" % timedelta(seconds=time()-start)

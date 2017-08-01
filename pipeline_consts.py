@@ -205,5 +205,10 @@ PCA_COMPONENTS = [(1, 2), (3, 4), (5, 6)]
 # the species flag for plink telling it how many chromosomes to expect
 PLINK_TAXA = '--dog'
 
+# how many CPU cores does this machine have
+TOTAL_CORES = multiprocessing.cpu_count()
+
 # no single worker should use more than 30% of the available cores
-MAX_CPU_CORES = int(multiprocessing.cpu_count() * 0.3)
+CPU_CORES_MED  = int(TOTAL_CORES * 0.3) # 30%
+CPU_CORES_HIGH = int(TOTAL_CORES * 0.5) # 50%
+CPU_CORES_MAX  = int(TOTAL_CORES * 0.9) # 90%
