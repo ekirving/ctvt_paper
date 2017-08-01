@@ -546,7 +546,9 @@ class PermuteQpgraph:
                 pool = mp.ProcessingPool(self.nthreads)
                 results = pool.map(self.build_graph, all_node_orders)
 
-                print results
+                # the results of each thread are stored separately, so we need to join them together
+                self.solutions = set().union([result[0] for result in results])
+                self.total_graphs = set().union([result[1].keys() for result in results])
 
             else:
                 self.log("INFO: Using a single CPU core" % self.nthreads)
@@ -575,6 +577,8 @@ class PermuteQpgraph:
             # log the error
             self.log(error)
 
+            return set(), dict()
+
 
 class NodeUnplaceable(Exception):
     """
@@ -602,7 +606,7 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
     pq.find_graphs()
 
     # how many new models were checked
-    new_models = cache_size - len(pq.model_cache)
+    new_models = len(pq.total_graphs) - cache_size
 
     pq.log("INFO: Checked {:,} new models in this run.".format(new_models))
 
