@@ -72,7 +72,7 @@ class PermuteQpgraph:
 
         self.root_node = 'R'
         self.problem_nodes = []
-        self.tested_graphs = set()
+        self.model_cache = dict()
         self.solutions = set()
 
     def log(self, message):
@@ -87,6 +87,25 @@ class PermuteQpgraph:
             # echo to stdout
             print message
             sys.stdout.flush()
+
+    def load_model_cache(self):
+        """
+        Check if there are any models which have already been run, and load their results into memory.
+        """
+
+        # get all the log files for the current graph space
+        log_files = glob.glob(self.dot_path + '-*.log')
+
+        for log_file in log_files:
+            # get the name of the graph
+            graph_name = re.search(r'-(.+).log', log_file).group(1)
+
+            # load the data from the log file
+            with open(log_file, 'r') as fin:
+                log = fin.read().splitlines()
+
+            # add it to the cache
+            self.model_cache[graph_name] = self.extract_outliers(log)
 
     def recurse_tree(self, root_tree, new_tag, remaining, depth=0):
         """
@@ -193,10 +212,7 @@ class PermuteQpgraph:
         # were we able to place the new node
         placed_node = False
 
-        for new_tree, outliers, graph_name in results:
-
-            # add this graph to the list of those we've tested
-            self.tested_graphs.add(graph_name)
+        for new_tree, outliers, worst_fstat, graph_name in results:
 
             # did our new trees pass the threshold
             if len(outliers) <= self.MAX_OUTLIER_THRESHOLD:
@@ -270,17 +286,21 @@ class PermuteQpgraph:
 
         # get unique names for the output files
         graph_name = self.hash_text(newick)
-        grp_file = self.dot_path + '-{name}.graph'.format(name=graph_name)
-        dot_file = self.dot_path + '-{name}.dot'.format(name=graph_name)
-        log_file = self.dot_path + '-{name}.log'.format(name=graph_name)
-        xml_file = self.dot_path + '-{name}.xml'.format(name=graph_name)
 
-        try:
-            # if the log file exists then we've run the analysis already
-            with open(log_file, 'r') as fin:
-                log = fin.read()
+        cached = False
 
-        except IOError:
+        if graph_name in self.model_cache:
+            # load the data from the cache
+            outliers, worst_fstat = self.model_cache[graph_name]
+
+            cached = True
+        else:
+            # run qpGraph and test for outliers
+            grp_file = self.dot_path + '-{name}.graph'.format(name=graph_name)
+            dot_file = self.dot_path + '-{name}.dot'.format(name=graph_name)
+            log_file = self.dot_path + '-{name}.log'.format(name=graph_name)
+            xml_file = self.dot_path + '-{name}.xml'.format(name=graph_name)
+
             # save the xml file
             new_tree.write(xml_file)
 
@@ -298,8 +318,11 @@ class PermuteQpgraph:
             with open(log_file, 'w') as fout:
                 fout.write(log)
 
-        # parse the log and extract the outliers
-        outliers, worst_fstat = self.extract_outliers(log.splitlines())
+            # parse the log and extract the outliers
+            outliers, worst_fstat = self.extract_outliers(log.splitlines())
+
+            # add this graph to the list of those we've tested
+            self.model_cache[graph_name] = (outliers, worst_fstat)
 
         # count the leaf nodes
         all_nodes = new_tree.findall('.//*')
@@ -316,15 +339,18 @@ class PermuteQpgraph:
                                                                                      admix=num_admix,
                                                                                      name=graph_name)
 
-            # pretty print the qpGraph dot file
-            pprint_qpgraph(dot_file, pdf_file)
+            if not os.path.isfile(pdf_file):
+                # pretty print the qpGraph dot file
+                pprint_qpgraph(dot_file, pdf_file)
 
-        # output some summary stats
-        self.log("{padding}{tree} \tnodes={nodes}\t admix={admix}\t outliers={out}\t worst={worst}\t {name}".format(
-            padding="  "*depth, name=graph_name, tree=newick.ljust(80), nodes=num_nodes, admix=num_admix,
-            out=len(outliers), worst=worst_fstat[-1]))
+        # if not cached:
+        if True:
+            # output some summary stats
+            self.log("{padding}{tree} \tnodes={nodes}\t admix={admix}\t outliers={out}\t worst={worst}\t {name}".format(
+                padding="  "*depth, name=graph_name, tree=newick.ljust(80), nodes=num_nodes, admix=num_admix,
+                out=len(outliers), worst=worst_fstat[-1]))
 
-        return new_tree, outliers, graph_name
+        return new_tree, outliers, worst_fstat, graph_name
 
     @staticmethod
     def extract_outliers(log):
@@ -522,6 +548,14 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
     # instantiate the class
     pq = PermuteQpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive, verbose, nthreads)
 
+    # load all the cached data
+    pq.load_model_cache()
+
+    # how big is the cache
+    cache_size = len(pq.model_cache)
+
+    pq.log("INFO: Loaded {:,} models from the cache.".format(cache_size))
+
     # get all the permutations of possible node orders
     all_nodes_perms = list(itertools.permutations(nodes, len(nodes)))
 
@@ -553,6 +587,10 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
 
             break
 
+    # how many new models were checked
+    new_models = cache_size - len(pq.model_cache)
+
+    pq.log("INFO: Checked {:,} new models in this run.".format(new_models))
     pq.log("FINISHED: Found {:,} unique solution(s) from a total of {:,} unique graphs!".format(len(pq.solutions),
                                                                                                 len(pq.model_cache)))
 
@@ -755,7 +793,7 @@ if __name__ == "__main__":
         dot_path = 'permute/graphs/sim'
         pdf_path = 'permute/pdf/sim'
 
-        permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True, nthreads=CPU_CORES_MAX)
+        permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True, nthreads=1)
 
         print "INFO: Permute execution took: %s" % timedelta(seconds=time() - start)
 
