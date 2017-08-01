@@ -547,8 +547,8 @@ class PermuteQpgraph:
                 results = pool.map(self.build_graph, all_node_orders)
 
                 # the results of each thread are stored separately, so we need to join them together
-                self.solutions = set().union([result[0] for result in results])
-                self.model_cache = set().union([result[1].keys() for result in results])
+                self.solutions = set().union(*[result[0] for result in results])
+                self.model_cache = set().union(*[result[1].keys() for result in results])
 
             else:
                 self.log("INFO: Using a single CPU core" % self.nthreads)
