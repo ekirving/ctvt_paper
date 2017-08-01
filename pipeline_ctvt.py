@@ -1161,7 +1161,8 @@ class CTVTqpGraphPipeline(luigi.WrapperTask):
 
         # new analysis group for Laurent mirroring the treemix group
         # yield QPGraphCluster('graph-pops2', 'merged_v2_TV_laurent', exhaustive=True)
-        yield QPGraphCluster('graph-pops3', 'merged_v3_TV_laurent', exhaustive=True)
+        # yield QPGraphCluster('graph-pops3', 'merged_v3_TV_laurent', exhaustive=True)
+        yield QPGraphPermute('graph-pops3', 'merged_v3_TV_laurent', exhaustive=True)
 
 
 class CTVTFiguresPipeline(luigi.WrapperTask):
