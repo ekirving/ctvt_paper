@@ -351,8 +351,7 @@ class PermuteQpgraph:
                 # pretty print the qpGraph dot file
                 pprint_qpgraph(dot_file, pdf_file)
 
-        # if not cached:
-        if True:
+        if not cached:
             # output some summary stats
             self.log("{padding}{tree} \tnodes={nodes}\t admix={admix}\t outliers={out}\t worst={worst}\t {name}".format(
                 padding="  "*depth, name=graph_name, tree=newick.ljust(80), nodes=num_nodes, admix=num_admix,
