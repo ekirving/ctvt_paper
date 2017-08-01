@@ -528,7 +528,7 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
     # randomise the list of starting orders
     random.shuffle(all_nodes_perms)
 
-    pq.log("INFO: There are %s possible starting orders for the given nodes." % len(all_nodes_perms))
+    pq.log("INFO: There are {:,} possible starting orders for the given nodes.".format(len(all_nodes_perms)))
     pq.log("INFO: Performing %s search." % ("an exhaustive" if pq.exhaustive_search else "a heuristic"))
 
     # keep looping until we find a solution, or until we've exhausted all possible starting orders
@@ -553,8 +553,8 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
 
             break
 
-    pq.log("FINISHED: Found %s unique solution(s) from a total of %s unique graphs!" %
-           (len(pq.solutions), len(pq.tested_graphs)))
+    pq.log("FINISHED: Found {:,} unique solution(s) from a total of {:,} unique graphs!".format(len(pq.solutions),
+                                                                                                len(pq.model_cache)))
 
     return pq.solutions
 
@@ -645,7 +645,7 @@ class ClusterQpgraph():
         # get all the i,j pairs for one diagonal half
         idxs = [(i, j) for i in range(1, size) for j in range(i)]
 
-        self.log("INFO: Calculating distance matrix for %s graph pairs" % len(idxs))
+        self.log("INFO: Calculating distance matrix for {:,} graph pairs".format(len(idxs)))
 
         if self.nthreads > 1:
             # we need to buffer the results to use multi-threading
@@ -696,7 +696,7 @@ def cluster_qpgraph(graph_names, dot_path, log_file, pdf_file, csv_file, mtx_fil
     # instantiate the class
     cq = ClusterQpgraph(graph_names, log_file, dot_path, csv_file, mtx_file, verbose, nthreads)
 
-    cq.log("INFO: There are %s graphs to compare" % len(set(graph_names)))
+    cq.log("INFO: There are {:,} graphs to compare".format(len(set(graph_names))))
 
     # get the distance matrix
     dist_matrix = cq.get_matrix()
@@ -735,7 +735,7 @@ if __name__ == "__main__":
 
     start = time()
 
-    if not(len(sys.argv) == 4 or (len(sys.argv) == 1 and sys.argv[1] == 'simulated')):
+    if len(sys.argv) != 4:
         print "Error: required params"
         quit()
 
