@@ -92,9 +92,8 @@ class PermuteQpgraph:
         """
         Check if there are any models which have already been run, and load their results into memory.
         """
-
         # get all the log files for the current graph space
-        log_files = glob.glob(self.dot_path + '-*.log')
+        log_files = glob.iglob(self.dot_path + '-*.log')
 
         for log_file in log_files:
             # get the name of the graph
@@ -106,6 +105,13 @@ class PermuteQpgraph:
 
             # add it to the cache
             self.model_cache[graph_name] = self.extract_outliers(log)
+
+        # how big is the cache
+        cache_size = len(self.model_cache)
+
+        self.log("INFO: Loaded {:,} models from the cache.".format(cache_size))
+
+        return cache_size
 
     def recurse_tree(self, root_tree, new_tag, remaining, depth=0):
         """
@@ -174,7 +180,7 @@ class PermuteQpgraph:
         if not node_placed:
 
             # we could not place the node via either method :(
-            if new_tag not in self.problem_nodes and remaining and not self.exhaustive_search:
+            if not self.exhaustive_search and new_tag not in self.problem_nodes and remaining:
                 self.log("WARNING: Unable to place node '%s' at this time." % new_tag)
 
                 self.problem_nodes.append(new_tag)
@@ -182,7 +188,7 @@ class PermuteQpgraph:
                 # add the problem node to end of the list, as we may be able to add it later on
                 remaining.append(new_tag)
 
-                # try and add the other nodes
+                # try to add the other nodes
                 self.recurse_tree(root_tree, remaining[0], remaining[1:], depth)
 
             else:
@@ -192,16 +198,11 @@ class PermuteQpgraph:
         """
         Run qpGraph on a list of trees
         """
-        if self.nthreads > 1:
-            # we need to buffer the results to use multi-threading
-            pool = mp.ProcessingPool(self.nthreads)
-            results = pool.map(self.run_qpgraph, itertools.izip(new_trees, itertools.repeat(depth)))
-        else:
-            # test the trees without multi-threading
-            results = []
-            for new_tree in new_trees:
-                result = self.run_qpgraph((new_tree, depth))
-                results.append(result)
+        # test the trees without multi-threading
+        results = []
+        for new_tree in new_trees:
+            result = self.run_qpgraph((new_tree, depth))
+            results.append(result)
 
         return results
 
@@ -510,22 +511,61 @@ class PermuteQpgraph:
             tag_name = '' if re.match('n[0-9]+|R', parent_node.tag) else parent_node.tag
             return '(' + ','.join(node for tag, node in children) + ')%s' % tag_name
 
-    def find_graph(self):
+    def find_graphs(self):
         """
-        Build and test all possible trees and graphs
+        Build and test all plausible graphs
         """
 
-        self.log('INFO: Starting list %s' % self.nodes)
+        self.log("INFO: Performing %s search." % ("an exhaustive" if self.exhaustive_search else "a heuristic"))
 
-        # setup a simple 2-node tree
-        root_node = ElemTree.Element(self.root_node)
-        root_tree = ElemTree.ElementTree(root_node)
+        if not self.exhaustive_search:
+            # build the graph with the initial node order only
+            self.build_graph(self.nodes)
 
-        ElemTree.SubElement(root_node, self.outgroup)
-        ElemTree.SubElement(root_node, self.nodes[0])
+        else:
+            # get all the permutations of the node orders (n!)
+            all_node_orders = list(itertools.permutations(self.nodes, len(self.nodes)))
 
-        # recursively add all the other nodes
-        self.recurse_tree(root_tree, self.nodes[1], self.nodes[2:])
+            # randomise the list of starting orders
+            random.shuffle(all_node_orders)
+
+            self.log("INFO: There are {:,} possible starting orders for the given nodes.".format(len(all_node_orders)))
+
+            if self.nthreads > 1:
+                self.log("INFO: Using multi-threading with %s CPU cores" % self.nthreads)
+
+                # we need to buffer the results to use multi-threading
+                pool = mp.ProcessingPool(self.nthreads)
+                results = pool.map(self.build_graph, all_node_orders)
+
+                print results
+
+            else:
+                self.log("INFO: Using a single CPU core" % self.nthreads)
+
+                for nodes in all_node_orders:
+                    self.build_graph(nodes)
+
+    def build_graph(self, nodes):
+
+        self.log('INFO: Starting list %s' % list(nodes))
+
+        try:
+            # setup a simple 2-node tree
+            root_node = ElemTree.Element(self.root_node)
+            root_tree = ElemTree.ElementTree(root_node)
+
+            ElemTree.SubElement(root_node, self.outgroup)
+            ElemTree.SubElement(root_node, nodes[0])
+
+            # recursively add all the other nodes
+            self.recurse_tree(root_tree, nodes[1], nodes[2:])
+
+            return self.solutions, self.model_cache
+
+        except NodeUnplaceable as error:
+            # log the error
+            self.log(error)
 
 
 class NodeUnplaceable(Exception):
@@ -548,48 +588,19 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
     pq = PermuteQpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive, verbose, nthreads)
 
     # load all the cached data
-    pq.load_model_cache()
+    cache_size = pq.load_model_cache()
 
-    # how big is the cache
-    cache_size = len(pq.model_cache)
-
-    pq.log("INFO: Loaded {:,} models from the cache.".format(cache_size))
-
-    # get all the permutations of possible node orders
-    all_nodes_perms = list(itertools.permutations(nodes, len(nodes)))
-
-    # randomise the list of starting orders
-    random.shuffle(all_nodes_perms)
-
-    pq.log("INFO: There are {:,} possible starting orders for the given nodes.".format(len(all_nodes_perms)))
-    pq.log("INFO: Performing %s search." % ("an exhaustive" if pq.exhaustive_search else "a heuristic"))
-
-    # keep looping until we find a solution, or until we've exhausted all possible starting orders
-    while not pq.solutions or pq.exhaustive_search:
-
-        try:
-            # find the best fitting graph for this starting order
-            pq.find_graph()
-
-        except NodeUnplaceable as error:
-            # log the error
-            pq.log(error)
-
-        try:
-            # try starting with a different node order
-            pq.nodes = list(all_nodes_perms.pop())
-
-        except IndexError:
-            # we've run out of node orders to try
-            if not pq.solutions:
-                pq.log("ERROR: Cannot resolve the graph from any permutation of the given nodes.")
-
-            break
+    # find the best fitting graphs
+    pq.find_graphs()
 
     # how many new models were checked
     new_models = cache_size - len(pq.model_cache)
 
     pq.log("INFO: Checked {:,} new models in this run.".format(new_models))
+
+    if not pq.solutions:
+        pq.log("ERROR: Cannot resolve the graph from any permutation of the given nodes.")
+
     pq.log("FINISHED: Found {:,} unique solution(s) from a total of {:,} unique graphs!".format(len(pq.solutions),
                                                                                                 len(pq.model_cache)))
 
@@ -792,7 +803,7 @@ if __name__ == "__main__":
         dot_path = 'permute/graphs/sim'
         pdf_path = 'permute/pdf/sim'
 
-        permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True, nthreads=1)
+        permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True, nthreads=2)
 
         print "INFO: Permute execution took: %s" % timedelta(seconds=time() - start)
 
