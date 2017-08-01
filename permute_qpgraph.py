@@ -301,22 +301,30 @@ class PermuteQpgraph:
             log_file = self.dot_path + '-{name}.log'.format(name=graph_name)
             xml_file = self.dot_path + '-{name}.xml'.format(name=graph_name)
 
-            # save the xml file
-            new_tree.write(xml_file)
+            try:
+                # if the log file exists then we've run the analysis already (but it's not loaded into the cache yet)
+                with open(log_file, 'r') as fin:
+                    log = fin.read()
 
-            # convert the tree to qpGraph format
-            graph = self.export_qpgraph(new_tree)
+                cached = True
 
-            # save the graph file
-            with open(grp_file, 'w') as fout:
-                fout.write(graph)
+            except IOError:
+                # save the xml file
+                new_tree.write(xml_file)
 
-            # run qpGraph
-            log = run_cmd(["qpGraph", "-p", self.par_file, "-g", grp_file, "-d", dot_file], verbose=False)
+                # convert the tree to qpGraph format
+                graph = self.export_qpgraph(new_tree)
 
-            # save the log file
-            with open(log_file, 'w') as fout:
-                fout.write(log)
+                # save the graph file
+                with open(grp_file, 'w') as fout:
+                    fout.write(graph)
+
+                # run qpGraph
+                log = run_cmd(["qpGraph", "-p", self.par_file, "-g", grp_file, "-d", dot_file], verbose=False)
+
+                # save the log file
+                with open(log_file, 'w') as fout:
+                    fout.write(log)
 
             # parse the log and extract the outliers
             outliers, worst_fstat = self.extract_outliers(log.splitlines())
