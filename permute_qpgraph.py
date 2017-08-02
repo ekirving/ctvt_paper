@@ -186,7 +186,8 @@ class PermuteQpgraph:
                 self.recurse_tree(root_tree, remaining[0], remaining[1:], depth)
 
             else:
-                raise NodeUnplaceable("ERROR: Cannot place node '%s' in the graph." % new_tag)
+                # log the error
+                self.log("ERROR: Cannot place node '%s' in the graph." % new_tag)
 
     def test_trees(self, new_trees, depth):
         """
@@ -536,13 +537,6 @@ class PermuteQpgraph:
         self.recurse_tree(root_tree, self.nodes[1], self.nodes[2:])
 
 
-class NodeUnplaceable(Exception):
-    """
-    Node cannot be placed in the graph without exceeding outlier threshold
-    """
-    pass
-
-
 def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=False, verbose=False, nthreads=1):
     """
     Find the best fitting graph for a given set of nodes, by permuting all possible graphs.
@@ -575,13 +569,8 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
     # keep looping until we find a solution, or until we've exhausted all possible starting orders
     while not pq.solutions or pq.exhaustive_search:
 
-        try:
-            # find the best fitting graph for this starting order
-            pq.find_graph()
-
-        except NodeUnplaceable as error:
-            # log the error
-            pq.log(error)
+        # find the best fitting graph for this starting order
+        pq.find_graph()
 
         try:
             # try starting with a different node order
