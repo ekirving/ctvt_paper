@@ -192,7 +192,7 @@ class PermuteQpgraph:
                 self.recurse_tree(root_tree, remaining[0], remaining[1:], depth)
 
             else:
-                raise NodeUnplaceable("ERROR: Cannot place node '%s' in the graph." % new_tag)
+                self.log("ERROR: Cannot place node '%s' in the graph." % new_tag)
 
     def test_trees(self, new_trees, depth):
         """
@@ -560,31 +560,17 @@ class PermuteQpgraph:
 
         self.log('INFO: Starting list %s' % list(nodes))
 
-        try:
-            # setup a simple 2-node tree
-            root_node = ElemTree.Element(self.root_node)
-            root_tree = ElemTree.ElementTree(root_node)
+        # setup a simple 2-node tree
+        root_node = ElemTree.Element(self.root_node)
+        root_tree = ElemTree.ElementTree(root_node)
 
-            ElemTree.SubElement(root_node, self.outgroup)
-            ElemTree.SubElement(root_node, nodes[0])
+        ElemTree.SubElement(root_node, self.outgroup)
+        ElemTree.SubElement(root_node, nodes[0])
 
-            # recursively add all the other nodes
-            self.recurse_tree(root_tree, nodes[1], nodes[2:])
+        # recursively add all the other nodes
+        self.recurse_tree(root_tree, nodes[1], nodes[2:])
 
-            return self.solutions, self.model_cache
-
-        except NodeUnplaceable as error:
-            # log the error
-            self.log(error)
-
-            return set(), dict()
-
-
-class NodeUnplaceable(Exception):
-    """
-    Node cannot be placed in the graph without exceeding outlier threshold
-    """
-    pass
+        return self.solutions, self.model_cache
 
 
 def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=False, verbose=False, nthreads=1):
