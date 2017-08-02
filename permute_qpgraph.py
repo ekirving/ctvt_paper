@@ -554,7 +554,7 @@ def permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exh
             break
 
     pq.log("FINISHED: Found {:,} unique solution(s) from a total of {:,} unique graphs!".format(len(pq.solutions),
-                                                                                                len(pq.model_cache)))
+                                                                                                len(pq.tested_graphs)))
 
     return pq.solutions
 
