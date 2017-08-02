@@ -789,7 +789,7 @@ if __name__ == "__main__":
         dot_path = 'permute/graphs/sim'
         pdf_path = 'permute/pdf/sim'
 
-        permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True, nthreads=1)
+        permute_qpgraph(par_file, log_file, dot_path, pdf_path, nodes, outgroup, exhaustive=True, verbose=True, nthreads=CPU_CORES_MAX)
 
         print "INFO: Permute execution took: %s" % timedelta(seconds=time() - start)
 
