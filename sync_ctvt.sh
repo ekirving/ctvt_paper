@@ -5,9 +5,10 @@ rsync -avz --partial \
            --exclude '.idea' \
            --exclude 'nohup*' \
            --exclude 'sam' \
+           --exclude '*.sh' \
            --exclude '*.py*' \
            --exclude '*.R' \
            --exclude '*.old*' \
            --exclude '_laurent_' \
-           --exclude 'qpgraph/dot' \
+           --exclude 'qpgraph/dot*' \
            evan@palaeoprime:~/ctvt/ ~/Dropbox/Code/ctvt/
