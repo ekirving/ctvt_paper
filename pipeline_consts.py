@@ -184,7 +184,7 @@ COLOURS = {
 DEFAULT_COLOUR = '#e7298a'
 
 # the maximum number of migration events in Treemix
-TREEMIX_MAX_M = 5
+TREEMIX_MAX_M = 6
 
 # number of SNPs to group for LD
 TREEMIX_K = 1000
