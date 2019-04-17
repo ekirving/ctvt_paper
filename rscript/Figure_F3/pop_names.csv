@@ -1,0 +1,30 @@
+Code,Name,Type.Name,Color
+BAS,Basenji,African Dogs,#a6cee3
+COY,Coyote,Coyotes,#1f78b4
+CTVT,CTVT,CTVT,#b2df8a
+DAE,Ancient European,European Dogs,#33a02c
+DAL,Alaskan Husky,Arctic Dogs,#fb9a99
+DCH,Chinese Village Dog,East Asian Dogs,#e31a1c
+DEU,European Village Dog,European Dogs,#33a02c
+DGL,Greenland Sledge Dog,Arctic Dogs,#fb9a99
+DGS,German Shepard,European Dogs,#33a02c
+DHU,Husky,Arctic Dogs,#fb9a99
+DID,Indian Village Dog,Asian Dogs,#fdbf6f
+DIN,Dingo,Dingo,#ff7f00
+DLB,Lebanese Village Dog,European Dogs,#33a02c
+DMA,Malamute,Arctic Dogs,#fb9a99
+DME,Mexican Hairless Dog,American Dogs,#cab2d6
+DNA,Namibian Village Dog,African Dogs,#a6cee3
+DPC,Pre-Columbian Dogs,Pre-Columbian Dogs,#6a3d9a
+DPU,Peruvian Hairless Dog,American Dogs,#cab2d6
+DQA,Qatari Village Dogs,Asian Dogs,#fdbf6f
+DSL,Siberian Laika,Spitz Dogs,#8dd3c7
+DTI,Tibetan Village Dog,East Asian Dogs,#fdbf6f
+DTM,Tibetan Mastiff,East Asian Dogs,#e31a1c
+DVN,Vietnamese Village Dog,East Asian Dogs,#e31a1c
+OUT,Andean Fox,Outgroup,#4d4d4d
+WAM,American Wolf,American Wolf,#b15928
+WAS,Asian Wolf,Eurasian Wolf,#003c30
+WEU,European Wolf,Eurasian Wolf,#003c30
+WME,Middle-east Wolf,Eurasian Wolf,#003c30
+TAI,Taimyr,Ancient Wolf,#4d4d4d

@@ -23,4 +23,4 @@ test*
 seedms
 
 # temp file for raw commands
-commands.sh
+*commands.sh
